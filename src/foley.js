@@ -191,13 +191,13 @@ const CUES = {
   /* feedback */
   success: { cat: "feedback", key: "E", ds: "a small major lift", fn(t) { tone({ t0: t, f: 523.25, d: 0.1, peak: 0.13 }); tone({ t0: t + 0.09, f: 659.25, d: 0.12, peak: 0.13 }); tone({ t0: t + 0.18, f: 783.99, d: 0.22, peak: 0.15, send: 0.3 }); } },
   error:   { cat: "feedback", key: "R", ds: "two flat buzzes, no drama", fn(t) { tone({ t0: t, type: "sawtooth", f: 220, d: 0.09, peak: 0.09 }); tone({ t0: t + 0.13, type: "sawtooth", f: 185, d: 0.13, peak: 0.09 }); } },
-  warning: { cat: "feedback", key: "T", ds: "the same note twice, raised brow", fn(t) { tone({ t0: t, type: "triangle", f: 493.88, d: 0.07, peak: 0.13 }); tone({ t0: t + 0.15, type: "triangle", f: 493.88, d: 0.1, peak: 0.13 }); } },
-  denied:  { cat: "feedback", key: "Y", ds: "a dull thud against the limit", fn(t) { tone({ t0: t, type: "triangle", f: 160, f2: 120, glide: 0.05, d: 0.08, peak: 0.26 }); noise({ t0: t, type: "lowpass", f: 400, d: 0.04, peak: 0.14 }); } },
+  warning: { cat: "feedback", key: "T", ds: "the same note, twice", fn(t) { tone({ t0: t, type: "triangle", f: 493.88, d: 0.07, peak: 0.13 }); tone({ t0: t + 0.15, type: "triangle", f: 493.88, d: 0.1, peak: 0.13 }); } },
+  denied:  { cat: "feedback", key: "Y", ds: "a thud against the limit", fn(t) { tone({ t0: t, type: "triangle", f: 160, f2: 120, glide: 0.05, d: 0.08, peak: 0.26 }); noise({ t0: t, type: "lowpass", f: 400, d: 0.04, peak: 0.14 }); } },
 
   /* notify */
-  chime:   { cat: "notify", key: "U", ds: "a struck bar with real partials", fn(t) { bellPartials(t, 880, 0.14, 0.7, 0.45); } },
+  chime:   { cat: "notify", key: "U", ds: "a struck bar with partials", fn(t) { bellPartials(t, 880, 0.14, 0.7, 0.45); } },
   ping:    { cat: "notify", key: "I", ds: "one bright point of light", fn(t) { tone({ t0: t, f: 1318.5, d: 0.28, peak: 0.12, send: 0.35 }); tone({ t0: t, f: 1324, d: 0.24, peak: 0.05, send: 0.3 }); } },
-  bell:    { cat: "notify", key: "O", ds: "lower, rounder, further away", fn(t) { bellPartials(t, 523.25, 0.13, 0.9, 0.55); } },
+  bell:    { cat: "notify", key: "O", ds: "rounder and further away", fn(t) { bellPartials(t, 523.25, 0.13, 0.9, 0.55); } },
   bubble:  { cat: "notify", key: "P", ds: "a message surfacing", fn(t) { tone({ t0: t, f: 320, f2: 900, glide: 0.09, d: 0.1, peak: 0.14, send: 0.2 }); } },
 
   /* motion */
@@ -209,7 +209,7 @@ const CUES = {
   /* state */
   loading:  { cat: "state", key: "G", ds: "three patient ticks", fn(t) { for (let i = 0; i < 3; i++) tone({ t0: t + i * 0.12, f: 700 + i * 120, d: 0.035, peak: 0.09 }); } },
   ready:    { cat: "state", key: "H", ds: "a warm open third", fn(t) { tone({ t0: t, f: 440, d: 0.3, peak: 0.1, send: 0.25 }); tone({ t0: t, f: 554.37, d: 0.3, peak: 0.09, send: 0.25 }); } },
-  complete: { cat: "state", key: "J", ds: "the arrival \u2014 arpeggio and shimmer", fn(t) { const seq = [523.25, 659.25, 783.99, 1046.5]; seq.forEach((f, i) => tone({ t0: t + i * 0.08, f, d: 0.16 + i * 0.05, peak: 0.12, send: 0.3 })); for (let i = 0; i < 4; i++) tone({ t0: t + 0.34 + i * 0.03, f: 2000 + Math.random() * 2500, d: 0.09, peak: 0.03, send: 0.5 }); } },
+  complete: { cat: "state", key: "J", ds: "arpeggio, then shimmer", fn(t) { const seq = [523.25, 659.25, 783.99, 1046.5]; seq.forEach((f, i) => tone({ t0: t + i * 0.08, f, d: 0.16 + i * 0.05, peak: 0.12, send: 0.3 })); for (let i = 0; i < 4; i++) tone({ t0: t + 0.34 + i * 0.03, f: 2000 + Math.random() * 2500, d: 0.09, peak: 0.03, send: 0.5 }); } },
   sparkle:  { cat: "state", key: "K", ds: "a handful of glitter", fn(t) { for (let i = 0; i < 6; i++) tone({ t0: t + i * 0.035, f: 1600 + Math.random() * 3000, d: 0.1, peak: 0.045, send: 0.5 }); } },
 };
 
