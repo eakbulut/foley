@@ -4,7 +4,7 @@
 [![CI](https://github.com/eakbulut/foley/actions/workflows/ci.yml/badge.svg)](https://github.com/eakbulut/foley/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-1B9E57)](./LICENSE)
 
-**Sound effects for the interface, performed live.** [Play the demo →](https://eakbulut.github.io/foley/)
+**Sound effects for the interface, performed live.** [Play the demo →](https://usefoley.dev/)
 
 Foley is a tiny, dependency-free library of **28 interaction sounds**, named for the film artists who perform footsteps and door-latches in sync with the picture. It does the same for your interface: every cue is synthesized with Web Audio at the instant of the action. No audio files, no network requests, no build step.
 

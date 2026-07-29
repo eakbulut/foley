@@ -1,7 +1,7 @@
 {
   "name": "@foleyjs/react",
   "version": "2.3.0",
-  "description": "React bindings for Foley — sound effects for the interface, performed live.",
+  "description": "React bindings for Foley \u2014 sound effects for the interface, performed live.",
   "type": "module",
   "main": "./src/index.js",
   "module": "./src/index.js",
@@ -12,20 +12,31 @@
       "import": "./src/index.js"
     }
   },
-  "files": ["src", "README.md"],
+  "files": [
+    "src",
+    "README.md"
+  ],
   "sideEffects": false,
   "peerDependencies": {
     "@foleyjs/core": "^2.3.0",
     "react": ">=17"
   },
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/eakbulut/foley.git",
     "directory": "packages/react"
   },
-  "homepage": "https://eakbulut.github.io/foley/",
-  "keywords": ["react", "hooks", "web-audio", "ui-sounds", "sound-effects"],
+  "homepage": "https://usefoley.dev/",
+  "keywords": [
+    "react",
+    "hooks",
+    "web-audio",
+    "ui-sounds",
+    "sound-effects"
+  ],
   "author": "eakbulut",
   "license": "MIT"
 }

@@ -27,8 +27,9 @@ jobs:
       - name: Assemble site (demo only, no node_modules)
         run: |
           mkdir -p _site
-          cp index.html _site/
+          cp index.html agents.md _site/
           cp -r src assets _site/
+          echo "usefoley.dev" > _site/CNAME
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:

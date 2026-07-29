@@ -24,6 +24,6 @@ function App() {
 
 `useFoley()` calls `bind()` once on mount (StrictMode-safe — it's idempotent) and returns `{ play, set, get, toWav, toBuffer, on, bind }`. Everything from `@foleyjs/core` is also re-exported, so one import covers both.
 
-[Full documentation →](https://github.com/eakbulut/foley#readme) · [Live demo →](https://eakbulut.github.io/foley/)
+[Full documentation →](https://github.com/eakbulut/foley#readme) · [Live demo →](https://usefoley.dev/)
 
 MIT © eakbulut and Foley contributors.

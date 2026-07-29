@@ -66,6 +66,28 @@ test("vue directive attaches and removes its listener", async () => {
 
 /* ---------- demo stays honest about the packages ---------- */
 
+test("the canonical domain is consistent everywhere", () => {
+  const home = corePkg.homepage;
+  assert.equal(home, "https://usefoley.dev/");
+  assert.equal(reactPkg.homepage, home);
+  assert.equal(vuePkg.homepage, home);
+  const page = readFileSync(join(root, "index.html"), "utf8");
+  assert.ok(page.includes('og:url" content="' + home), "og:url out of sync with homepage");
+  assert.ok(page.includes(home + "assets/og-image.png"), "og:image not on the canonical domain");
+  const deploy = readFileSync(join(root, ".github/workflows/deploy.yml"), "utf8");
+  assert.ok(deploy.includes('echo "usefoley.dev" > _site/CNAME'), "Pages deploy must write the CNAME file");
+});
+
+test("agents.md is served and linked, and knows about the framework packages", () => {
+  const agents = readFileSync(join(root, "agents.md"), "utf8");
+  assert.ok(agents.includes("@foleyjs/react"), "agents.md should recommend the React package");
+  assert.ok(agents.includes("@foleyjs/vue"), "agents.md should recommend the Vue package");
+  const page = readFileSync(join(root, "index.html"), "utf8");
+  assert.ok(page.includes('href="agents.md"'), "demo should link agents.md");
+  const deploy = readFileSync(join(root, ".github/workflows/deploy.yml"), "utf8");
+  assert.ok(deploy.includes("agents.md"), "Pages deploy must ship agents.md or the site link 404s");
+});
+
 test("demo's recipes step references the published packages", () => {
   const page = readFileSync(join(root, "index.html"), "utf8");
   assert.ok(page.includes("@foleyjs/react"), "demo should mention @foleyjs/react");

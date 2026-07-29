@@ -15,6 +15,10 @@ bind();                 // once, at app startup — wires all data-foley-* attri
 set({ volume: 0.7 });   // optional; themes: "default" | "soft" | "mechanical" | "glass"
 ```
 
+In React, prefer `@foleyjs/react`: `const { play } = useFoley({ volume: 0.7 })` — it
+binds on mount and re-exports the core. In Vue 3, prefer `@foleyjs/vue`:
+`app.use(FoleyPlugin, { volume: 0.7 })`, then `<button v-foley="'success'">`.
+
 ## Preferred: declarative attributes
 
 Add attributes to existing markup; do not add event listeners for sounds the

@@ -21,6 +21,6 @@ createApp(App).use(FoleyPlugin, { volume: 0.7, theme: "soft" }).mount("#app");
 
 The plugin registers the `v-foley` directive, applies your settings, and wires any `data-foley-*` attributes. Everything from `@foleyjs/core` is also re-exported.
 
-[Full documentation →](https://github.com/eakbulut/foley#readme) · [Live demo →](https://eakbulut.github.io/foley/)
+[Full documentation →](https://github.com/eakbulut/foley#readme) · [Live demo →](https://usefoley.dev/)
 
 MIT © eakbulut and Foley contributors.
