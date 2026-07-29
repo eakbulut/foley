@@ -499,7 +499,7 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
           <button aria-pressed="false" data-pm="yarn">yarn</button>
           <button aria-pressed="false" data-pm="bun">bun</button>
         </div>
-        <pre class="code" id="install-code"><button class="copy-btn" data-copy="#install-cmd">copy</button><span id="install-cmd">$ npm install foley</span></pre>
+        <pre class="code" id="install-code"><button class="copy-btn" data-copy="#install-cmd">copy</button><span id="install-cmd">$ npm install @foleyjs/core</span></pre>
       </div>
 
       <div class="step">
@@ -511,7 +511,7 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
 &lt;button <span class="at">data-foley-toggle</span>&gt;Dark mode&lt;/button&gt;
 &lt;input <span class="at">data-foley-type</span>=<span class="st">"thock"</span>&gt;
 &lt;input type=<span class="st">"range"</span> <span class="at">data-foley-slide</span>&gt;</code></pre>
-          <pre class="code"><button class="copy-btn" data-copy="#code-js">copy</button><code id="code-js"><span class="kw">import</span> { bind, play, set } <span class="kw">from</span> <span class="st">"foley"</span>;
+          <pre class="code"><button class="copy-btn" data-copy="#code-js">copy</button><code id="code-js"><span class="kw">import</span> { bind, play, set } <span class="kw">from</span> <span class="st">"@foleyjs/core"</span>;
 
 bind();                     <span class="cm">// wires every data-foley-*</span>
 set({ volume: 0.7,          <span class="cm">// 0 – 1</span>
@@ -984,7 +984,7 @@ async function exportCue(name, btn) {
 
 /* package manager switcher */
 (function pmSwitch() {
-  const cmds = { npm: "$ npm install foley", pnpm: "$ pnpm add foley", yarn: "$ yarn add foley", bun: "$ bun add foley" };
+  const cmds = { npm: "$ npm install @foleyjs/core", pnpm: "$ pnpm add @foleyjs/core", yarn: "$ yarn add @foleyjs/core", bun: "$ bun add @foleyjs/core" };
   const out = document.getElementById("install-cmd");
   document.querySelectorAll(".pm-row button").forEach((b) => {
     b.addEventListener("click", () => {

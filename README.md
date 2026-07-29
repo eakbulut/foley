@@ -13,10 +13,10 @@ Foley is a tiny, dependency-free library of **28 interaction sounds**, named for
 ## Install
 
 ```sh
-npm install foley
+npm install @foleyjs/core
 ```
 
-> **Note:** if the bare name is unavailable on the npm registry, this package is published under a scope — check the repository sidebar for the current install name.
+> Published under the [foleyjs org](https://www.npmjs.com/org/foleyjs) — the bare name `foley` is blocked by npm's package-name similarity rules. Framework bindings will join as `@foleyjs/react` and friends.
 
 Or skip the install entirely and vendor the single file: copy `src/foley.js` into your project.
 
@@ -32,7 +32,7 @@ Mark up anything that should make a sound, then bind once at startup.
 ```
 
 ```js
-import { bind, play, set } from "foley";
+import { bind, play, set } from "@foleyjs/core";
 
 bind();                          // wires every data-foley-* attribute
 set({ volume: 0.7, theme: "default" });
@@ -71,7 +71,7 @@ Every attribute accepts a cue name as its value to override the default.
 ## API
 
 ```js
-import { play, bind, set, get, toWav, unlock, getAnalyser, on, cues, families, themes, version } from "foley";
+import { play, bind, set, get, toWav, unlock, getAnalyser, on, cues, families, themes, version } from "@foleyjs/core";
 ```
 
 - **`play(name, { pitch?, volume? })`** — play a cue, with optional per-play transpose (semitones) and level (0–1).

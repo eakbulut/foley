@@ -1,7 +1,7 @@
 {
-  "name": "foley",
+  "name": "@foleyjs/core",
   "version": "2.2.0",
-  "description": "Sound effects for the interface, performed live. 28 interaction cues synthesized with Web Audio — zero dependencies, zero audio files.",
+  "description": "Sound effects for the interface, performed live. 28 interaction cues synthesized with Web Audio \u2014 zero dependencies, zero audio files.",
   "type": "module",
   "main": "./src/foley.js",
   "module": "./src/foley.js",
@@ -12,7 +12,11 @@
       "import": "./src/foley.js"
     }
   },
-  "files": ["src", "README.md", "LICENSE"],
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
   "sideEffects": false,
   "scripts": {
     "demo": "npx serve ."
@@ -22,8 +26,22 @@
     "url": "git+https://github.com/eakbulut/foley.git"
   },
   "homepage": "https://github.com/eakbulut/foley#readme",
-  "bugs": { "url": "https://github.com/eakbulut/foley/issues" },
-  "keywords": ["web-audio", "ui-sounds", "sound-effects", "interaction", "sfx", "microinteractions", "audio", "synthesis"],
+  "bugs": {
+    "url": "https://github.com/eakbulut/foley/issues"
+  },
+  "keywords": [
+    "web-audio",
+    "ui-sounds",
+    "sound-effects",
+    "interaction",
+    "sfx",
+    "microinteractions",
+    "audio",
+    "synthesis"
+  ],
   "author": "eakbulut",
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
 }
