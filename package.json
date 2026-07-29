@@ -1,7 +1,7 @@
 {
   "name": "@foleyjs/core",
   "version": "2.3.0",
-  "description": "Sound effects for the interface, performed live. 28 interaction cues synthesized with Web Audio — zero dependencies, zero audio files.",
+  "description": "Sound effects for the interface, performed live. 28 interaction cues synthesized with Web Audio \u2014 zero dependencies, zero audio files.",
   "type": "module",
   "main": "./src/foley.js",
   "module": "./src/foley.js",
@@ -19,13 +19,15 @@
   ],
   "sideEffects": false,
   "scripts": {
+    "test": "node --test",
+    "build": "node scripts/build-standalone.mjs",
     "demo": "npx serve ."
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/eakbulut/foley.git"
   },
-  "homepage": "https://github.com/eakbulut/foley#readme",
+  "homepage": "https://eakbulut.github.io/foley/",
   "bugs": {
     "url": "https://github.com/eakbulut/foley/issues"
   },

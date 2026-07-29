@@ -1,6 +1,10 @@
 # foley
 
-**Sound effects for the interface, performed live.**
+[![npm](https://img.shields.io/npm/v/%40foleyjs%2Fcore)](https://www.npmjs.com/package/@foleyjs/core)
+[![CI](https://github.com/eakbulut/foley/actions/workflows/ci.yml/badge.svg)](https://github.com/eakbulut/foley/actions/workflows/ci.yml)
+[![license](https://img.shields.io/badge/license-MIT-1B9E57)](./LICENSE)
+
+**Sound effects for the interface, performed live.** [Play the demo →](https://eakbulut.github.io/foley/)
 
 Foley is a tiny, dependency-free library of **28 interaction sounds**, named for the film artists who perform footsteps and door-latches in sync with the picture. It does the same for your interface: every cue is synthesized with Web Audio at the instant of the action. No audio files, no network requests, no build step.
 
@@ -118,6 +122,16 @@ npm run demo        # or: npx serve .
 ```
 
 Then open the printed URL. GitHub Pages works too: enable it on the repo root and the demo is live.
+
+## Development
+
+```sh
+npm test         # node --test: metadata integrity, settings, docs/types consistency, build
+npm run build    # regenerate the single-file demo at dist/foley-demo.html
+npm run demo     # serve the demo locally
+```
+
+CI runs the tests on every push; merges to `main` deploy the demo to GitHub Pages (enable Pages with the "GitHub Actions" source in repo settings, once).
 
 ## License
 
