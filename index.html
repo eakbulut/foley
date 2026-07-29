@@ -58,20 +58,26 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 /* ---------- header ---------- */
 header.top{
-  position:sticky;top:0;z-index:50;
+  position:sticky;top:0;z-index:50;position:sticky;
   background:color-mix(in srgb,var(--panel) 88%, transparent);
   backdrop-filter:blur(10px);
   border-bottom:1px solid var(--card-edge);
 }
 .top-in{display:flex;align-items:center;gap:16px;height:58px}
-.logo{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:800;font-size:19px;letter-spacing:-.01em;text-decoration:none}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:800;font-size:19px;letter-spacing:-.01em;text-decoration:none;white-space:nowrap;flex:none}
 .logo-jack{width:18px;height:18px;border-radius:50%;background:var(--ink);position:relative;flex:none}
 .logo-jack::after{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--panel)}
-.ver{font-family:var(--mono);font-size:11px;color:var(--ink-faint);border:1px solid var(--card-edge);border-radius:999px;padding:2px 8px;background:var(--card)}
-.top-nav{margin-left:auto;display:flex;gap:4px}
-.top-nav a{font-size:13.5px;font-weight:500;color:var(--ink-soft);text-decoration:none;padding:7px 11px;border-radius:8px}
+.ver{font-family:var(--mono);font-size:11px;color:var(--ink-faint);border:1px solid var(--card-edge);border-radius:999px;padding:2px 8px;background:var(--card);white-space:nowrap;flex:none}
+.top-nav{display:flex;gap:4px}
+.top-nav a{font-size:13.5px;font-weight:500;color:var(--ink-soft);text-decoration:none;padding:7px 10px;border-radius:8px;white-space:nowrap}
 .top-nav a:hover{background:var(--card);color:var(--ink)}
 .top-nav a:focus-visible{outline:2px solid var(--c-toggle);outline-offset:2px}
+.top-nav a.gh{display:inline-flex;align-items:center;gap:8px;padding:7px 8px}
+.gh-txt{display:none}
+.menu-btn{display:none;align-items:center;justify-content:center;width:38px;height:38px;border-radius:9px;border:1px solid var(--card-edge);background:var(--card);color:var(--ink-soft);cursor:pointer;flex:none}
+.menu-btn:hover{color:var(--ink);border-color:var(--ink-faint)}
+.menu-btn[aria-expanded="true"]{background:var(--ink);color:#F4F6F3;border-color:var(--ink)}
+.menu-btn:focus-visible{outline:2px solid var(--c-toggle);outline-offset:2px}
 
 /* ---------- hero ---------- */
 .hero{padding:72px 0 0;position:relative}
@@ -112,19 +118,45 @@ header.top{
 .btn-ghost:hover{border-color:var(--ink-faint)}
 .hint-audio{font-size:13px;color:var(--ink-faint)}
 
-/* ---------- scope (signature) ---------- */
-.scope-shell{
-  margin:26px 0 22px;border-radius:16px;overflow:hidden;border:1px solid #0B1713;
-  background:var(--scope-bg);
-  box-shadow:inset 0 0 40px rgba(0,0,0,.55), 0 8px 22px rgba(16,34,28,.2);
+/* ---------- scope: a live strip in the chrome, visible from everywhere ---------- */
+.head-scope{
+  display:flex;align-items:center;gap:8px;margin-left:auto;
+  background:var(--scope-bg);border:1px solid #0B1713;border-radius:9px;
+  padding:4px 8px 4px 4px;
 }
-.scope-head{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid rgba(126,231,196,.14)}
-.scope-head .lamp{width:8px;height:8px;border-radius:50%;background:#3AE38F;box-shadow:0 0 8px #3AE38F}
-.scope-head .lamp.idle{background:#2B4A3F;box-shadow:none}
-.scope-title{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7EE7C4}
-.scope-cue{margin-left:auto;font-family:var(--mono);font-size:12px;color:#B9F3DD}
-#scope{display:block;width:100%;height:150px}
-@media(max-width:640px){#scope{height:100px}}
+#scope{display:block;width:180px;height:32px;border-radius:6px}
+.head-cue{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:#7EE7C4;min-width:52px;text-align:left}
+.scope-mode{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#7EE7C4;background:transparent;border:1px solid rgba(126,231,196,.35);border-radius:5px;padding:2px 6px;cursor:pointer}
+.scope-mode:hover{background:rgba(126,231,196,.12)}
+.scope-mode:focus-visible{outline:2px solid #7EE7C4}
+/* shed the least essential items first, one breakpoint at a time */
+@media(max-width:1080px){.top-nav a[href="agents.md"]{display:none}}
+@media(max-width:960px){.ver{display:none}}
+@media(max-width:880px){.head-cue,.scope-mode{display:none}#scope{width:120px}}
+/* below 640px: one clean row — logo, scope, menu button; nav lives in a dropdown */
+@media(max-width:640px){
+  .wrap{padding:0 18px}
+  .top-in{gap:10px}
+  /* the icon sits ~10px inside its own hit area; overhang the button so the
+     glyph, not the invisible padding, aligns with the page's right edge */
+  .menu-btn{margin-right:-9px}
+  .head-scope{margin-left:auto}
+  #scope{width:96px;height:28px}
+  .menu-btn{display:inline-flex}
+  .top-nav{
+    display:none;position:absolute;top:100%;left:0;right:0;
+    flex-direction:column;gap:2px;padding:8px 16px 14px;
+    background:var(--card);border-bottom:1px solid var(--card-edge);
+    box-shadow:0 16px 30px rgba(20,25,22,.14);
+  }
+  .top-nav.open{display:flex}
+  .top-nav a{font-size:15px;padding:11px 10px;border-radius:10px}
+  .top-nav a[href="agents.md"]{display:block}
+  .gh-txt{display:inline}
+}
+/* the scope fits down to ~330px; below that, the menu button inherits the push-right
+   so right-alignment never depends on any one element existing */
+@media(max-width:330px){.head-scope{display:none}.menu-btn{margin-left:auto}}
 
 /* ---------- quotes strip ---------- */
 .quotes{
@@ -157,7 +189,7 @@ p.blk-sub{color:var(--ink-soft);max-width:60ch;font-size:15.5px}
 .cat-dot{width:10px;height:10px;border-radius:50%;flex:none;position:relative;top:0}
 .cat-name{font-family:var(--disp);font-weight:700;font-size:16px;letter-spacing:-.01em}
 .cat-desc{font-size:13px;color:var(--ink-faint)}
-.chip-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}
+.chip-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:10px}
 .chip-row{align-items:stretch}
 .chip{
   position:relative;display:flex;flex-direction:column;gap:6px;align-items:stretch;
@@ -234,19 +266,19 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .pill-toggle:focus-visible{outline:2px solid var(--c-toggle);outline-offset:2px}
 
 /* ---------- playground ---------- */
-.play-grid{margin-top:30px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:stretch}
-@media(max-width:1040px){.play-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.play-grid{grid-template-columns:1fr}}
-.demo-card{background:var(--card);border:1px solid var(--card-edge);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.play-grid{margin-top:30px;display:grid;grid-template-columns:repeat(2,1fr);gap:18px;align-items:stretch}
+@media(max-width:680px){.play-grid{grid-template-columns:1fr}}
+.demo-card{background:var(--card);border:1px solid var(--card-edge);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:13px}
 .demo-card h3{font-family:var(--disp);font-weight:700;font-size:16.5px;letter-spacing:-.01em}
-.demo-card .attr{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);background:var(--panel);border:1px solid var(--card-edge);border-radius:7px;padding:3px 8px;align-self:flex-start;max-width:100%;overflow-wrap:anywhere;line-height:1.6}
-.demo-card p{font-size:13px;color:var(--ink-soft);min-height:4em}
-.demo-stage{background:var(--panel);border:1px dashed var(--card-edge);border-radius:12px;padding:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;min-height:110px;flex:1}
-.notif-stack{display:flex;flex-direction:column;gap:8px;width:100%}
-.notif-stack .notif-btn{width:100%;justify-content:flex-start}
+.demo-card .attr{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);background:var(--panel);border:1px solid var(--card-edge);border-radius:7px;padding:3px 8px;align-self:flex-start;max-width:100%;overflow-wrap:anywhere;line-height:1.6}
+.demo-card p{font-size:13.5px;color:var(--ink-soft);min-height:2.9em}
+.demo-stage{background:var(--panel);border:1px dashed var(--card-edge);border-radius:12px;padding:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;min-height:104px;flex:1}
+.notif-stack{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.notif-stack .notif-btn{justify-content:center}
 
-.save-btn{position:relative;background:var(--ink);color:#F4F6F3;border-radius:10px;padding:10px 18px;font-weight:600;font-size:14px;border:none;box-shadow:0 2px 0 #000;transition:transform .06s}
-.save-btn:active{transform:translateY(2px);box-shadow:0 0 0 #000}
+.save-btn{position:relative;background:var(--ink);color:#F4F6F3;border-radius:10px;padding:10px 18px;font-weight:600;font-size:14px;border:none;box-shadow:0 1px 2px rgba(0,0,0,.28), 0 3px 8px rgba(0,0,0,.14);transition:transform .06s, box-shadow .12s}
+.save-btn:hover{box-shadow:0 2px 4px rgba(0,0,0,.28), 0 5px 14px rgba(0,0,0,.18)}
+.save-btn:active{transform:translateY(1px);box-shadow:0 1px 2px rgba(0,0,0,.3)}
 .save-btn.done{background:var(--c-feedback)}
 .mini-status{font-family:var(--mono);font-size:12px;color:var(--ink-faint)}
 
@@ -279,24 +311,6 @@ input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;bac
 .upload-zone .bar{height:5px;border-radius:3px;background:var(--card-edge);margin-top:10px;overflow:hidden;display:none}
 .upload-zone.busy .bar{display:block}
 .upload-zone .bar i{display:block;height:100%;width:0;background:var(--c-motion);transition:width .12s linear}
-
-/* mini scope (picture-in-picture) */
-.mini-scope{
-  position:fixed;left:18px;bottom:18px;z-index:90;width:236px;
-  background:var(--scope-bg);border:1px solid #0B1713;border-radius:12px;
-  box-shadow:0 10px 26px rgba(16,34,28,.4);padding:8px 10px 10px;cursor:pointer;
-  opacity:0;transform:translateY(12px);pointer-events:none;
-  transition:opacity .2s ease,transform .2s ease;
-}
-.mini-scope.on{opacity:1;transform:none;pointer-events:auto}
-.mini-scope:focus-visible{outline:2px solid #7EE7C4;outline-offset:2px}
-.mini-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.mini-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#7EE7C4}
-.mini-close{background:none;border:none;color:#5E8A78;font-size:15px;line-height:1;cursor:pointer;padding:2px 5px;border-radius:5px}
-.mini-close:hover{color:#B9F3DD}
-.mini-close:focus-visible{outline:2px solid #7EE7C4}
-#mini-canvas{display:block;width:100%;height:48px}
-@media(max-width:640px){.mini-scope{width:172px;left:12px;bottom:12px}}
 
 /* toasts */
 .toasts{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:100;max-width:320px}
@@ -345,13 +359,23 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
   <div class="wrap top-in">
     <a class="logo" href="#"><span class="logo-jack" aria-hidden="true"></span>foley</a>
     <span class="ver">v2.3.0 · 5.6 kB</span>
-    <nav class="top-nav" aria-label="Site">
+    <div class="head-scope" aria-hidden="true" title="Live output">
+      <canvas id="scope"></canvas>
+      <span class="head-cue" id="scope-label">idle</span>
+      <button class="scope-mode" id="scope-mode" aria-pressed="false" title="Waveform / spectrum">wave</button>
+    </div>
+    <nav class="top-nav" id="top-nav" aria-label="Site">
       <a href="#cues">Cues</a>
       <a href="#playground">Playground</a>
       <a href="#start">Get started</a>
-      <a href="https://github.com/eakbulut/foley" target="_blank" rel="noopener">GitHub</a>
       <a href="agents.md" target="_blank" rel="noopener">agents.md</a>
+      <a class="gh" href="https://github.com/eakbulut/foley" target="_blank" rel="noopener" aria-label="GitHub">
+        <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg><span class="gh-txt">GitHub</span>
+      </a>
     </nav>
+    <button class="menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="top-nav">
+      <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="2" y="5" width="2.4" height="6" rx="1.2"/><rect x="6.8" y="2.5" width="2.4" height="11" rx="1.2"/><rect x="11.6" y="6" width="2.4" height="4" rx="1.2"/></svg>
+    </button>
   </div>
 </header>
 
@@ -396,17 +420,6 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
     <div class="eyebrow">The library · 28 cues in 7 families</div>
     <h2 class="blk">A palette, not a pile of clicks.</h2>
     <p class="blk-sub">Each family has its own material — noise for touch, glides for motion, harmonics for news. Click any cue, or just start typing: every cue is mapped to a key.</p>
-
-    <!-- the scope lives with the instrument: it pins here while you play the board -->
-    <div class="scope-shell" aria-hidden="true">
-      <div class="scope-head">
-        <span class="lamp idle" id="scope-lamp"></span>
-        <span class="scope-title">live output · analyser 2048</span>
-        <button class="scope-mode" id="scope-mode" aria-pressed="false" title="Switch between waveform and spectrum">wave</button>
-        <span class="scope-cue" id="scope-label">idle — click a cue below</span>
-      </div>
-      <canvas id="scope"></canvas>
-    </div>
 
     <div class="board" id="board"><!-- built by JS --></div>
     <div class="board-tools">
@@ -622,11 +635,6 @@ app.use(FoleyPlugin, { theme: <span class="st">"soft"</span> });
 
 </main>
 
-<div class="mini-scope" id="mini-scope" role="button" tabindex="0" title="Live output — click to jump to the scope" aria-label="Live output mini scope. Activate to jump to the main scope.">
-  <span class="mini-head"><span class="mini-label" id="mini-label">idle</span><button class="mini-close" id="mini-close" aria-label="Hide mini scope">×</button></span>
-  <canvas id="mini-canvas"></canvas>
-</div>
-
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
 <footer class="site">
@@ -672,7 +680,7 @@ on("unlock", () => {
 on("play", ({ name, family }) => {
   ui.last = { name, family, at: performance.now() };
   const label = document.getElementById("scope-label");
-  if (label) label.textContent = name + " \u00b7 " + families[family].name.toLowerCase();
+  if (label) label.textContent = name;
   const chip = document.querySelector('.chip[data-cue="' + name + '"]');
   if (chip) {
     chip.classList.add("playing");
@@ -680,6 +688,26 @@ on("play", ({ name, family }) => {
     chip._t = setTimeout(() => chip.classList.remove("playing"), 320);
   }
 });
+
+/* mobile menu: opens with "on", closes with "off" — the nav itself is a demo */
+(function mobileMenu() {
+  const btn = document.getElementById("menu-btn");
+  const nav = document.getElementById("top-nav");
+  if (!btn || !nav) return;
+  function setOpen(open, silent) {
+    nav.classList.toggle("open", open);
+    btn.setAttribute("aria-expanded", String(open));
+    if (!silent) play(open ? "on" : "off");
+  }
+  btn.addEventListener("click", () => setOpen(!nav.classList.contains("open")));
+  nav.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setOpen(false, true)));
+  document.addEventListener("click", (e) => {
+    if (nav.classList.contains("open") && !nav.contains(e.target) && !btn.contains(e.target)) setOpen(false, true);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && nav.classList.contains("open")) setOpen(false);
+  });
+})();
 
 /* hero pills */
 document.querySelectorAll(".hero-pill").forEach((b) => {
@@ -795,121 +823,76 @@ document.addEventListener("keydown", (e) => {
   if (cue) { play(cue); e.preventDefault(); }
 });
 
-/* oscilloscope \u2014 main scope in the cue board + picture-in-picture that follows you */
+/* oscilloscope: one compact live strip in the header, visible from anywhere */
 (function scope() {
-  const main = document.getElementById("scope");
-  const lamp = document.getElementById("scope-lamp");
-  const shell = document.querySelector(".scope-shell");
-  const mini = document.getElementById("mini-scope");
-  const miniCv = document.getElementById("mini-canvas");
-  const miniLabel = document.getElementById("mini-label");
-  let mainVisible = true, miniClosed = false, mode = "wave";
+  const cv = document.getElementById("scope");
+  if (!cv) return;
+  let mode = "wave";
   const modeBtn = document.getElementById("scope-mode");
-  modeBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
+  if (modeBtn) modeBtn.addEventListener("click", () => {
     mode = mode === "wave" ? "spectrum" : "wave";
     modeBtn.textContent = mode === "wave" ? "wave" : "fft";
     modeBtn.setAttribute("aria-pressed", String(mode === "spectrum"));
     play("switch");
   });
 
-  new IntersectionObserver((es) => { mainVisible = es[0].isIntersecting; }, { threshold: 0.15 }).observe(shell);
-
-  document.getElementById("mini-close").addEventListener("click", (e) => {
-    e.stopPropagation();
-    miniClosed = true;
-    mini.classList.remove("on");
-  });
-  function jump() { shell.scrollIntoView({ behavior: "smooth", block: "center" }); }
-  mini.addEventListener("click", jump);
-  mini.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); jump(); } });
-
-  function fit(cv) {
+  const c = cv.getContext("2d");
+  let w = 0, h = 0;
+  function fit() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = cv.clientWidth, h = cv.clientHeight;
+    w = cv.clientWidth; h = cv.clientHeight;
     if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
       cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
     }
-    const c = cv.getContext("2d");
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    return [c, w, h];
   }
 
   const data = new Uint8Array(2048);
   const freq = new Uint8Array(1024);
 
-  function spectrum(c, w, h, glow) {
-    const color = (ui.last.family && FAM[ui.last.family].hex) || "#7EE7C4";
-    c.clearRect(0, 0, w, h);
-    c.strokeStyle = "rgba(126,231,196,.09)";
-    c.lineWidth = 1;
-    c.beginPath();
-    for (let y = 0; y <= h; y += h / 4) { c.moveTo(0, y); c.lineTo(w, y); }
-    c.stroke();
+  function frame() {
+    requestAnimationFrame(frame);
+    fit();
     const an = getAnalyser();
-    if (!an) return;
-    an.getByteFrequencyData(freq);
-    const bars = 96, bw = w / bars;
-    c.fillStyle = color + "CC";
-    c.shadowColor = color;
-    c.shadowBlur = glow;
-    for (let i = 0; i < bars; i++) {
-      /* log-ish bin mapping so lows don't hog the whole scope */
-      const bin = Math.floor(Math.pow(i / bars, 1.6) * (freq.length * 0.6));
-      const v = freq[bin] / 255;
-      const bh = Math.max(1, v * (h - 4));
-      c.fillRect(i * bw + 0.5, h - 2 - bh, bw - 1.5, bh);
-    }
-    c.shadowBlur = 0;
-  }
-
-  function trace(c, w, h, gridCols, glow) {
+    const active = an && performance.now() - ui.last.at < 1600;
     const color = (ui.last.family && FAM[ui.last.family].hex) || "#7EE7C4";
     c.clearRect(0, 0, w, h);
-    c.strokeStyle = "rgba(126,231,196,.09)";
+    c.strokeStyle = "rgba(126,231,196,.12)";
     c.lineWidth = 1;
     c.beginPath();
-    for (let x = 0; x <= w; x += w / gridCols) { c.moveTo(x, 0); c.lineTo(x, h); }
-    for (let y = 0; y <= h; y += h / 4) { c.moveTo(0, y); c.lineTo(w, y); }
+    c.moveTo(0, h / 2); c.lineTo(w, h / 2);
     c.stroke();
-    c.lineWidth = 2;
+    if (mode === "spectrum" && an) {
+      an.getByteFrequencyData(freq);
+      const bars = 48, bw = w / bars;
+      c.fillStyle = color;
+      c.shadowColor = color;
+      c.shadowBlur = active ? 4 : 0;
+      for (let i = 0; i < bars; i++) {
+        const bin = Math.floor(Math.pow(i / bars, 1.6) * (freq.length * 0.6));
+        const bh = Math.max(1, (freq[bin] / 255) * (h - 2));
+        c.fillRect(i * bw + 0.5, h - 1 - bh, bw - 1, bh);
+      }
+      c.shadowBlur = 0;
+      return;
+    }
+    c.lineWidth = 1.6;
     c.lineJoin = "round";
     c.strokeStyle = color;
     c.shadowColor = color;
-    c.shadowBlur = glow;
+    c.shadowBlur = active ? 6 : 0;
     c.beginPath();
-    const an = getAnalyser();
     if (an) {
+      an.getByteTimeDomainData(data);
       const n = data.length;
       for (let i = 0; i < n; i++) {
         const x = (i / (n - 1)) * w;
-        const y = h / 2 + ((data[i] - 128) / 128) * (h * 0.46);
+        const y = h / 2 + ((data[i] - 128) / 128) * (h * 0.47);
         if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
       }
-    } else {
-      c.moveTo(0, h / 2); c.lineTo(w, h / 2);
+      c.stroke();
     }
-    c.stroke();
     c.shadowBlur = 0;
-  }
-
-  function frame() {
-    requestAnimationFrame(frame);
-    const an = getAnalyser();
-    if (an) an.getByteTimeDomainData(data);
-    const active = an && performance.now() - ui.last.at < 1600;
-    lamp.classList.toggle("idle", !active);
-    const [c, w, h] = fit(main);
-    if (mode === "spectrum") spectrum(c, w, h, active ? 8 : 0);
-    else trace(c, w, h, 12, active ? 10 : 0);
-    /* PiP: appears only when the main scope is off-screen and something played recently */
-    const showMini = !miniClosed && !mainVisible && an && performance.now() - ui.last.at < 2800;
-    mini.classList.toggle("on", showMini);
-    if (showMini) {
-      const [mc, mw, mh] = fit(miniCv);
-      trace(mc, mw, mh, 6, active ? 6 : 0);
-      miniLabel.textContent = ui.last.name || "idle";
-    }
   }
   frame();
 })();
