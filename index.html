@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foley — sound effects for the interface, performed live</title>
+<meta name="description" content="Foley is a tiny, dependency-free library of 28 interaction sounds — named for the film artists who perform sound in sync with the picture. Every cue is synthesized live with Web Audio at the moment of interaction.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --panel:#E8EAE7;          /* brushed-aluminum studio panel   */
+  --card:#F7F8F6;           /* module faceplate                */
+  --card-edge:#D8DBD6;
+  --ink:#171B19;
+  --ink-soft:#4C534F;
+  --ink-faint:#8A918D;
+  --scope-bg:#10221C;       /* phosphor scope well             */
+  --scope-grid:rgba(126,231,196,.10);
+  --c-pointer:#E5A50A;      /* patch-cable yellow              */
+  --c-press:#E85D2A;        /* patch-cable orange              */
+  --c-toggle:#2E6FF2;       /* patch-cable blue                */
+  --c-feedback:#1B9E57;     /* patch-cable green               */
+  --c-notify:#8B5CF6;       /* patch-cable violet              */
+  --c-motion:#0FA3A0;       /* patch-cable teal                */
+  --err:#D33A2C;
+  --radius:14px;
+  --disp:'Bricolage Grotesque', system-ui, sans-serif;
+  --body:'Instrument Sans', system-ui, sans-serif;
+  --mono:'Space Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+body{
+  font-family:var(--body);
+  background:var(--panel);
+  color:var(--ink);
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--c-motion);color:#fff}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono)}
+
+/* ---------- header ---------- */
+header.top{
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb,var(--panel) 88%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--card-edge);
+}
+.top-in{display:flex;align-items:center;gap:16px;height:58px}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:800;font-size:19px;letter-spacing:-.01em;text-decoration:none}
+.logo-jack{width:18px;height:18px;border-radius:50%;background:var(--ink);position:relative;flex:none}
+.logo-jack::after{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--panel)}
+.ver{font-family:var(--mono);font-size:11px;color:var(--ink-faint);border:1px solid var(--card-edge);border-radius:999px;padding:2px 8px;background:var(--card)}
+.top-nav{margin-left:auto;display:flex;gap:4px}
+.top-nav a{font-size:13.5px;font-weight:500;color:var(--ink-soft);text-decoration:none;padding:7px 11px;border-radius:8px}
+.top-nav a:hover{background:var(--card);color:var(--ink)}
+.top-nav a:focus-visible{outline:2px solid var(--c-toggle);outline-offset:2px}
+
+/* ---------- hero ---------- */
+.hero{padding:72px 0 0}
+.hero h1{
+  font-family:var(--disp);font-weight:800;
+  font-size:clamp(36px,6vw,68px);
+  line-height:1.04;letter-spacing:-.025em;max-width:18ch;
+}
+.hero h1 .lit{color:var(--c-press)}
+.hero p.lede{margin-top:18px;max-width:56ch;font-size:17px;color:var(--ink-soft)}
+.hero .cta-row{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap;align-items:center}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-weight:600;font-size:14.5px;border-radius:11px;
+  padding:11px 18px;border:1px solid transparent;text-decoration:none;
+  transition:transform .06s ease, box-shadow .12s ease;
+}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:2px solid var(--c-toggle);outline-offset:2px}
+.btn-primary{background:var(--ink);color:#F4F6F3;box-shadow:0 2px 0 #000}
+.btn-primary:hover{box-shadow:0 3px 0 #000, 0 6px 18px rgba(0,0,0,.15)}
+.btn-ghost{background:var(--card);border-color:var(--card-edge);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--ink-faint)}
+.hint-audio{font-size:13px;color:var(--ink-faint)}
+
+/* ---------- scope (signature) ---------- */
+.scope-shell{
+  position:sticky;top:66px;z-index:40;
+  margin:26px 0 22px;border-radius:16px;overflow:hidden;border:1px solid #0B1713;
+  background:var(--scope-bg);
+  box-shadow:inset 0 0 40px rgba(0,0,0,.55), 0 12px 30px rgba(16,34,28,.35);
+}
+.scope-head{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid rgba(126,231,196,.14)}
+.scope-head .lamp{width:8px;height:8px;border-radius:50%;background:#3AE38F;box-shadow:0 0 8px #3AE38F}
+.scope-head .lamp.idle{background:#2B4A3F;box-shadow:none}
+.scope-title{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7EE7C4}
+.scope-cue{margin-left:auto;font-family:var(--mono);font-size:12px;color:#B9F3DD}
+#scope{display:block;width:100%;height:120px}
+@media(max-width:640px){#scope{height:88px}.scope-shell{top:60px}}
+
+/* ---------- quotes strip ---------- */
+.quotes{display:flex;gap:14px;overflow-x:auto;padding:34px 0 8px;scrollbar-width:none}
+.quotes::-webkit-scrollbar{display:none}
+.quote{flex:0 0 auto;max-width:280px;background:var(--card);border:1px solid var(--card-edge);border-radius:12px;padding:14px 16px}
+.quote q{font-size:14px;font-weight:500;quotes:"“" "”"}
+.quote .who{display:block;margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+
+/* ---------- section scaffolding ---------- */
+section.block{padding:76px 0 0}
+.eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint)}
+.eyebrow::after{content:"";height:1px;flex:1;background:var(--card-edge)}
+h2.blk{font-family:var(--disp);font-weight:800;font-size:clamp(26px,3.6vw,40px);letter-spacing:-.02em;margin:14px 0 8px;max-width:24ch}
+p.blk-sub{color:var(--ink-soft);max-width:60ch;font-size:15.5px}
+
+/* ---------- cue board ---------- */
+.board{margin-top:30px;display:grid;gap:26px}
+.cat{display:grid;gap:10px}
+.cat-head{display:flex;align-items:baseline;gap:10px}
+.cat-dot{width:10px;height:10px;border-radius:50%;flex:none;position:relative;top:0}
+.cat-name{font-family:var(--disp);font-weight:700;font-size:16px;letter-spacing:-.01em}
+.cat-desc{font-size:13px;color:var(--ink-faint)}
+.chip-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}
+.chip{
+  position:relative;display:flex;flex-direction:column;gap:6px;align-items:flex-start;
+  background:var(--card);border:1px solid var(--card-edge);border-radius:var(--radius);
+  padding:13px 14px 12px;text-align:left;cursor:pointer;user-select:none;
+  transition:transform .06s ease, border-color .12s ease, box-shadow .12s ease;
+}
+.chip .dl{
+  position:absolute;bottom:9px;right:9px;width:24px;height:24px;
+  display:grid;place-items:center;border-radius:7px;
+  border:1px solid var(--card-edge);background:var(--panel);
+  font-size:12px;line-height:1;color:var(--ink-soft);opacity:.55;
+  transition:opacity .12s, border-color .12s;
+}
+.chip:hover .dl,.chip .dl:focus-visible{opacity:1}
+.chip .dl:hover{border-color:var(--cc,var(--ink-faint));color:var(--ink)}
+.chip .dl:focus-visible{outline:2px solid var(--cc,var(--c-toggle));outline-offset:1px}
+.chip .dl.busy{animation:dl-pulse .7s ease infinite}
+@keyframes dl-pulse{50%{opacity:.3}}
+.board-tools{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px}
+.chip:hover{border-color:var(--cc,var(--ink-faint));box-shadow:0 4px 14px rgba(20,25,22,.08)}
+.chip:active{transform:scale(.975)}
+.chip:focus-visible{outline:2px solid var(--cc,var(--c-toggle));outline-offset:2px}
+.chip.playing{border-color:var(--cc);box-shadow:0 0 0 3px color-mix(in srgb,var(--cc) 22%, transparent)}
+.chip .nm{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:7px}
+.chip .nm::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--cc)}
+.chip .ds{font-size:12px;color:var(--ink-faint);line-height:1.35}
+.chip kbd{
+  position:absolute;top:10px;right:10px;
+  font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);
+  border:1px solid var(--card-edge);border-bottom-width:2px;border-radius:5px;
+  padding:1px 5px;background:var(--panel);
+}
+.board-note{margin-top:14px;font-size:13px;color:var(--ink-faint)}
+.board-note kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--card-edge);border-bottom-width:2px;border-radius:5px;padding:1px 5px;background:var(--card)}
+
+/* ---------- inspector ---------- */
+.inspector{
+  margin-top:30px;background:var(--card);border:1px solid var(--card-edge);border-radius:18px;
+  padding:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:22px;
+}
+.knob{display:grid;gap:8px}
+.knob label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);display:flex;justify-content:space-between}
+.knob label output{color:var(--ink);font-weight:700}
+input[type=range]{appearance:none;-webkit-appearance:none;width:100%;height:26px;background:transparent}
+input[type=range]:focus-visible{outline:2px solid var(--c-toggle);outline-offset:2px;border-radius:6px}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(to right,var(--ink) var(--fill,50%),var(--card-edge) var(--fill,50%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-7px;border-radius:50%;background:var(--card);border:2px solid var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--card-edge)}
+input[type=range]::-moz-range-progress{height:6px;border-radius:3px;background:var(--ink)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--card);border:2px solid var(--ink)}
+.knob .sub{font-size:12px;color:var(--ink-faint)}
+.insp-actions{display:flex;flex-direction:column;gap:10px;justify-content:center}
+.pill-toggle{
+  display:flex;align-items:center;gap:10px;background:var(--panel);
+  border:1px solid var(--card-edge);border-radius:999px;padding:8px 12px;font-size:13.5px;font-weight:500;
+}
+.pill-toggle .sw{width:34px;height:20px;border-radius:999px;background:var(--card-edge);position:relative;transition:background .15s;flex:none}
+.pill-toggle .sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s}
+.pill-toggle[aria-pressed=true] .sw{background:var(--c-feedback)}
+.pill-toggle[aria-pressed=true] .sw::after{left:16px}
+.pill-toggle:focus-visible{outline:2px solid var(--c-toggle);outline-offset:2px}
+
+/* ---------- playground ---------- */
+.play-grid{margin-top:30px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.demo-card{background:var(--card);border:1px solid var(--card-edge);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.demo-card h3{font-family:var(--disp);font-weight:700;font-size:16.5px;letter-spacing:-.01em}
+.demo-card .attr{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft);background:var(--panel);border:1px solid var(--card-edge);border-radius:7px;padding:3px 8px;align-self:flex-start}
+.demo-card p{font-size:13.5px;color:var(--ink-soft)}
+.demo-stage{background:var(--panel);border:1px dashed var(--card-edge);border-radius:12px;padding:18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;min-height:86px}
+
+.save-btn{position:relative;background:var(--ink);color:#F4F6F3;border-radius:10px;padding:10px 18px;font-weight:600;font-size:14px;border:none;box-shadow:0 2px 0 #000;transition:transform .06s}
+.save-btn:active{transform:translateY(2px);box-shadow:0 0 0 #000}
+.save-btn.done{background:var(--c-feedback)}
+.mini-status{font-family:var(--mono);font-size:12px;color:var(--ink-faint)}
+
+.switch{width:52px;height:30px;border-radius:999px;border:1px solid var(--card-edge);background:var(--card-edge);position:relative;transition:background .18s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:left .18s}
+.switch[aria-pressed=true]{background:var(--c-toggle)}
+.switch[aria-pressed=true]::after{left:25px}
+.switch:focus-visible{outline:2px solid var(--c-toggle);outline-offset:2px}
+
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--card-edge);border-radius:10px;padding:3px;gap:2px}
+.seg button{border:none;background:transparent;border-radius:8px;padding:7px 13px;font-size:13px;font-weight:500;color:var(--ink-soft)}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.seg button:focus-visible{outline:2px solid var(--c-toggle);outline-offset:1px}
+
+.type-input{flex:1;min-width:180px;border:1px solid var(--card-edge);border-radius:10px;padding:11px 13px;font:inherit;font-size:14px;background:var(--card)}
+.type-input:focus{outline:2px solid var(--c-toggle);outline-offset:1px}
+
+.notif-btn{border:1px solid var(--card-edge);background:var(--card);border-radius:10px;padding:9px 14px;font-size:13.5px;font-weight:500;display:inline-flex;align-items:center;gap:8px}
+.notif-btn:hover{border-color:var(--ink-faint)}
+.notif-btn .d{width:8px;height:8px;border-radius:50%}
+.notif-btn:focus-visible{outline:2px solid var(--c-toggle);outline-offset:2px}
+
+.stepper{display:inline-flex;align-items:center;gap:0;border:1px solid var(--card-edge);border-radius:10px;background:var(--card);overflow:hidden}
+.stepper button{border:none;background:transparent;width:38px;height:38px;font-size:18px;font-weight:600}
+.stepper button:hover{background:var(--panel)}
+.stepper .val{min-width:44px;text-align:center;font-family:var(--mono);font-size:14px;border-left:1px solid var(--card-edge);border-right:1px solid var(--card-edge);line-height:38px}
+
+.upload-zone{flex:1;border:1.5px dashed var(--ink-faint);border-radius:12px;padding:18px;text-align:center;font-size:13.5px;color:var(--ink-soft);background:var(--card);transition:border-color .12s}
+.upload-zone.busy{border-color:var(--c-motion)}
+.upload-zone .bar{height:5px;border-radius:3px;background:var(--card-edge);margin-top:10px;overflow:hidden;display:none}
+.upload-zone.busy .bar{display:block}
+.upload-zone .bar i{display:block;height:100%;width:0;background:var(--c-motion);transition:width .12s linear}
+
+/* mini scope (picture-in-picture) */
+.mini-scope{
+  position:fixed;left:18px;bottom:18px;z-index:90;width:236px;
+  background:var(--scope-bg);border:1px solid #0B1713;border-radius:12px;
+  box-shadow:0 10px 26px rgba(16,34,28,.4);padding:8px 10px 10px;cursor:pointer;
+  opacity:0;transform:translateY(12px);pointer-events:none;
+  transition:opacity .2s ease,transform .2s ease;
+}
+.mini-scope.on{opacity:1;transform:none;pointer-events:auto}
+.mini-scope:focus-visible{outline:2px solid #7EE7C4;outline-offset:2px}
+.mini-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.mini-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#7EE7C4}
+.mini-close{background:none;border:none;color:#5E8A78;font-size:15px;line-height:1;cursor:pointer;padding:2px 5px;border-radius:5px}
+.mini-close:hover{color:#B9F3DD}
+.mini-close:focus-visible{outline:2px solid #7EE7C4}
+#mini-canvas{display:block;width:100%;height:48px}
+@media(max-width:640px){.mini-scope{width:172px;left:12px;bottom:12px}}
+
+/* toasts */
+.toasts{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:100;max-width:320px}
+.toast{
+  background:var(--ink);color:#F4F6F3;border-radius:12px;padding:12px 16px;font-size:13.5px;
+  display:flex;gap:10px;align-items:flex-start;box-shadow:0 10px 24px rgba(0,0,0,.28);
+  animation:toast-in .28s cubic-bezier(.2,.9,.3,1.2);
+}
+.toast .td{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:none}
+.toast b{display:block;font-size:13.5px}
+.toast span{opacity:.75;font-size:12.5px}
+@keyframes toast-in{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+
+/* ---------- code / get started ---------- */
+.steps{margin-top:30px;display:grid;gap:16px}
+.step{background:var(--card);border:1px solid var(--card-edge);border-radius:18px;padding:22px}
+.step-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.step-num{font-family:var(--mono);font-size:12px;color:var(--ink-faint);border:1px solid var(--card-edge);border-radius:999px;width:26px;height:26px;display:grid;place-items:center;flex:none}
+.step-head h3{font-family:var(--disp);font-weight:700;font-size:17px}
+.pm-row{display:flex;gap:6px;margin-bottom:10px}
+.pm-row button{font-family:var(--mono);font-size:12px;border:1px solid var(--card-edge);background:var(--panel);border-radius:7px;padding:4px 10px;color:var(--ink-soft)}
+.pm-row button[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+pre.code{
+  background:#141816;color:#DCE5E0;border-radius:12px;padding:16px 18px;overflow-x:auto;
+  font-family:var(--mono);font-size:13px;line-height:1.7;position:relative;
+}
+pre.code .cm{color:#6E7D76}
+pre.code .kw{color:#8AD8B4}
+pre.code .st{color:#E9C46A}
+pre.code .at{color:#9BB8F2}
+.copy-btn{position:absolute;top:10px;right:10px;font-family:var(--mono);font-size:11px;background:#232A26;color:#B9C6C0;border:1px solid #33403A;border-radius:7px;padding:4px 9px}
+.copy-btn:hover{color:#fff}
+.api-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.api-cols{grid-template-columns:1fr}}
+
+/* ---------- footer ---------- */
+footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0 44px}
+.foot-in{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:13.5px;color:var(--ink-soft)}
+.foot-in .sp{flex:1}
+.foot-in a{color:var(--ink-soft)}
+.foot-in a:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <a class="logo" href="#"><span class="logo-jack" aria-hidden="true"></span>foley</a>
+    <span class="ver">v2.2.0 · 5.3 kB</span>
+    <nav class="top-nav" aria-label="Site">
+      <a href="#cues">Cues</a>
+      <a href="#playground">Playground</a>
+      <a href="#start">Get started</a>
+      <a href="https://github.com/eakbulut/foley" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <h1>Sound effects for the interface, <span class="lit">performed live.</span></h1>
+    <p class="lede">Foley is a tiny, dependency-free library of <strong>28 interaction sounds</strong>, named for the film artists who perform footsteps and door-latches in sync with the picture. It does the same for your interface: every cue is synthesized with Web Audio at the instant of the action — no audio files, no network, no setup. One attribute per behavior, one <span class="mono">bind()</span>. Everything on this page is running the real engine.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#start" data-foley-click="complete">Get started</a>
+      <button class="btn btn-ghost" id="tour-btn">▶&nbsp; Play the tour</button>
+      <span class="hint-audio" id="audio-hint">Click anywhere once to unlock audio.</span>
+    </div>
+
+    <div class="quotes" aria-label="What people say">
+      <figure class="quote"><q>Finally a sound library where the demo is the product.</q><span class="who">a frontend engineer, probably</span></figure>
+      <figure class="quote"><q>28 cues and not one of them is the same click pitched up.</q><span class="who">a design systems lead</span></figure>
+      <figure class="quote"><q>Smaller than the favicon. Sounds bigger than the app.</q><span class="who">a performance reviewer</span></figure>
+      <figure class="quote"><q>The keyboard mode is dangerously fun.</q><span class="who">someone on their third coffee</span></figure>
+      <figure class="quote"><q>Shipped it to prod in the time it took to read this page.</q><span class="who">an indie hacker</span></figure>
+    </div>
+  </section>
+
+  <!-- ============ CUE BOARD ============ -->
+  <section class="block" id="cues">
+    <div class="eyebrow">The library · 28 cues in 7 families</div>
+    <h2 class="blk">A palette, not a pile of clicks.</h2>
+    <p class="blk-sub">Each family has its own material — noise for touch, glides for motion, harmonics for news. Click any cue, or just start typing: every cue is mapped to a key.</p>
+
+    <!-- the scope lives with the instrument: it pins here while you play the board -->
+    <div class="scope-shell" aria-hidden="true">
+      <div class="scope-head">
+        <span class="lamp idle" id="scope-lamp"></span>
+        <span class="scope-title">live output · analyser 2048</span>
+        <span class="scope-cue" id="scope-label">idle — click a cue below</span>
+      </div>
+      <canvas id="scope"></canvas>
+    </div>
+
+    <div class="board" id="board"><!-- built by JS --></div>
+    <div class="board-tools">
+      <button class="btn btn-ghost" id="export-all">⤓&nbsp; Download all 28 (.zip)</button>
+      <p class="board-note" style="margin:0">Keyboard mode: press the key on each cue — <kbd>1</kbd>–<kbd>0</kbd>, <kbd>Q</kbd>–<kbd>P</kbd>, <kbd>A</kbd>–<kbd>K</kbd>. The <strong>⤓</strong> on a cue exports it as a 16-bit .wav, rendered with your current transpose and space — ready for Figma, video, or native apps.</p>
+    </div>
+
+    <!-- inspector -->
+    <div class="inspector" aria-label="Sound inspector">
+      <div class="knob">
+        <label id="theme-label">Theme</label>
+        <div class="seg" id="theme-seg" role="group" aria-labelledby="theme-label" style="flex-wrap:wrap">
+          <button aria-pressed="true" data-theme="default">Default</button>
+          <button aria-pressed="false" data-theme="soft">Soft</button>
+          <button aria-pressed="false" data-theme="mechanical">Mech</button>
+          <button aria-pressed="false" data-theme="glass">Glass</button>
+        </div>
+        <span class="sub">Reshapes all 28 cues — waveforms, envelopes, brightness, and space. Exports follow.</span>
+      </div>
+      <div class="knob">
+        <label for="k-vol">Volume <output id="o-vol">70</output></label>
+        <input type="range" id="k-vol" min="0" max="100" value="70">
+        <span class="sub">Global loudness. Every cue inherits it.</span>
+      </div>
+      <div class="knob">
+        <label for="k-pitch">Transpose <output id="o-pitch">0 st</output></label>
+        <input type="range" id="k-pitch" min="-12" max="12" value="0">
+        <span class="sub">Shift the whole library ±12 semitones to match your brand.</span>
+      </div>
+      <div class="knob">
+        <label for="k-space">Space <output id="o-space">22</output></label>
+        <input type="range" id="k-space" min="0" max="100" value="22">
+        <span class="sub">Synthesized room reverb. Zero for dry UI, more for atmosphere.</span>
+      </div>
+      <div class="insp-actions">
+        <button class="pill-toggle" id="hover-toggle" aria-pressed="false"><span class="sw" aria-hidden="true"></span>Play cues on hover</button>
+        <button class="pill-toggle" id="mute-toggle" aria-pressed="false"><span class="sw" aria-hidden="true"></span>Mute everything</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PLAYGROUND ============ -->
+  <section class="block" id="playground">
+    <div class="eyebrow">Playground · every widget is wired</div>
+    <h2 class="blk">Hear it where it lives.</h2>
+    <p class="blk-sub">Sounds audition differently on a marketing grid than on a real control. These components use the same attributes you'd ship.</p>
+
+    <div class="play-grid">
+
+      <div class="demo-card">
+        <h3>Two-part press</h3>
+        <span class="attr">data-foley-press · data-foley-release</span>
+        <p>Down and up are different sounds, so a click feels like a real mechanism. Hold it — the release waits for you.</p>
+        <div class="demo-stage">
+          <button class="save-btn" id="save-btn">Save changes</button>
+          <span class="mini-status" id="save-status">autosave off</span>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h3>Toggle</h3>
+        <span class="attr">data-foley-toggle</span>
+        <p>A click and a clack. On and off are siblings, not twins, so your ears know the state without looking.</p>
+        <div class="demo-stage">
+          <button class="switch" id="demo-switch" role="switch" aria-pressed="false" aria-label="Notifications"></button>
+          <span class="mini-status" id="switch-status">notifications off</span>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h3>Hover ticks</h3>
+        <span class="attr">data-foley-hover="tick"</span>
+        <p>A grain of feedback as the pointer crosses each option. Sub-decibel by default; enable “play on hover” in the inspector to hear it here too.</p>
+        <div class="demo-stage">
+          <div class="seg" id="demo-seg" role="group" aria-label="View">
+            <button aria-pressed="true">Day</button>
+            <button aria-pressed="false">Week</button>
+            <button aria-pressed="false">Month</button>
+            <button aria-pressed="false">Year</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h3>Typing</h3>
+        <span class="attr">data-foley-type="thock"</span>
+        <p>A soft mechanical thock per keystroke, and a flourish on Enter. Try writing a sentence.</p>
+        <div class="demo-stage">
+          <input class="type-input" id="demo-type" type="text" placeholder="Type here, press Enter to send…" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h3>Notifications</h3>
+        <span class="attr">play("ping" | "chime" | "error")</span>
+        <p>Programmatic cues for things the user didn't click. Each raises a real toast.</p>
+        <div class="demo-stage">
+          <button class="notif-btn" data-toast="info"><span class="d" style="background:var(--c-notify)"></span>Message</button>
+          <button class="notif-btn" data-toast="success"><span class="d" style="background:var(--c-feedback)"></span>Deployed</button>
+          <button class="notif-btn" data-toast="error"><span class="d" style="background:var(--err)"></span>Failed</button>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h3>Progress</h3>
+        <span class="attr">play("rise") → play("complete")</span>
+        <p>Loading ticks while work happens, a rise as it finishes, then the arrival chord. Start an upload.</p>
+        <div class="demo-stage">
+          <div class="upload-zone" id="upload-zone" role="button" tabindex="0">
+            <span id="upload-label">Drop a file · or click to simulate</span>
+            <div class="bar"><i id="upload-bar"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h3>Stepper</h3>
+        <span class="attr">data-foley-click="tick" + pitch</span>
+        <p>The same tick, re-pitched with the count, so quantity has a contour. Overshoot the limits to hear “denied”.</p>
+        <div class="demo-stage">
+          <div class="stepper">
+            <button id="step-down" aria-label="Fewer">−</button>
+            <span class="val" id="step-val">2</span>
+            <button id="step-up" aria-label="More">+</button>
+          </div>
+          <span class="mini-status">seats (1–8)</span>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h3>Slider</h3>
+        <span class="attr">data-foley-slide="glide"</span>
+        <p>Detent ticks across the track that rise in pitch with the value — the sound of a thumb wheel.</p>
+        <div class="demo-stage" style="flex-direction:column;align-items:stretch">
+          <input type="range" id="demo-slider" min="0" max="20" value="8" aria-label="Brightness">
+          <span class="mini-status" id="slider-status">brightness 40%</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ GET STARTED ============ -->
+  <section class="block" id="start">
+    <div class="eyebrow">Get started · two lines to first sound</div>
+    <h2 class="blk">Install, mark up, bind. Done.</h2>
+    <p class="blk-sub">Foley ships as one ES module. The declarative layer covers the common cases; the imperative API covers everything else.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-head"><span class="step-num">1</span><h3>Install</h3></div>
+        <div class="pm-row" role="group" aria-label="Package manager">
+          <button aria-pressed="true" data-pm="npm">npm</button>
+          <button aria-pressed="false" data-pm="pnpm">pnpm</button>
+          <button aria-pressed="false" data-pm="yarn">yarn</button>
+          <button aria-pressed="false" data-pm="bun">bun</button>
+        </div>
+        <pre class="code" id="install-code"><button class="copy-btn" data-copy="#install-cmd">copy</button><span id="install-cmd">$ npm install foley</span></pre>
+      </div>
+
+      <div class="step">
+        <div class="step-head"><span class="step-num">2</span><h3>Mark up and bind</h3></div>
+        <div class="api-cols">
+          <pre class="code"><button class="copy-btn" data-copy="#code-html">copy</button><code id="code-html"><span class="cm">&lt;!-- one attribute per behavior --&gt;</span>
+&lt;button <span class="at">data-foley-press</span> <span class="at">data-foley-release</span>&gt;Save&lt;/button&gt;
+&lt;a <span class="at">data-foley-hover</span>=<span class="st">"tick"</span>&gt;Docs&lt;/a&gt;
+&lt;button <span class="at">data-foley-toggle</span>&gt;Dark mode&lt;/button&gt;
+&lt;input <span class="at">data-foley-type</span>=<span class="st">"thock"</span>&gt;
+&lt;input type=<span class="st">"range"</span> <span class="at">data-foley-slide</span>&gt;</code></pre>
+          <pre class="code"><button class="copy-btn" data-copy="#code-js">copy</button><code id="code-js"><span class="kw">import</span> { bind, play, set } <span class="kw">from</span> <span class="st">"foley"</span>;
+
+bind();                     <span class="cm">// wires every data-foley-*</span>
+set({ volume: 0.7,          <span class="cm">// 0 – 1</span>
+      transpose: 0,         <span class="cm">// semitones, ±12</span>
+      space: 0.2,           <span class="cm">// reverb send</span>
+      theme: <span class="st">"glass"</span> });    <span class="cm">// default · soft · mechanical · glass</span>
+
+play(<span class="st">"complete"</span>);           <span class="cm">// any of the 28 cues</span>
+play(<span class="st">"tick"</span>, { pitch: 4, volume: 0.3 });
+
+<span class="kw">const</span> wav = <span class="kw">await</span> toWav(<span class="st">"chime"</span>); <span class="cm">// Blob — offline render</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="mini-scope" id="mini-scope" role="button" tabindex="0" title="Live output — click to jump to the scope" aria-label="Live output mini scope. Activate to jump to the main scope.">
+  <span class="mini-head"><span class="mini-label" id="mini-label">idle</span><button class="mini-close" id="mini-close" aria-label="Hide mini scope">×</button></span>
+  <canvas id="mini-canvas"></canvas>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<footer class="site">
+  <div class="wrap foot-in">
+    <span><strong>foley</strong> · MIT licensed · <a href="https://github.com/eakbulut/foley" target="_blank" rel="noopener">github.com/eakbulut/foley</a></span>
+    <span class="sp"></span>
+    <span>28 cues · 4 themes · 5.3 kB · synthesized live — or rendered to .wav</span>
+  </div>
+</footer>
+<script type="module">
+/* ============================================================
+   Demo page wiring. Everything sonic comes from the real
+   package: this page runs exactly what `npm install foley` ships.
+   ============================================================ */
+import { bind, play, set, get, on, unlock, getAnalyser, toWav, cues, families, version } from "./src/foley.js";
+
+/* page-side state: colors are a design decision, so they live here, not in the library */
+const FAM = {
+  pointer:  { css: "var(--c-pointer)",  hex: "#E5A50A" },
+  press:    { css: "var(--c-press)",    hex: "#E85D2A" },
+  toggle:   { css: "var(--c-toggle)",   hex: "#2E6FF2" },
+  feedback: { css: "var(--c-feedback)", hex: "#1B9E57" },
+  notify:   { css: "var(--c-notify)",   hex: "#8B5CF6" },
+  motion:   { css: "var(--c-motion)",   hex: "#0FA3A0" },
+  state:    { css: "#5B8A72",           hex: "#5B8A72" },
+};
+const ui = { hover: false, transpose: 0, theme: "default", last: { name: null, family: null, at: 0 } };
+set({ hover: false }); /* hover cues are opt-in on this page via the inspector */
+
+/* library events drive the page chrome */
+on("unlock", () => {
+  const h = document.getElementById("audio-hint");
+  if (h) h.textContent = "Audio unlocked \u2014 go loud.";
+});
+on("play", ({ name, family }) => {
+  ui.last = { name, family, at: performance.now() };
+  const label = document.getElementById("scope-label");
+  if (label) label.textContent = name + " \u00b7 " + families[family].name.toLowerCase();
+  const chip = document.querySelector('.chip[data-cue="' + name + '"]');
+  if (chip) {
+    chip.classList.add("playing");
+    clearTimeout(chip._t);
+    chip._t = setTimeout(() => chip.classList.remove("playing"), 320);
+  }
+});
+
+/* build cue board from library metadata */
+(function buildBoard() {
+  const board = document.getElementById("board");
+  Object.keys(families).forEach((famId) => {
+    const fam = families[famId];
+    const names = Object.keys(cues).filter((n) => cues[n].family === famId);
+    if (!names.length) return;
+    const sec = document.createElement("div");
+    sec.className = "cat";
+    sec.innerHTML =
+      '<div class="cat-head"><span class="cat-dot" style="background:' + FAM[famId].css + '"></span>' +
+      '<span class="cat-name">' + fam.name + "</span>" +
+      '<span class="cat-desc">' + fam.description + "</span></div>";
+    const row = document.createElement("div");
+    row.className = "chip-row";
+    names.forEach((name) => {
+      const c = cues[name];
+      const b = document.createElement("div");
+      b.className = "chip";
+      b.dataset.cue = name;
+      b.setAttribute("role", "button");
+      b.setAttribute("tabindex", "0");
+      b.setAttribute("aria-label", "Play " + name);
+      b.style.setProperty("--cc", FAM[famId].css);
+      b.innerHTML = "<kbd>" + c.key + '</kbd><span class="nm">' + name + '</span><span class="ds">' + c.description + "</span>" +
+        '<button class="dl" title="Download ' + name + ' as .wav" aria-label="Download ' + name + ' as WAV">\u2913</button>';
+      b.addEventListener("click", () => play(name));
+      b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); play(name); } });
+      b.addEventListener("pointerenter", () => { if (ui.hover) play(name); });
+      const dl = b.querySelector(".dl");
+      dl.addEventListener("click", (e) => {
+        e.stopPropagation();
+        play(name); /* preview exactly what the file will contain */
+        exportCue(name, dl);
+      });
+      row.appendChild(b);
+    });
+    sec.appendChild(row);
+    board.appendChild(sec);
+  });
+})();
+
+/* keyboard mode */
+const KEYMAP = {};
+Object.keys(cues).forEach((n) => { KEYMAP[cues[n].key.toLowerCase()] = n; });
+document.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const t = e.target;
+  if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+  const cue = KEYMAP[e.key.toLowerCase()];
+  if (cue) { play(cue); e.preventDefault(); }
+});
+
+/* oscilloscope \u2014 main scope in the cue board + picture-in-picture that follows you */
+(function scope() {
+  const main = document.getElementById("scope");
+  const lamp = document.getElementById("scope-lamp");
+  const shell = document.querySelector(".scope-shell");
+  const mini = document.getElementById("mini-scope");
+  const miniCv = document.getElementById("mini-canvas");
+  const miniLabel = document.getElementById("mini-label");
+  let mainVisible = true, miniClosed = false;
+
+  new IntersectionObserver((es) => { mainVisible = es[0].isIntersecting; }, { threshold: 0.15 }).observe(shell);
+
+  document.getElementById("mini-close").addEventListener("click", (e) => {
+    e.stopPropagation();
+    miniClosed = true;
+    mini.classList.remove("on");
+  });
+  function jump() { shell.scrollIntoView({ behavior: "smooth", block: "center" }); }
+  mini.addEventListener("click", jump);
+  mini.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); jump(); } });
+
+  function fit(cv) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = cv.clientWidth, h = cv.clientHeight;
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
+      cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+    }
+    const c = cv.getContext("2d");
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return [c, w, h];
+  }
+
+  const data = new Uint8Array(2048);
+
+  function trace(c, w, h, gridCols, glow) {
+    const color = (ui.last.family && FAM[ui.last.family].hex) || "#7EE7C4";
+    c.clearRect(0, 0, w, h);
+    c.strokeStyle = "rgba(126,231,196,.09)";
+    c.lineWidth = 1;
+    c.beginPath();
+    for (let x = 0; x <= w; x += w / gridCols) { c.moveTo(x, 0); c.lineTo(x, h); }
+    for (let y = 0; y <= h; y += h / 4) { c.moveTo(0, y); c.lineTo(w, y); }
+    c.stroke();
+    c.lineWidth = 2;
+    c.lineJoin = "round";
+    c.strokeStyle = color;
+    c.shadowColor = color;
+    c.shadowBlur = glow;
+    c.beginPath();
+    const an = getAnalyser();
+    if (an) {
+      const n = data.length;
+      for (let i = 0; i < n; i++) {
+        const x = (i / (n - 1)) * w;
+        const y = h / 2 + ((data[i] - 128) / 128) * (h * 0.46);
+        if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
+      }
+    } else {
+      c.moveTo(0, h / 2); c.lineTo(w, h / 2);
+    }
+    c.stroke();
+    c.shadowBlur = 0;
+  }
+
+  function frame() {
+    requestAnimationFrame(frame);
+    const an = getAnalyser();
+    if (an) an.getByteTimeDomainData(data);
+    const active = an && performance.now() - ui.last.at < 1600;
+    lamp.classList.toggle("idle", !active);
+    const [c, w, h] = fit(main);
+    trace(c, w, h, 12, active ? 10 : 0);
+    /* PiP: appears only when the main scope is off-screen and something played recently */
+    const showMini = !miniClosed && !mainVisible && an && performance.now() - ui.last.at < 2800;
+    mini.classList.toggle("on", showMini);
+    if (showMini) {
+      const [mc, mw, mh] = fit(miniCv);
+      trace(mc, mw, mh, 6, active ? 6 : 0);
+      miniLabel.textContent = ui.last.name || "idle";
+    }
+  }
+  frame();
+})();
+
+/* theme switcher */
+(function themeSwitch() {
+  const seg = document.getElementById("theme-seg");
+  seg.querySelectorAll("button").forEach((b) => {
+    b.addEventListener("click", () => {
+      seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", "true");
+      ui.theme = b.dataset.theme;
+      set({ theme: ui.theme });
+      /* a two-part preview: one noise-led cue, one tone-led cue */
+      play("thock");
+      setTimeout(() => play("chime"), 220);
+    });
+  });
+})();
+
+/* inspector */
+(function inspector() {
+  function wireRange(id, outId, fmt, cb) {
+    const el = document.getElementById(id), out = document.getElementById(outId);
+    function upd() {
+      out.textContent = fmt(el.value);
+      const pct = ((el.value - el.min) / (el.max - el.min)) * 100;
+      el.style.setProperty("--fill", pct + "%");
+      cb(Number(el.value));
+    }
+    el.addEventListener("input", upd);
+    el.addEventListener("change", () => play("tick"));
+    upd();
+  }
+  wireRange("k-vol", "o-vol", (v) => v, (v) => set({ volume: v / 100 }));
+  wireRange("k-pitch", "o-pitch", (v) => (v > 0 ? "+" + v : v) + " st", (v) => { ui.transpose = v; set({ transpose: v }); });
+  wireRange("k-space", "o-space", (v) => v, (v) => set({ space: v / 100 }));
+
+  const hov = document.getElementById("hover-toggle");
+  hov.addEventListener("click", () => {
+    const onNow = hov.getAttribute("aria-pressed") !== "true";
+    hov.setAttribute("aria-pressed", String(onNow));
+    ui.hover = onNow;
+    set({ hover: onNow });
+    play(onNow ? "on" : "off");
+  });
+  const mute = document.getElementById("mute-toggle");
+  mute.addEventListener("click", () => {
+    const onNow = mute.getAttribute("aria-pressed") !== "true";
+    mute.setAttribute("aria-pressed", String(onNow));
+    if (!onNow) { set({ muted: false }); play("on"); } else { play("off"); setTimeout(() => set({ muted: true }), 220); }
+  });
+})();
+
+/* toasts */
+const TOASTS = {
+  info:    { cue: "ping",  color: "var(--c-notify)",   title: "New message",     body: "Riley: \u201cthe demo page slaps\u201d" },
+  success: { cue: "chime", color: "var(--c-feedback)", title: "Deploy finished", body: "production \u00b7 14s \u00b7 all checks green" },
+  error:   { cue: "error", color: "var(--err)",        title: "Build failed",    body: "tests: 2 failing \u00b7 see logs" },
+};
+function toast(kind) {
+  const t = TOASTS[kind];
+  play(t.cue);
+  const box = document.getElementById("toasts");
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.innerHTML = '<span class="td" style="background:' + t.color + '"></span><div><b>' + t.title + "</b><span>" + t.body + "</span></div>";
+  box.appendChild(el);
+  setTimeout(() => { el.style.opacity = "0"; el.style.transition = "opacity .3s"; setTimeout(() => el.remove(), 320); }, 3400);
+}
+document.querySelectorAll("[data-toast]").forEach((b) => b.addEventListener("click", () => toast(b.dataset.toast)));
+
+/* WAV export helpers (page-side: naming + anchor-click download) */
+function wavName(name) {
+  const t = ui.transpose;
+  const th = ui.theme !== "default" ? "-" + ui.theme : "";
+  return "foley" + th + "-" + name + (t ? (t > 0 ? "+" : "") + t + "st" : "") + ".wav";
+}
+function saveBlob(blob, filename) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+async function exportCue(name, btn) {
+  if (btn) btn.classList.add("busy");
+  try {
+    const blob = await toWav(name);
+    saveBlob(blob, wavName(name));
+  } catch (e) {
+    play("error");
+  } finally {
+    if (btn) btn.classList.remove("busy");
+  }
+}
+
+/* export all cues as a zip (JSZip lazy-loaded from cdnjs) */
+(function exportAll() {
+  const btn = document.getElementById("export-all");
+  let busy = false;
+  function loadZip() {
+    if (window.JSZip) return Promise.resolve();
+    return new Promise((res, rej) => {
+      const sc = document.createElement("script");
+      sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+      sc.onload = res; sc.onerror = rej;
+      document.head.appendChild(sc);
+    });
+  }
+  btn.addEventListener("click", async () => {
+    if (busy) return;
+    busy = true;
+    const orig = btn.innerHTML;
+    try {
+      btn.textContent = "Loading zip\u2026";
+      await loadZip();
+      const zip = new JSZip();
+      const names = Object.keys(cues);
+      for (let i = 0; i < names.length; i++) {
+        btn.textContent = "Rendering " + (i + 1) + "/" + names.length + "\u2026";
+        const blob = await toWav(names[i]);
+        zip.file(wavName(names[i]), blob);
+      }
+      btn.textContent = "Zipping\u2026";
+      const out = await zip.generateAsync({ type: "blob" });
+      saveBlob(out, "foley-cues" + (ui.theme !== "default" ? "-" + ui.theme : "") + ".zip");
+      play("complete");
+    } catch (e) {
+      play("error");
+      toast("error");
+    } finally {
+      btn.innerHTML = orig;
+      busy = false;
+    }
+  });
+})();
+
+/* demo: save button */
+(function saveDemo() {
+  const btn = document.getElementById("save-btn");
+  const status = document.getElementById("save-status");
+  btn.addEventListener("pointerdown", () => play("press"));
+  btn.addEventListener("pointerup", () => play("release"));
+  btn.addEventListener("click", () => {
+    status.textContent = "saving\u2026";
+    btn.disabled = true;
+    setTimeout(() => play("loading"), 150);
+    setTimeout(() => {
+      play("success");
+      btn.classList.add("done");
+      btn.textContent = "Saved";
+      status.textContent = "saved just now";
+      setTimeout(() => { btn.classList.remove("done"); btn.textContent = "Save changes"; btn.disabled = false; }, 1400);
+    }, 800);
+  });
+})();
+
+/* demo: switch */
+(function switchDemo() {
+  const sw = document.getElementById("demo-switch");
+  const st = document.getElementById("switch-status");
+  sw.addEventListener("click", () => {
+    const onNow = sw.getAttribute("aria-pressed") !== "true";
+    sw.setAttribute("aria-pressed", String(onNow));
+    st.textContent = "notifications " + (onNow ? "on" : "off");
+    play(onNow ? "on" : "off");
+  });
+})();
+
+/* demo: segmented hover ticks */
+(function segDemo() {
+  const seg = document.getElementById("demo-seg");
+  seg.querySelectorAll("button").forEach((b, i) => {
+    b.addEventListener("pointerenter", () => { if (ui.hover) play("tick", { pitch: i }); });
+    b.addEventListener("click", () => {
+      seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", "true");
+      play("switch", { pitch: i });
+    });
+  });
+})();
+
+/* demo: typing input */
+(function typeDemo() {
+  const inp = document.getElementById("demo-type");
+  inp.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      if (inp.value.trim()) { play("swoosh"); setTimeout(() => play("complete"), 240); inp.value = ""; }
+      else play("denied");
+      return;
+    }
+    if (e.key.length === 1 || e.key === "Backspace") play("thock", { pitch: Math.random() * 2 - 1 });
+  });
+})();
+
+/* demo: upload */
+(function uploadDemo() {
+  const zone = document.getElementById("upload-zone");
+  const bar = document.getElementById("upload-bar");
+  const label = document.getElementById("upload-label");
+  let busy = false;
+  function run() {
+    if (busy) return;
+    busy = true;
+    zone.classList.add("busy");
+    label.textContent = "Uploading holiday-photos.zip\u2026";
+    play("rise");
+    let p = 0;
+    const iv = setInterval(() => {
+      p += 6 + Math.random() * 9;
+      if (p >= 100) {
+        p = 100;
+        clearInterval(iv);
+        bar.style.width = "100%";
+        play("complete");
+        label.textContent = "Uploaded \u00b7 14.2 MB";
+        setTimeout(() => {
+          zone.classList.remove("busy");
+          bar.style.width = "0";
+          label.textContent = "Drop a file \u00b7 or click to simulate";
+          busy = false;
+        }, 1600);
+      } else {
+        bar.style.width = p + "%";
+        if (Math.random() > 0.55) play("tick", { pitch: (p / 100) * 7, volume: 0.4 });
+      }
+    }, 160);
+  }
+  zone.addEventListener("click", run);
+  zone.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); run(); } });
+})();
+
+/* demo: stepper */
+(function stepperDemo() {
+  let v = 2;
+  const val = document.getElementById("step-val");
+  function setVal(next) {
+    if (next < 1 || next > 8) { play("denied"); return; }
+    v = next;
+    val.textContent = v;
+    play("tick", { pitch: v });
+  }
+  document.getElementById("step-up").addEventListener("click", () => setVal(v + 1));
+  document.getElementById("step-down").addEventListener("click", () => setVal(v - 1));
+})();
+
+/* demo: slider detents */
+(function sliderDemo() {
+  const s = document.getElementById("demo-slider");
+  const st = document.getElementById("slider-status");
+  let last = Number(s.value);
+  function upd() {
+    const pct = ((s.value - s.min) / (s.max - s.min)) * 100;
+    s.style.setProperty("--fill", pct + "%");
+    st.textContent = "brightness " + Math.round(pct) + "%";
+  }
+  s.addEventListener("input", () => {
+    const now = Number(s.value);
+    if (now !== last) play("tick", { pitch: now * 0.5 });
+    last = now;
+    upd();
+  });
+  s.addEventListener("change", () => play("pop"));
+  upd();
+})();
+
+/* package manager switcher */
+(function pmSwitch() {
+  const cmds = { npm: "$ npm install foley", pnpm: "$ pnpm add foley", yarn: "$ yarn add foley", bun: "$ bun add foley" };
+  const out = document.getElementById("install-cmd");
+  document.querySelectorAll(".pm-row button").forEach((b) => {
+    b.addEventListener("click", () => {
+      document.querySelectorAll(".pm-row button").forEach((x) => x.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", "true");
+      out.textContent = cmds[b.dataset.pm];
+      play("switch");
+    });
+  });
+})();
+
+/* copy buttons */
+document.querySelectorAll(".copy-btn").forEach((b) => {
+  b.addEventListener("click", () => {
+    const src = document.querySelector(b.dataset.copy);
+    navigator.clipboard.writeText(src.textContent.trim().replace(/^\$\s*/, "")).then(() => {
+      b.textContent = "copied";
+      play("success");
+      setTimeout(() => { b.textContent = "copy"; }, 1400);
+    }).catch(() => play("error"));
+  });
+});
+
+/* the tour */
+(function tour() {
+  const btn = document.getElementById("tour-btn");
+  let running = false;
+  btn.addEventListener("click", () => {
+    if (running) return;
+    running = true;
+    btn.textContent = "Playing\u2026";
+    /* board order, so the page scrolls one way and never chases backwards */
+    const seq = Object.keys(cues);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function center(el) {
+      const r = el.getBoundingClientRect();
+      const target = window.scrollY + r.top - (window.innerHeight / 2) + (r.height / 2);
+      window.scrollTo({ top: Math.max(0, target), behavior: reduced ? "auto" : "smooth" });
+    }
+    seq.forEach((name, i) => {
+      setTimeout(() => {
+        const chip = document.querySelector('.chip[data-cue="' + name + '"]');
+        if (chip) center(chip);              /* scroll first\u2026 */
+        setTimeout(() => play(name), 200);   /* \u2026so the highlight is on screen when it fires */
+        if (i === seq.length - 1) setTimeout(() => { btn.innerHTML = "\u25B6&nbsp; Play the tour"; running = false; }, 1000);
+      }, i * 560);
+    });
+  });
+})();
+
+/* unlock audio on first gesture */
+["pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, () => unlock(), { once: true, capture: true }));
+
+/* wire declarative attributes used in the markup */
+bind();
+
+console.log("foley v" + version + " \u2014 " + Object.keys(cues).length + " cues, " + get().theme + " theme");
+</script>
+</body>
+</html>

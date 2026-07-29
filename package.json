@@ -1,0 +1,29 @@
+{
+  "name": "foley",
+  "version": "2.2.0",
+  "description": "Sound effects for the interface, performed live. 28 interaction cues synthesized with Web Audio — zero dependencies, zero audio files.",
+  "type": "module",
+  "main": "./src/foley.js",
+  "module": "./src/foley.js",
+  "types": "./src/foley.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/foley.d.ts",
+      "import": "./src/foley.js"
+    }
+  },
+  "files": ["src", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "scripts": {
+    "demo": "npx serve ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eakbulut/foley.git"
+  },
+  "homepage": "https://github.com/eakbulut/foley#readme",
+  "bugs": { "url": "https://github.com/eakbulut/foley/issues" },
+  "keywords": ["web-audio", "ui-sounds", "sound-effects", "interaction", "sfx", "microinteractions", "audio", "synthesis"],
+  "author": "eakbulut",
+  "license": "MIT"
+}
