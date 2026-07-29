@@ -146,6 +146,11 @@ p.blk-sub{color:var(--ink-soft);max-width:60ch;font-size:15.5px}
 .chip .dl.busy{animation:dl-pulse .7s ease infinite}
 @keyframes dl-pulse{50%{opacity:.3}}
 .board-tools{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px}
+.chip canvas.env{width:100%;height:22px;display:block;margin-top:2px;border-radius:5px;background:color-mix(in srgb,var(--cc) 7%, transparent)}
+.scope-mode{margin-left:10px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#7EE7C4;background:transparent;border:1px solid rgba(126,231,196,.35);border-radius:6px;padding:2px 8px;cursor:pointer}
+.scope-mode:hover{background:rgba(126,231,196,.12)}
+.scope-mode:focus-visible{outline:2px solid #7EE7C4}
+@media(pointer:coarse){.chip kbd{display:none}}
 .chip:hover{border-color:var(--cc,var(--ink-faint));box-shadow:0 4px 14px rgba(20,25,22,.08)}
 .chip:active{transform:scale(.975)}
 .chip:focus-visible{outline:2px solid var(--cc,var(--c-toggle));outline-offset:2px}
@@ -296,7 +301,7 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
 <header class="top">
   <div class="wrap top-in">
     <a class="logo" href="#"><span class="logo-jack" aria-hidden="true"></span>foley</a>
-    <span class="ver">v2.2.0 · 5.3 kB</span>
+    <span class="ver">v2.3.0 · 5.6 kB</span>
     <nav class="top-nav" aria-label="Site">
       <a href="#cues">Cues</a>
       <a href="#playground">Playground</a>
@@ -338,6 +343,7 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
       <div class="scope-head">
         <span class="lamp idle" id="scope-lamp"></span>
         <span class="scope-title">live output · analyser 2048</span>
+        <button class="scope-mode" id="scope-mode" aria-pressed="false" title="Switch between waveform and spectrum">wave</button>
         <span class="scope-cue" id="scope-label">idle — click a cue below</span>
       </div>
       <canvas id="scope"></canvas>
@@ -525,6 +531,27 @@ play(<span class="st">"tick"</span>, { pitch: 4, volume: 0.3 });
 <span class="kw">const</span> wav = <span class="kw">await</span> toWav(<span class="st">"chime"</span>); <span class="cm">// Blob — offline render</span></code></pre>
         </div>
       </div>
+      <div class="step">
+        <div class="step-head"><span class="step-num">3</span><h3>In React or Vue</h3></div>
+        <div class="api-cols">
+          <pre class="code"><button class="copy-btn" data-copy="#code-react">copy</button><code id="code-react"><span class="cm">// recipes/react.js in the repo</span>
+<span class="kw">import</span> { useFoley } <span class="kw">from</span> <span class="st">"./recipes/react"</span>;
+
+<span class="kw">function</span> App() {
+  <span class="kw">const</span> { play } = useFoley({ volume: 0.7 });
+  <span class="kw">return</span> &lt;button onClick={() =&gt; play(<span class="st">"success"</span>)}&gt;
+    Save
+  &lt;/button&gt;;
+}</code></pre>
+          <pre class="code"><button class="copy-btn" data-copy="#code-vue">copy</button><code id="code-vue"><span class="cm">// recipes/vue.js in the repo</span>
+<span class="kw">import</span> { vFoley } <span class="kw">from</span> <span class="st">"./recipes/vue"</span>;
+app.directive(<span class="st">"foley"</span>, vFoley);
+
+<span class="cm">&lt;!-- then in any template --&gt;</span>
+&lt;button <span class="at">v-foley</span>=<span class="st">"'success'"</span>&gt;Save&lt;/button&gt;
+&lt;a <span class="at">v-foley:hover</span>=<span class="st">"'tick'"</span>&gt;Docs&lt;/a&gt;</code></pre>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -549,7 +576,7 @@ play(<span class="st">"tick"</span>, { pitch: 4, volume: 0.3 });
    Demo page wiring. Everything sonic comes from the real
    package: this page runs exactly what `npm install foley` ships.
    ============================================================ */
-import { bind, play, set, get, on, unlock, getAnalyser, toWav, cues, families, version } from "./src/foley.js";
+import { bind, play, set, get, on, unlock, getAnalyser, toWav, toBuffer, cues, families, version } from "./src/foley.js";
 
 /* page-side state: colors are a design decision, so they live here, not in the library */
 const FAM = {
@@ -563,6 +590,14 @@ const FAM = {
 };
 const ui = { hover: false, transpose: 0, theme: "default", last: { name: null, family: null, at: 0 } };
 set({ hover: false }); /* hover cues are opt-in on this page via the inspector */
+
+/* BEGIN-STORE (settings persistence; the single-file build replaces this with in-memory) */
+const store = {
+  load() { try { return JSON.parse(localStorage.getItem("foley-demo") || "{}"); } catch (e) { return {}; } },
+  save(patch) { try { localStorage.setItem("foley-demo", JSON.stringify(Object.assign(this.load(), patch))); } catch (e) { /* private mode etc. */ } },
+};
+/* END-STORE */
+const saved = store.load();
 
 /* library events drive the page chrome */
 on("unlock", () => {
@@ -605,7 +640,7 @@ on("play", ({ name, family }) => {
       b.setAttribute("tabindex", "0");
       b.setAttribute("aria-label", "Play " + name);
       b.style.setProperty("--cc", FAM[famId].css);
-      b.innerHTML = "<kbd>" + c.key + '</kbd><span class="nm">' + name + '</span><span class="ds">' + c.description + "</span>" +
+      b.innerHTML = "<kbd>" + c.key + '</kbd><span class="nm">' + name + '</span><canvas class="env" aria-hidden="true"></canvas><span class="ds">' + c.description + "</span>" +
         '<button class="dl" title="Download ' + name + ' as .wav" aria-label="Download ' + name + ' as WAV">\u2913</button>';
       b.addEventListener("click", () => play(name));
       b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); play(name); } });
@@ -622,6 +657,62 @@ on("play", ({ name, family }) => {
     board.appendChild(sec);
   });
 })();
+
+/* envelope drawings: each chip shows the real amplitude shape of its cue,
+   computed from an offline render — and recomputed when the theme changes */
+let envRun = 0;
+async function drawEnvelopes() {
+  const run = ++envRun;
+  for (const name of Object.keys(cues)) {
+    if (run !== envRun) return; /* a newer run (theme switch) superseded this one */
+    try {
+      const buf = await toBuffer(name);
+      if (run !== envRun) return;
+      paintEnv(name, buf);
+    } catch (e) { /* offline audio unavailable; chips just skip the drawing */ }
+    await new Promise((r) => setTimeout(r, 25)); /* stay off the main thread's toes */
+  }
+}
+function paintEnv(name, buf) {
+  const cv = document.querySelector('.chip[data-cue="' + name + '"] canvas.env');
+  if (!cv || !buf) return;
+  const L = buf.getChannelData(0), R = buf.getChannelData(1);
+  let end = 0, peak = 0;
+  for (let i = 0; i < L.length; i++) {
+    const m = Math.max(Math.abs(L[i]), Math.abs(R[i]));
+    if (m > peak) peak = m;
+    if (m > 0.002) end = i;
+  }
+  end = Math.min(L.length, end + 1500);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = cv.clientWidth || 130, h = cv.clientHeight || 22;
+  cv.width = w * dpr; cv.height = h * dpr;
+  const c = cv.getContext("2d");
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const fam = cues[name].family;
+  const color = FAM[fam].hex;
+  const N = 72, step = Math.max(1, Math.floor(end / N));
+  c.beginPath();
+  c.moveTo(0, h - 1);
+  for (let i = 0; i < N; i++) {
+    let m = 0;
+    const s0 = i * step, e0 = Math.min(end, s0 + step);
+    for (let j = s0; j < e0; j += 24) {
+      const v = Math.max(Math.abs(L[j]), Math.abs(R[j]));
+      if (v > m) m = v;
+    }
+    const y = h - 1 - (peak ? m / peak : 0) * (h - 3);
+    c.lineTo((i / (N - 1)) * w, y);
+  }
+  c.lineTo(w, h - 1);
+  c.closePath();
+  c.fillStyle = color + "38"; /* family color at ~22% alpha */
+  c.fill();
+  c.strokeStyle = color;
+  c.lineWidth = 1.4;
+  c.stroke();
+}
+setTimeout(drawEnvelopes, 500);
 
 /* keyboard mode */
 const KEYMAP = {};
@@ -642,7 +733,15 @@ document.addEventListener("keydown", (e) => {
   const mini = document.getElementById("mini-scope");
   const miniCv = document.getElementById("mini-canvas");
   const miniLabel = document.getElementById("mini-label");
-  let mainVisible = true, miniClosed = false;
+  let mainVisible = true, miniClosed = false, mode = "wave";
+  const modeBtn = document.getElementById("scope-mode");
+  modeBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    mode = mode === "wave" ? "spectrum" : "wave";
+    modeBtn.textContent = mode === "wave" ? "wave" : "fft";
+    modeBtn.setAttribute("aria-pressed", String(mode === "spectrum"));
+    play("switch");
+  });
 
   new IntersectionObserver((es) => { mainVisible = es[0].isIntersecting; }, { threshold: 0.15 }).observe(shell);
 
@@ -667,6 +766,32 @@ document.addEventListener("keydown", (e) => {
   }
 
   const data = new Uint8Array(2048);
+  const freq = new Uint8Array(1024);
+
+  function spectrum(c, w, h, glow) {
+    const color = (ui.last.family && FAM[ui.last.family].hex) || "#7EE7C4";
+    c.clearRect(0, 0, w, h);
+    c.strokeStyle = "rgba(126,231,196,.09)";
+    c.lineWidth = 1;
+    c.beginPath();
+    for (let y = 0; y <= h; y += h / 4) { c.moveTo(0, y); c.lineTo(w, y); }
+    c.stroke();
+    const an = getAnalyser();
+    if (!an) return;
+    an.getByteFrequencyData(freq);
+    const bars = 96, bw = w / bars;
+    c.fillStyle = color + "CC";
+    c.shadowColor = color;
+    c.shadowBlur = glow;
+    for (let i = 0; i < bars; i++) {
+      /* log-ish bin mapping so lows don't hog the whole scope */
+      const bin = Math.floor(Math.pow(i / bars, 1.6) * (freq.length * 0.6));
+      const v = freq[bin] / 255;
+      const bh = Math.max(1, v * (h - 4));
+      c.fillRect(i * bw + 0.5, h - 2 - bh, bw - 1.5, bh);
+    }
+    c.shadowBlur = 0;
+  }
 
   function trace(c, w, h, gridCols, glow) {
     const color = (ui.last.family && FAM[ui.last.family].hex) || "#7EE7C4";
@@ -705,7 +830,8 @@ document.addEventListener("keydown", (e) => {
     const active = an && performance.now() - ui.last.at < 1600;
     lamp.classList.toggle("idle", !active);
     const [c, w, h] = fit(main);
-    trace(c, w, h, 12, active ? 10 : 0);
+    if (mode === "spectrum") spectrum(c, w, h, active ? 8 : 0);
+    else trace(c, w, h, 12, active ? 10 : 0);
     /* PiP: appears only when the main scope is off-screen and something played recently */
     const showMini = !miniClosed && !mainVisible && an && performance.now() - ui.last.at < 2800;
     mini.classList.toggle("on", showMini);
@@ -721,12 +847,19 @@ document.addEventListener("keydown", (e) => {
 /* theme switcher */
 (function themeSwitch() {
   const seg = document.getElementById("theme-seg");
+  if (saved.theme && saved.theme !== "default") {
+    ui.theme = saved.theme;
+    set({ theme: saved.theme });
+    seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.theme === saved.theme)));
+  }
   seg.querySelectorAll("button").forEach((b) => {
     b.addEventListener("click", () => {
       seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", "false"));
       b.setAttribute("aria-pressed", "true");
       ui.theme = b.dataset.theme;
       set({ theme: ui.theme });
+      store.save({ theme: ui.theme });
+      drawEnvelopes(); /* the chips reshape with the sound */
       /* a two-part preview: one noise-led cue, one tone-led cue */
       play("thock");
       setTimeout(() => play("chime"), 220);
@@ -748,16 +881,21 @@ document.addEventListener("keydown", (e) => {
     el.addEventListener("change", () => play("tick"));
     upd();
   }
-  wireRange("k-vol", "o-vol", (v) => v, (v) => set({ volume: v / 100 }));
-  wireRange("k-pitch", "o-pitch", (v) => (v > 0 ? "+" + v : v) + " st", (v) => { ui.transpose = v; set({ transpose: v }); });
-  wireRange("k-space", "o-space", (v) => v, (v) => set({ space: v / 100 }));
+  if (saved.volume != null) document.getElementById("k-vol").value = saved.volume;
+  if (saved.transpose != null) document.getElementById("k-pitch").value = saved.transpose;
+  if (saved.space != null) document.getElementById("k-space").value = saved.space;
+  wireRange("k-vol", "o-vol", (v) => v, (v) => { set({ volume: v / 100 }); store.save({ volume: v }); });
+  wireRange("k-pitch", "o-pitch", (v) => (v > 0 ? "+" + v : v) + " st", (v) => { ui.transpose = v; set({ transpose: v }); store.save({ transpose: v }); });
+  wireRange("k-space", "o-space", (v) => v, (v) => { set({ space: v / 100 }); store.save({ space: v }); });
 
   const hov = document.getElementById("hover-toggle");
+  if (saved.hover) { hov.setAttribute("aria-pressed", "true"); ui.hover = true; set({ hover: true }); }
   hov.addEventListener("click", () => {
     const onNow = hov.getAttribute("aria-pressed") !== "true";
     hov.setAttribute("aria-pressed", String(onNow));
     ui.hover = onNow;
     set({ hover: onNow });
+    store.save({ hover: onNow });
     play(onNow ? "on" : "off");
   });
   const mute = document.getElementById("mute-toggle");
@@ -1034,6 +1172,12 @@ document.querySelectorAll(".copy-btn").forEach((b) => {
     });
   });
 })();
+
+/* touch devices: keyboard hints don't apply, so say something true instead */
+if (window.matchMedia("(pointer:coarse)").matches) {
+  const note = document.querySelector(".board-tools .board-note");
+  if (note) note.innerHTML = "Tap any cue to hear it \u2014 the shaded shape on each chip is its real amplitude envelope. The <strong>\u2913</strong> exports a 16-bit .wav rendered with your current transpose, space, and theme.";
+}
 
 /* unlock audio on first gesture */
 ["pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, () => unlock(), { once: true, capture: true }));

@@ -5,7 +5,7 @@
    https://github.com/eakbulut/foley
    ============================================================ */
 
-export const version = "2.2.0";
+export const version = "2.3.0";
 
 /* ---------------- engine ---------------- */
 const T = {
@@ -327,9 +327,9 @@ export function bind(root) {
 
 /* ---------------- offline render & WAV export ---------------- */
 
-/** Render a cue to a 16-bit 44.1kHz stereo WAV Blob, honoring the current transpose, space, and theme.
-    Deterministic: no humanization drift is applied to exports. */
-export async function toWav(name) {
+/** Offline-render a cue to an AudioBuffer, honoring the current transpose, space, and theme.
+    Deterministic: no humanization drift. For envelopes, meters, or custom encoding. */
+export async function toBuffer(name) {
   const cue = CUES[name];
   if (!cue) return null;
   const rate = 44100;
@@ -351,8 +351,15 @@ export async function toWav(name) {
     T.ctx = saved.ctx; T.dry = saved.dry; T.verb = saved.verb;
     T.wet = saved.wet; T.master = saved.master; T._noise = saved.noise;
   }
-  const buf = await off.startRendering();
-  return encodeWav(trimAndNormalize(buf), rate);
+  return off.startRendering();
+}
+
+/** Render a cue to a 16-bit 44.1kHz stereo WAV Blob, honoring the current transpose, space, and theme.
+    Deterministic: no humanization drift is applied to exports. */
+export async function toWav(name) {
+  const buf = await toBuffer(name);
+  if (!buf) return null;
+  return encodeWav(trimAndNormalize(buf), 44100);
 }
 
 function trimAndNormalize(buf) {

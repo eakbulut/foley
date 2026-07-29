@@ -78,6 +78,7 @@ import { play, bind, set, get, toWav, unlock, getAnalyser, on, cues, families, t
 - **`bind(root?)`** — wire all `data-foley-*` attributes under `root` (default `document`). Idempotent.
 - **`set({ volume?, transpose?, space?, muted?, hover?, theme? })`** — update global settings.
 - **`get()`** — snapshot of current settings.
+- **`toBuffer(name)`** — `Promise<AudioBuffer>`: same offline render, raw — for envelope drawings, meters, or custom encoding.
 - **`toWav(name)`** — `Promise<Blob>`: offline-render a cue to 16-bit 44.1 kHz stereo WAV, honoring transpose, space, and theme. Exports are deterministic (no humanization drift).
 - **`unlock()`** — resume/create the AudioContext from a user gesture.
 - **`getAnalyser()`** — the engine's `AnalyserNode` for scopes and meters, or `null` before unlock.
@@ -99,6 +100,14 @@ set({ theme: "glass" }); // "default" | "soft" | "mechanical" | "glass"
 - A **master limiter** (DynamicsCompressor as brick-wall safety) so overlapping cues never clip.
 - A **60ms per-cue cooldown** so hover storms and fast sliders stay musical instead of machine-gunning.
 - **Humanization**: each performance drifts up to ±30 cents in pitch and ±8% in level, applied to the whole cue at once — repeated ticks sound performed, not stamped.
+
+## Framework recipes
+
+Copy-paste adapters live in [`recipes/`](./recipes):
+
+- **React** — [`recipes/react.js`](./recipes/react.js): `const { play } = useFoley({ theme: "soft" })`
+- **Vue 3** — [`recipes/vue.js`](./recipes/vue.js): `<button v-foley="'success'">Save</button>`
+- **AI agents** — [`agents.md`](./agents.md): integration instructions for coding assistants
 
 ## Run the demo
 

@@ -76,6 +76,9 @@ export declare function get(): Settings;
     Deterministic: exports skip humanization. */
 export declare function toWav(name: CueName): Promise<Blob>;
 
+/** Offline-render a cue to an AudioBuffer for envelopes, meters, or custom encoding. */
+export declare function toBuffer(name: CueName): Promise<AudioBuffer>;
+
 /** Resume/create the AudioContext. Call from a user gesture, or let play()/bind() handle it. */
 export declare function unlock(): void;
 
