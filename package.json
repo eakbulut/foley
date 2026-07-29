@@ -45,5 +45,9 @@
   "license": "MIT",
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@foleyjs/core": "file:.",
+    "react": "^18.3.0"
   }
 }

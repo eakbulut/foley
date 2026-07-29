@@ -105,13 +105,13 @@ set({ theme: "glass" }); // "default" | "soft" | "mechanical" | "glass"
 - A **60ms per-cue cooldown** so hover storms and fast sliders stay musical instead of machine-gunning.
 - **Humanization**: each performance drifts up to ±30 cents in pitch and ±8% in level, applied to the whole cue at once — repeated ticks sound performed, not stamped.
 
-## Framework recipes
+## Framework packages
 
-Copy-paste adapters live in [`recipes/`](./recipes):
-
-- **React** — [`recipes/react.js`](./recipes/react.js): `const { play } = useFoley({ theme: "soft" })`
-- **Vue 3** — [`recipes/vue.js`](./recipes/vue.js): `<button v-foley="'success'">Save</button>`
+- **React** — [`@foleyjs/react`](./packages/react): `const { play } = useFoley({ theme: "soft" })`
+- **Vue 3** — [`@foleyjs/vue`](./packages/vue): `app.use(FoleyPlugin)` then `<button v-foley="'success'">`
 - **AI agents** — [`agents.md`](./agents.md): integration instructions for coding assistants
+
+Both re-export everything from the core, share its version number, and declare it as a peer dependency.
 
 ## Run the demo
 

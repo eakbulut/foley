@@ -20,11 +20,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Install dev dependencies
+        run: npm install --no-audit --no-fund
       - name: Tests must pass before deploy
         run: npm test
+      - name: Assemble site (demo only, no node_modules)
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp -r src assets _site/
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: "."
+          path: "_site"
       - id: deployment
         uses: actions/deploy-pages@v4

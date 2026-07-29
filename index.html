@@ -541,8 +541,8 @@ play(<span class="st">"tick"</span>, { pitch: 4, volume: 0.3 });
       <div class="step">
         <div class="step-head"><span class="step-num">3</span><h3>In React or Vue</h3></div>
         <div class="api-cols">
-          <pre class="code"><button class="copy-btn" data-copy="#code-react">copy</button><code id="code-react"><span class="cm">// recipes/react.js in the repo</span>
-<span class="kw">import</span> { useFoley } <span class="kw">from</span> <span class="st">"./recipes/react"</span>;
+          <pre class="code"><button class="copy-btn" data-copy="#code-react">copy</button><code id="code-react"><span class="cm">// npm install @foleyjs/react</span>
+<span class="kw">import</span> { useFoley } <span class="kw">from</span> <span class="st">"@foleyjs/react"</span>;
 
 <span class="kw">function</span> App() {
   <span class="kw">const</span> { play } = useFoley({ volume: 0.7 });
@@ -550,9 +550,9 @@ play(<span class="st">"tick"</span>, { pitch: 4, volume: 0.3 });
     Save
   &lt;/button&gt;;
 }</code></pre>
-          <pre class="code"><button class="copy-btn" data-copy="#code-vue">copy</button><code id="code-vue"><span class="cm">// recipes/vue.js in the repo</span>
-<span class="kw">import</span> { vFoley } <span class="kw">from</span> <span class="st">"./recipes/vue"</span>;
-app.directive(<span class="st">"foley"</span>, vFoley);
+          <pre class="code"><button class="copy-btn" data-copy="#code-vue">copy</button><code id="code-vue"><span class="cm">// npm install @foleyjs/vue</span>
+<span class="kw">import</span> { FoleyPlugin } <span class="kw">from</span> <span class="st">"@foleyjs/vue"</span>;
+app.use(FoleyPlugin, { theme: <span class="st">"soft"</span> });
 
 <span class="cm">&lt;!-- then in any template --&gt;</span>
 &lt;button <span class="at">v-foley</span>=<span class="st">"'success'"</span>&gt;Save&lt;/button&gt;

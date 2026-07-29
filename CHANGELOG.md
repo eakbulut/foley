@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.3.1 (packages)
+- New packages: `@foleyjs/react` (`useFoley` hook) and `@foleyjs/vue` (`v-foley` directive + `FoleyPlugin`), replacing the copy-paste `recipes/` folder. Both re-export the core and pin it as a peer dependency.
+
 ## 2.3.0
 - New `toBuffer(name)` export: offline-render any cue to an AudioBuffer for envelopes, meters, or custom encoding.
 - Demo: real per-cue envelope drawings on every chip, computed from offline renders and redrawn on theme change.
