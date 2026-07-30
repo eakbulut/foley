@@ -33,3 +33,12 @@ test("docs page is shipped by the deploy and linked from the demo", () => {
   const page = readFileSync(join(root, "index.html"), "utf8");
   assert.ok(page.includes("usefoley.dev/docs.html"), "demo nav must link the docs");
 });
+
+test("reduced-motion posture holds (audited 2.5.x): global rule, marquee fallback, tour gate", () => {
+  const page = readFileSync(join(root, "index.html"), "utf8");
+  assert.ok(page.includes("prefers-reduced-motion:reduce){\n  html{scroll-behavior:auto}") ||
+            page.includes("prefers-reduced-motion:reduce)"), "global reduce rule missing");
+  assert.ok(page.includes(".quotes-track{animation:none}"), "marquee static fallback missing");
+  assert.ok(page.includes('matchMedia("(prefers-reduced-motion: reduce)")'), "tour must gate smooth scrolling");
+  assert.ok(page.includes("apple-touch-icon"), "touch icon link missing");
+});
