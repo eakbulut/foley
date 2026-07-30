@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Foley — sound effects for the interface, performed live</title>
-<meta name="description" content="Foley is a tiny, dependency-free library of 28 interaction sounds — named for the film artists who perform sound in sync with the picture. Every cue is synthesized live with Web Audio at the moment of interaction.">
+<meta name="description" content="Foley is a tiny, dependency-free library of 28 interaction sounds, synthesized live with Web Audio. Design your own cues and ship your product’s sonic identity as a sound set.">
 <meta property="og:title" content="Foley — sound effects for the interface, performed live">
-<meta property="og:description" content="28 interaction sounds synthesized live with Web Audio. Zero dependencies, zero audio files.">
+<meta property="og:description" content="28 interaction sounds synthesized live with Web Audio. Design your own, ship a sound set. Zero dependencies, zero audio files.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://usefoley.dev/">
 <meta property="og:image" content="https://usefoley.dev/assets/og-image.png">
@@ -389,13 +389,16 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
 .midi-bar{margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1px solid var(--card-edge);border-radius:14px;padding:12px 16px}
 .midi-bar label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)}
 .midi-bar .btn{padding:8px 13px;font-size:13px}
+.dz-set{margin-top:16px;padding-top:14px;border-top:1px dashed var(--card-edge)}
+.dz-set .dz-row{margin-bottom:10px}
+.dz-set .dz-seed{max-width:150px}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="wrap top-in">
     <a class="logo" href="#"><span class="logo-jack" aria-hidden="true"></span>foley</a>
-    <span class="ver">v2.5.0 · 8.4 kB</span>
+    <span class="ver">v2.6.0 · 9.6 kB</span>
     <div class="head-scope" aria-hidden="true" title="Live output">
       <canvas id="scope"></canvas>
       <span class="head-cue" id="scope-label">idle</span>
@@ -423,7 +426,7 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
   <!-- ============ HERO ============ -->
   <section class="hero">
     <h1>Sound effects for the interface, <span class="lit">performed live.</span></h1>
-    <p class="lede">Foley is a tiny, dependency-free library of <strong>28 interaction sounds</strong> — named for the film artists who perform sound in sync with the picture. Every cue is synthesized live with Web Audio the instant you interact. No audio files, no setup.</p>
+    <p class="lede">Foley is a tiny, dependency-free library of <strong>28 interaction sounds</strong> — named for the film artists who perform sound in sync with the picture. Every cue is synthesized live with Web Audio the instant you interact. No audio files, no setup — and when the defaults aren’t yours, redesign them and ship a <strong>sound set</strong>: your product’s whole sonic identity in one small JSON file.</p>
     <div class="hero-pills" aria-hidden="true">
       <button class="hero-pill" data-cue="chime" style="--pc:var(--c-notify);--r:-4deg;--x:8%;--y:6%">chime</button>
       <button class="hero-pill" data-cue="thock" style="--pc:var(--c-press);--r:3deg;--x:52%;--y:0%">thock</button>
@@ -607,7 +610,7 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
 
       <div class="demo-card">
         <h3>Slider</h3>
-        <span class="attr">data-foley-slide="glide"</span>
+        <span class="attr">play("tick", { pitch })</span>
         <p>Detent ticks across the track that rise in pitch with the value — the sound of a thumb wheel.</p>
         <div class="demo-stage" style="flex-direction:column;align-items:stretch">
           <input type="range" id="demo-slider" min="0" max="20" value="8" aria-label="Brightness">
@@ -622,7 +625,7 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
   <section class="block" id="designer">
     <div class="eyebrow">Cue designer · roll your own</div>
     <h2 class="blk">Not quite your sound? Change it.</h2>
-    <p class="blk-sub">Start from any cue and shape it with four plain dials — no synthesis degree required. Every change plays live, and the header scope traces it. Export a .wav for your assets folder, JSON for <span class="mono">playSpec()</span>, or share the design as a link. The full layer editor is one click away when you want it.</p>
+    <p class="blk-sub">Start from any cue and shape it with four plain dials — no synthesis degree required. Every change plays live, and the header scope traces it. Export a .wav for your assets folder, JSON for <span class="mono">playSpec()</span>, or share the design as a link. The full layer editor is one click away when you want it. And when a design is right, apply it site-wide — build a <b>sound set</b>, export it as JSON, and load it in your app with <span class="mono">set({ theme: mySet })</span>.</p>
 
     <div class="designer">
       <div class="dz-grid">
@@ -657,6 +660,18 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
             <button class="btn btn-ghost" id="dz-link">Copy link</button>
             <input type="file" id="dz-file" accept=".json,application/json" hidden>
           </div>
+          <div class="dz-set">
+            <div class="dz-row"><label>Sound set</label><span class="mini-status" id="set-status">no overrides yet</span></div>
+            <div class="dz-actions">
+              <select class="dz-seed" id="set-cue" title="Which cue this design replaces site-wide"></select>
+              <button class="btn btn-ghost" id="set-apply">Use site-wide</button>
+              <button class="btn btn-ghost" id="set-json">⤓ set</button>
+              <button class="btn btn-ghost" id="set-import">Import set</button>
+              <button class="btn btn-ghost" id="set-link">Copy set link</button>
+              <button class="btn btn-ghost" id="set-clear">Clear</button>
+              <input type="file" id="set-file" accept=".json,application/json" hidden>
+            </div>
+          </div>
           <p class="dz-note" id="dz-note">Space replays. Exports honor your transpose, space, and theme — and designs live in the URL, so copy the link to share one.</p>
         </div>
       </div>
@@ -688,17 +703,17 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
 &lt;button <span class="at">data-foley-press</span> <span class="at">data-foley-release</span>&gt;Save&lt;/button&gt;
 &lt;a <span class="at">data-foley-hover</span>=<span class="st">"tick"</span>&gt;Docs&lt;/a&gt;
 &lt;button <span class="at">data-foley-toggle</span>&gt;Dark mode&lt;/button&gt;
-&lt;input <span class="at">data-foley-type</span>=<span class="st">"thock"</span>&gt;
-&lt;input type=<span class="st">"range"</span> <span class="at">data-foley-slide</span>&gt;</code></pre>
+&lt;input <span class="at">data-foley-type</span>=<span class="st">"thock"</span>&gt;</code></pre>
           <pre class="code"><button class="copy-btn" data-copy="#code-js">copy</button><code id="code-js"><span class="kw">import</span> { bind, play, set } <span class="kw">from</span> <span class="st">"@foleyjs/core"</span>;
 
 bind();                     <span class="cm">// wires every data-foley-*</span>
 set({ volume: 0.7,          <span class="cm">// 0 – 1</span>
       transpose: 0,         <span class="cm">// semitones, ±12</span>
       space: 0.2,           <span class="cm">// reverb send</span>
-      theme: <span class="st">"glass"</span> });    <span class="cm">// default · soft · mechanical · glass</span>
+      theme: <span class="st">"glass"</span> });    <span class="cm">// a name — or your sound set object</span>
 
 play(<span class="st">"complete"</span>);           <span class="cm">// any of the 28 cues</span>
+set({ theme: brandSet });   <span class="cm">// load your identity — build one in the designer ↓</span>
 play(<span class="st">"tick"</span>, { pitch: 4, volume: 0.3 });
 
 <span class="kw">const</span> wav = <span class="kw">await</span> toWav(<span class="st">"chime"</span>); <span class="cm">// Blob — offline render</span></code></pre>
@@ -736,7 +751,7 @@ app.use(FoleyPlugin, { theme: <span class="st">"soft"</span> });
   <div class="wrap foot-in">
     <span><strong>foley</strong> · MIT licensed · <a href="https://github.com/eakbulut/foley" target="_blank" rel="noopener">GitHub</a> · <a href="agents.md" target="_blank" rel="noopener">agents.md</a> — point your coding agent at it</span>
     <span class="sp"></span>
-    <span>28 cues · 4 themes · 8.4 kB · synthesized live — or designed, then rendered to .wav</span>
+    <span>28 cues · 4 themes · sound sets · 9.6 kB · synthesized live — designed, shared, and rendered to .wav</span>
   </div>
 </footer>
 <script type="module">
@@ -744,7 +759,7 @@ app.use(FoleyPlugin, { theme: <span class="st">"soft"</span> });
    Demo page wiring. Everything sonic comes from the real
    package: this page runs exactly what `npm install foley` ships.
    ============================================================ */
-import { bind, play, set, get, on, unlock, getAnalyser, toWav, toBuffer, cues, families, version, getSpec, playSpec, toWavSpec, toBufferSpec, normalizeSpec, toSprite } from "./src/foley.js";
+import { bind, play, set, get, on, unlock, getAnalyser, toWav, toBuffer, cues, families, version, getSpec, playSpec, toWavSpec, toBufferSpec, normalizeSpec, toSprite, getSet, themes } from "./src/foley.js";
 
 /* page-side state: colors are a design decision, so they live here, not in the library */
 const FAM = {
@@ -1858,6 +1873,83 @@ if (window.matchMedia("(pointer:coarse)").matches) {
       audition();
     }
   });
+
+  /* ---------- sound sets: this design, applied site-wide ---------- */
+  const setCue = document.getElementById("set-cue");
+  const setStatus = document.getElementById("set-status");
+  Object.keys(cues).forEach((n) => {
+    const o = document.createElement("option");
+    o.value = n; o.textContent = "replace: " + n;
+    setCue.appendChild(o);
+  });
+  seedSel.addEventListener("change", () => { if (seedSel.value) setCue.value = seedSel.value; });
+
+  function refreshSetUI() {
+    const st = getSet();
+    const names = Object.keys(st.cues);
+    setStatus.textContent = names.length
+      ? names.length + " override" + (names.length > 1 ? "s" : "") + ": " + names.slice(0, 4).join(", ") + (names.length > 4 ? "\u2026" : "")
+      : "no overrides yet";
+    const cur = get().theme;
+    const seg = document.getElementById("theme-seg");
+    const themeOut = document.getElementById("o-theme");
+    seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.theme === cur)));
+    themeOut.textContent = themes.includes(cur) ? cur[0].toUpperCase() + cur.slice(1) : cur;
+    drawEnvelopes(); /* the board honors overrides - keep its envelopes honest */
+    const keep = names.length > 0 || !themes.includes(cur);
+    store.save({ soundSet: keep ? st : null });
+  }
+
+  document.getElementById("set-apply").addEventListener("click", () => {
+    const merged = getSet();
+    if (themes.includes(merged.name)) merged.name = "custom set"; /* a modified identity is no longer the preset */
+    merged.cues[setCue.value] = current();
+    set({ theme: merged });
+    play(setCue.value);
+    refreshSetUI();
+  });
+  document.getElementById("set-json").addEventListener("click", () => {
+    const st = getSet();
+    const fname = (st.name || "foley").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + "-foley-set.json";
+    saveBlob(new Blob([JSON.stringify(st, null, 2)], { type: "application/json" }), fname);
+  });
+  const setFile = document.getElementById("set-file");
+  document.getElementById("set-import").addEventListener("click", () => setFile.click());
+  setFile.addEventListener("change", () => {
+    const f = setFile.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try { set({ theme: JSON.parse(r.result) }); play("switch"); refreshSetUI(); }
+      catch (e) { play("error"); }
+      setFile.value = "";
+    };
+    r.readAsText(f);
+  });
+  document.getElementById("set-link").addEventListener("click", () => {
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(getSet()))));
+    const url = location.origin + location.pathname + "#set=" + b64;
+    history.replaceState(null, "", "#set=" + b64);
+    navigator.clipboard.writeText(url).then(() => {
+      play("success");
+      setStatus.textContent = "set link copied \u2014 it carries the whole identity";
+    }).catch(() => play("error"));
+  });
+  document.getElementById("set-clear").addEventListener("click", () => {
+    set({ theme: "default" });
+    play("off");
+    refreshSetUI();
+  });
+  /* named-theme clicks in the inspector clear overrides in the engine - mirror it here */
+  document.getElementById("theme-seg").addEventListener("click", () => setTimeout(refreshSetUI, 0));
+
+  /* restore the identity: URL #set= wins, then the saved one */
+  if (location.hash.startsWith("#set=")) {
+    try { set({ theme: JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(5))))) }); } catch (e) { /* bad hash */ }
+  } else if (saved.soundSet) {
+    try { set({ theme: saved.soundSet }); } catch (e) { /* stale */ }
+  }
+  setTimeout(refreshSetUI, 0);
 
   /* initial state: URL hash > saved design > the "on" cue */
   let initial = null;

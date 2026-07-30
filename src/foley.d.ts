@@ -31,6 +31,17 @@ export interface ThemeTransform {
   wave?: Partial<Record<WaveName, WaveName>> | null;
 }
 
+/** A portable sonic identity: a global transform plus per-cue spec overrides.
+    Load one with set({ theme: soundSet }); snapshot the current one with getSet(). */
+export interface SoundSet {
+  /** Display name; becomes get().theme. */
+  name?: string;
+  /** Global character transform applied to every cue. */
+  transform?: ThemeTransform;
+  /** Full replacement specs for individual cues. */
+  cues?: Partial<Record<CueName, Spec>>;
+}
+
 export interface PlayHandle {
   /** Fade this performance out (~20ms) and, if looping, stop the loop. */
   stop(): void;
@@ -86,7 +97,7 @@ export declare function bind(root?: ParentNode): void;
 
 /** Update engine settings. Only the provided keys change.
     theme accepts a name or a custom ThemeTransform object. */
-export declare function set(opts: Partial<Omit<Settings, "theme">> & { theme?: ThemeName | ThemeTransform }): void;
+export declare function set(opts: Partial<Omit<Settings, "theme">> & { theme?: ThemeName | ThemeTransform | SoundSet }): void;
 
 /** A snapshot of the current settings. */
 export declare function get(): Settings;
@@ -121,8 +132,11 @@ export interface PlaySpecOptions extends PlayOptions {
   id?: string;
 }
 
-/** A deep, editable copy of a built-in cue's spec. */
+/** A deep, editable copy of the cue's effective spec (the active sound set's override, or the built-in). */
 export declare function getSpec(name: CueName): Spec;
+
+/** Snapshot the active sonic identity as a portable SoundSet. */
+export declare function getSet(): SoundSet;
 
 /** Validate and clamp a spec into a safe, playable copy (max 8 layers). */
 export declare function normalizeSpec(spec: unknown): Spec;

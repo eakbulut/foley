@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.6.0
+- **Sound sets**: a portable sonic identity — `{ name, transform, cues }` — loaded with `set({ theme: soundSet })`. A global transform reshapes every cue; per-cue specs replace the ones that matter. `getSet()` snapshots the active identity, JSON-safe and lossless through `set()`. Assigning any named theme clears the whole identity.
+- `getSpec(name)` now returns the *effective* spec (the active set's override, or the built-in) — so the designer, WAV export, board envelopes, and sprite all honor the set.
+- Demo: the designer grew a set workflow — design a cue, "Use site-wide", export the set as JSON, import one, or copy a `#set=` link that carries the entire identity.
+
+
 ## 2.5.0
 - `play()` and `playSpec()` return a handle with `stop()` — each performance runs on its own bus and fades out in ~20ms without touching other sounds.
 - Looping: `play("loading", { loop: true })` repeats until stopped (spacing defaults to the sound's own duration; override with `every`).

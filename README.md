@@ -9,9 +9,9 @@
 Foley is a tiny, dependency-free library of **28 interaction sounds**, named for the film artists who perform footsteps and door-latches in sync with the picture. It does the same for your interface: every cue is synthesized with Web Audio at the instant of the action. No audio files, no network requests, no build step.
 
 - **28 cues in 7 families** — pointer, press, toggle, feedback, notify, motion, state
-- **4 themes** — default, soft, mechanical, glass — or pass your own transform object
+- **4 themes** — default, soft, mechanical, glass — or your own transform, or a full [sound set](#sound-sets)
 - **Cues are data** — edit any cue's layers with `getSpec()`/`playSpec()`, or visually in the [Cue Designer](https://usefoley.dev/#designer)
-- **8.4 kB**, zero dependencies, one ES module
+- **9.6 kB**, zero dependencies, one ES module
 - **Defensive by design** — master limiter, 60ms per-cue cooldown, ±30-cent humanization; `stop()` handles, looping, and ducking built in
 - **WAV export** — any cue, any custom design, or all 28 as an audio sprite with an offset map
 
@@ -111,6 +111,30 @@ const wav = await toWavSpec(mySound);
 ```
 
 Or use the visual [Cue Designer on the demo](https://usefoley.dev/#designer) — edit with live playback, then export .wav/.json or share the design as a link.
+
+## Sound sets
+
+A sound set is your product's whole sonic identity as one portable JSON object: a
+global character transform plus full replacement specs for the cues that matter most.
+
+```js
+import { set, getSet } from "@foleyjs/core";
+
+set({ theme: {
+  name: "Acme",
+  transform: { pitch: 0.9, decay: 1.3 },      // every cue, reshaped
+  cues: { success: [/* layers */], error: [/* layers */] }  // these two, replaced
+}});
+
+get().theme;   // "Acme"
+getSet();      // snapshot the active identity - JSON-safe, version it in your repo
+```
+
+- **`getSet()`** returns the active identity; feeding it back through `set({ theme })` is lossless.
+- Assigning any named theme replaces the whole identity, overrides included.
+- Overrides are validated like any spec (unknown cues dropped, params clamped).
+- Build one visually in the [Cue Designer](https://usefoley.dev/#designer): design a cue, pick
+  which built-in it replaces, "Use site-wide", then export the set or copy a set link.
 
 ## Themes
 

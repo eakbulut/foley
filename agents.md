@@ -111,6 +111,11 @@ s.forEach((l) => { l.d *= 1.4; if (l.f) l.f *= 0.84; });  // longer, ~3 st lower
 playSpec(s);
 ```
 
+A whole sonic identity is a **sound set**: `{ name, transform, cues }` — a global
+transform plus per-cue replacement specs. Load with `set({ theme: soundSet })`;
+snapshot with `getSet()`. If the project has a set JSON (often `*-foley-set.json`),
+load it at startup and do not re-tune individual cues by hand.
+
 Humans can do this visually at https://usefoley.dev/#designer — its JSON export is a
 valid spec and can be pasted straight into `playSpec()`, and its share links
 (`#spec=...`) encode the same format. If a user hands you a designer link or JSON
