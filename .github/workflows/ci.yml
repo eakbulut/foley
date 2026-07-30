@@ -16,3 +16,5 @@ jobs:
         run: npm test
       - name: Build standalone demo
         run: npm run build
+      - name: Build docs page
+        run: npm run docs

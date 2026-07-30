@@ -21,7 +21,8 @@
   "scripts": {
     "test": "node --test",
     "build": "node scripts/build-standalone.mjs",
-    "demo": "npx serve ."
+    "demo": "npx serve .",
+    "docs": "node scripts/build-docs.mjs"
   },
   "repository": {
     "type": "git",
@@ -48,6 +49,7 @@
   },
   "devDependencies": {
     "@foleyjs/core": "file:.",
+    "marked": "^18.0.7",
     "react": "^18.3.0"
   }
 }

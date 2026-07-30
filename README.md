@@ -9,10 +9,11 @@
 Foley is a tiny, dependency-free library of **28 interaction sounds**, named for the film artists who perform footsteps and door-latches in sync with the picture. It does the same for your interface: every cue is synthesized with Web Audio at the instant of the action. No audio files, no network requests, no build step.
 
 - **28 cues in 7 families** — pointer, press, toggle, feedback, notify, motion, state
-- **4 themes** — default, soft, mechanical, glass — one setting reshapes every cue
-- **~5 kB**, zero dependencies, one ES module
-- **Defensive by design** — master limiter, 60ms per-cue cooldown, ±30-cent humanization
-- **WAV export** — render any cue offline to a 16-bit .wav for Figma, video, or native apps
+- **4 themes** — default, soft, mechanical, glass — or pass your own transform object
+- **Cues are data** — edit any cue's layers with `getSpec()`/`playSpec()`, or visually in the [Cue Designer](https://usefoley.dev/#designer)
+- **8.4 kB**, zero dependencies, one ES module
+- **Defensive by design** — master limiter, 60ms per-cue cooldown, ±30-cent humanization; `stop()` handles, looping, and ducking built in
+- **WAV export** — any cue, any custom design, or all 28 as an audio sprite with an offset map
 
 ## Install
 
@@ -152,10 +153,11 @@ npm install      # once per clone — the test suite imports the framework packa
                  # which need react and the self-linked core from node_modules
 npm test         # node --test: metadata integrity, settings, docs/types consistency, build
 npm run build    # regenerate the single-file demo at dist/foley-demo.html
+npm run docs     # render README.md into dist/docs.html (deployed at /docs.html)
 npm run demo     # serve the demo locally
 ```
 
-CI runs the tests on every push; merges to `main` deploy the demo to GitHub Pages (enable Pages with the "GitHub Actions" source in repo settings, once). Pushing a `v*` tag publishes all three packages to npm from CI via [trusted publishing](https://docs.npmjs.com/trusted-publishers) — no tokens. One-time setup: publish each package manually once, then in each package’s npm settings add a Trusted Publisher pointing at this repo and `release.yml`. Provenance is automatic.
+Releases follow [RELEASING.md](./RELEASING.md). CI runs the tests on every push; merges to `main` deploy the demo to GitHub Pages (enable Pages with the "GitHub Actions" source in repo settings, once). Pushing a `v*` tag publishes all three packages to npm from CI via [trusted publishing](https://docs.npmjs.com/trusted-publishers) — no tokens. One-time setup: publish each package manually once, then in each package’s npm settings add a Trusted Publisher pointing at this repo and `release.yml`. Provenance is automatic.
 
 ## License
 

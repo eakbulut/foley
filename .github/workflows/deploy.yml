@@ -27,7 +27,9 @@ jobs:
       - name: Assemble site (demo only, no node_modules)
         run: |
           mkdir -p _site
+          npm run docs
           cp index.html agents.md _site/
+          cp dist/docs.html _site/
           cp -r src assets _site/
           echo "usefoley.dev" > _site/CNAME
       - uses: actions/configure-pages@v4
