@@ -147,6 +147,8 @@ Then open the printed URL. GitHub Pages works too: enable it on the repo root an
 ## Development
 
 ```sh
+npm install      # once per clone — the test suite imports the framework packages,
+                 # which need react and the self-linked core from node_modules
 npm test         # node --test: metadata integrity, settings, docs/types consistency, build
 npm run build    # regenerate the single-file demo at dist/foley-demo.html
 npm run demo     # serve the demo locally
