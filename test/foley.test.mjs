@@ -99,6 +99,13 @@ test("d.ts CueName union matches the actual cues", () => {
   assert.deepEqual(declared, actual);
 });
 
+test("package-lock.json tracks the package version (the seventh sync point)", () => {
+  const lock = JSON.parse(readFileSync(join(root, "package-lock.json"), "utf8"));
+  const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+  assert.equal(lock.version, pkg.version, "run npm install to refresh the lockfile");
+  assert.equal(lock.packages[""].version, pkg.version, "run npm install to refresh the lockfile");
+});
+
 test("version is consistent across module, package.json, and demo badge", () => {
   const pkg = JSON.parse(read("package.json"));
   assert.equal(foley.version, pkg.version);
