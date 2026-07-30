@@ -181,7 +181,7 @@ npm run docs     # render README.md into dist/docs.html (deployed at /docs.html)
 npm run demo     # serve the demo locally
 ```
 
-Releases follow [RELEASING.md](./RELEASING.md). CI runs the tests on every push; merges to `main` deploy the demo to GitHub Pages (enable Pages with the "GitHub Actions" source in repo settings, once). Pushing a `v*` tag publishes all three packages to npm from CI via [trusted publishing](https://docs.npmjs.com/trusted-publishers) — no tokens. One-time setup: publish each package manually once, then in each package’s npm settings add a Trusted Publisher pointing at this repo and `release.yml`. Provenance is automatic.
+Contributions welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md). Releases follow [RELEASING.md](./RELEASING.md). CI runs the tests on every push; merges to `main` deploy the demo to GitHub Pages (enable Pages with the "GitHub Actions" source in repo settings, once). Pushing a `v*` tag publishes all three packages to npm from CI via [trusted publishing](https://docs.npmjs.com/trusted-publishers) — no tokens. One-time setup: publish each package manually once, then in each package’s npm settings add a Trusted Publisher pointing at this repo and `release.yml`. Provenance is automatic.
 
 ## License
 

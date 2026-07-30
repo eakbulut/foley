@@ -42,3 +42,21 @@ test("reduced-motion posture holds (audited 2.5.x): global rule, marquee fallbac
   assert.ok(page.includes('matchMedia("(prefers-reduced-motion: reduce)")'), "tour must gate smooth scrolling");
   assert.ok(page.includes("apple-touch-icon"), "touch icon link missing");
 });
+
+test("SEO surfaces: canonical, structured data, npm keywords, crawler files", () => {
+  const page = readFileSync(join(root, "index.html"), "utf8");
+  assert.ok(page.includes('rel="canonical"'), "canonical link missing");
+  assert.ok(page.includes("ld+json"), "structured data missing");
+  const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+  assert.ok(pkg.keywords && pkg.keywords.length >= 8, "npm keywords missing");
+  const deploy = readFileSync(join(root, ".github/workflows/deploy.yml"), "utf8");
+  assert.ok(deploy.includes("robots.txt") && deploy.includes("sitemap.xml"), "crawler files not shipped");
+  assert.ok(page.includes("data-goatcounter"), "analytics missing from the live page");
+});
+
+test("contributor docs exist and are linked", () => {
+  const contrib = readFileSync(join(root, "CONTRIBUTING.md"), "utf8");
+  assert.ok(contrib.includes("npm test"), "CONTRIBUTING must cover setup");
+  const readme = readFileSync(join(root, "README.md"), "utf8");
+  assert.ok(readme.includes("CONTRIBUTING.md"), "README must link CONTRIBUTING");
+});

@@ -17,6 +17,11 @@ export function buildDocs(outFile = join(root, "dist", "docs.html")) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Foley docs</title>
 <meta name="description" content="Documentation for Foley - sound effects for the interface, performed live.">
+<link rel="canonical" href="https://usefoley.dev/docs.html">
+<meta property="og:title" content="Foley docs">
+<meta property="og:description" content="API, cues, themes, sound sets, and framework bindings for Foley.">
+<meta property="og:url" content="https://usefoley.dev/docs.html">
+<meta property="og:image" content="https://usefoley.dev/assets/og-image.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23171B19'/%3E%3Ccircle cx='16' cy='16' r='5.5' fill='%23E8EAE7'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,6 +56,7 @@ th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:upp
 blockquote{margin:1em 0;padding:10px 16px;border-left:3px solid var(--card-edge);color:var(--ink-faint);font-size:14px}
 img{max-width:100%}
 </style>
+<script data-goatcounter="https://foley.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
 <header><div class="bar">

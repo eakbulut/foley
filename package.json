@@ -33,14 +33,16 @@
     "url": "https://github.com/eakbulut/foley/issues"
   },
   "keywords": [
-    "web-audio",
-    "ui-sounds",
-    "sound-effects",
-    "interaction",
-    "sfx",
+    "ui sounds",
+    "sound effects",
+    "web audio",
+    "interaction sounds",
+    "audio feedback",
+    "sound design",
     "microinteractions",
-    "audio",
-    "synthesis"
+    "haptics",
+    "ui sound library",
+    "sound set"
   ],
   "author": "eakbulut",
   "license": "MIT",

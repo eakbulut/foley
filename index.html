@@ -4,12 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Foley — sound effects for the interface, performed live</title>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Foley",
+"url":"https://usefoley.dev/","applicationCategory":"DeveloperApplication",
+"operatingSystem":"Web","license":"https://opensource.org/license/mit",
+"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+"description":"A tiny, dependency-free library of 28 UI interaction sounds synthesized live with Web Audio. Design custom cues and ship a sound set — your product's sonic identity as JSON."}
+</script>
 <meta name="description" content="Foley is a tiny, dependency-free library of 28 interaction sounds, synthesized live with Web Audio. Design your own cues and ship your product’s sonic identity as a sound set.">
 <meta property="og:title" content="Foley — sound effects for the interface, performed live">
 <meta property="og:description" content="28 interaction sounds synthesized live with Web Audio. Design your own, ship a sound set. Zero dependencies, zero audio files.">
 <meta property="og:type" content="website">
+<link rel="canonical" href="https://usefoley.dev/">
 <meta property="og:url" content="https://usefoley.dev/">
 <meta property="og:image" content="https://usefoley.dev/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Foley — sound effects for the interface, performed live">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://usefoley.dev/assets/og-image.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23171B19'/%3E%3Ccircle cx='16' cy='16' r='5.5' fill='%23E8EAE7'/%3E%3C/svg%3E">
@@ -33,7 +44,9 @@
   --c-feedback:#1B9E57;     /* patch-cable green               */
   --c-notify:#8B5CF6;       /* patch-cable violet              */
   --c-motion:#0FA3A0;       /* patch-cable teal                */
+  --c-state:#5B8A72;        /* patch-cable moss - also the designer's color */
   --err:#D33A2C;
+  --scope-trace:#7EE7C4;    /* phosphor beam on every scope surface        */
   --radius:14px;
   --disp:'Bricolage Grotesque', system-ui, sans-serif;
   --body:'Instrument Sans', system-ui, sans-serif;
@@ -173,9 +186,10 @@ header.top{
   .quotes{overflow-x:auto;-webkit-mask-image:none;mask-image:none}
   .quotes-track{animation:none}
 }
-.quote{flex:0 0 auto;max-width:280px;margin-right:14px;background:var(--card);border:1px solid var(--card-edge);border-radius:12px;padding:14px 16px}
-.quote q{font-size:14px;font-weight:500;quotes:"“" "”"}
-.quote .who{display:block;margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+.quote{flex:0 0 auto;display:flex;flex-direction:column;width:280px;margin-right:14px;background:var(--card);border:1px solid var(--card-edge);border-radius:12px;padding:16px 18px 14px}
+.quote q{font-size:14px;font-weight:500;line-height:1.5;quotes:"“" "”"}
+/* bylines anchor to the card floor: one shared baseline across the whole strip */
+.quote .who{display:block;margin-top:auto;padding-top:12px;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
 
 /* ---------- section scaffolding ---------- */
 section.block{padding:76px 0 0}
@@ -393,6 +407,7 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
 .dz-set .dz-row{margin-bottom:10px}
 .dz-set .dz-seed{max-width:150px}
 </style>
+<script data-goatcounter="https://foley.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
 <header class="top">
@@ -426,7 +441,7 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
   <!-- ============ HERO ============ -->
   <section class="hero">
     <h1>Sound effects for the interface, <span class="lit">performed live.</span></h1>
-    <p class="lede">Foley is a tiny, dependency-free library of <strong>28 interaction sounds</strong> — named for the film artists who perform sound in sync with the picture. Every cue is synthesized live with Web Audio the instant you interact. No audio files, no setup — and when the defaults aren’t yours, redesign them and ship a <strong>sound set</strong>: your product’s whole sonic identity in one small JSON file.</p>
+    <p class="lede">Foley is a tiny, dependency-free library of <strong>28 interaction sounds</strong>, synthesized live with Web Audio the instant you interact — no audio files, no setup. When the defaults aren’t yours, redesign them and ship a <strong>sound set</strong>: your product’s sonic identity in one small JSON file.</p>
     <div class="hero-pills" aria-hidden="true">
       <button class="hero-pill" data-cue="chime" style="--pc:var(--c-notify);--r:-4deg;--x:8%;--y:6%">chime</button>
       <button class="hero-pill" data-cue="thock" style="--pc:var(--c-press);--r:3deg;--x:52%;--y:0%">thock</button>
@@ -625,7 +640,7 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
   <section class="block" id="designer">
     <div class="eyebrow">Cue designer · roll your own</div>
     <h2 class="blk">Not quite your sound? Change it.</h2>
-    <p class="blk-sub">Start from any cue and shape it with four plain dials — no synthesis degree required. Every change plays live, and the header scope traces it. Export a .wav for your assets folder, JSON for <span class="mono">playSpec()</span>, or share the design as a link. The full layer editor is one click away when you want it. And when a design is right, apply it site-wide — build a <b>sound set</b>, export it as JSON, and load it in your app with <span class="mono">set({ theme: mySet })</span>.</p>
+    <p class="blk-sub">Shape any cue with four plain dials — no synthesis degree required — and hear every change live. Export .wav or JSON, share a design as a link, or apply it site-wide as a <b>sound set</b> your app loads in one line. The full layer editor is a click away.</p>
 
     <div class="designer">
       <div class="dz-grid">
@@ -751,7 +766,8 @@ app.use(FoleyPlugin, { theme: <span class="st">"soft"</span> });
   <div class="wrap foot-in">
     <span><strong>foley</strong> · MIT licensed · <a href="https://github.com/eakbulut/foley" target="_blank" rel="noopener">GitHub</a> · <a href="agents.md" target="_blank" rel="noopener">agents.md</a> — point your coding agent at it</span>
     <span class="sp"></span>
-    <span>28 cues · 4 themes · sound sets · 9.6 kB · synthesized live — designed, shared, and rendered to .wav</span>
+    <span>Named for the foley artists who perform sound in sync with the picture.</span>
+      <span>28 cues · 4 themes · sound sets · 9.6 kB · synthesized live — designed, shared, and rendered to .wav</span>
   </div>
 </footer>
 <script type="module">
@@ -762,14 +778,18 @@ app.use(FoleyPlugin, { theme: <span class="st">"soft"</span> });
 import { bind, play, set, get, on, unlock, getAnalyser, toWav, toBuffer, cues, families, version, getSpec, playSpec, toWavSpec, toBufferSpec, normalizeSpec, toSprite, getSet, themes } from "./src/foley.js";
 
 /* page-side state: colors are a design decision, so they live here, not in the library */
+/* design tokens are CSS custom properties; canvases read them here so a palette
+   change in :root repaints the drawings too - one source, both render layers */
+const cssVar = (n, fb) => (getComputedStyle(document.documentElement).getPropertyValue(n) || "").trim() || fb;
+
 const FAM = {
-  pointer:  { css: "var(--c-pointer)",  hex: "#E5A50A" },
-  press:    { css: "var(--c-press)",    hex: "#E85D2A" },
-  toggle:   { css: "var(--c-toggle)",   hex: "#2E6FF2" },
-  feedback: { css: "var(--c-feedback)", hex: "#1B9E57" },
-  notify:   { css: "var(--c-notify)",   hex: "#8B5CF6" },
-  motion:   { css: "var(--c-motion)",   hex: "#0FA3A0" },
-  state:    { css: "#5B8A72",           hex: "#5B8A72" },
+  pointer:  { css: "var(--c-pointer)",  hex: cssVar("--c-pointer", "#E5A50A") },
+  press:    { css: "var(--c-press)",    hex: cssVar("--c-press", "#E85D2A") },
+  toggle:   { css: "var(--c-toggle)",   hex: cssVar("--c-toggle", "#2E6FF2") },
+  feedback: { css: "var(--c-feedback)", hex: cssVar("--c-feedback", "#1B9E57") },
+  notify:   { css: "var(--c-notify)",   hex: cssVar("--c-notify", "#8B5CF6") },
+  motion:   { css: "var(--c-motion)",   hex: cssVar("--c-motion", "#0FA3A0") },
+  state:    { css: cssVar("--c-state", "#5B8A72"),           hex: cssVar("--c-state", "#5B8A72") },
 };
 const ui = { hover: false, transpose: 0, theme: "default", last: { name: null, family: null, at: 0 } };
 set({ hover: false }); /* hover cues are opt-in on this page via the inspector */
@@ -965,7 +985,7 @@ document.addEventListener("keydown", (e) => {
     fit();
     const an = getAnalyser();
     const active = an && performance.now() - ui.last.at < 1600;
-    const color = (ui.last.family && FAM[ui.last.family].hex) || "#7EE7C4";
+    const color = (ui.last.family && FAM[ui.last.family].hex) || cssVar("--scope-trace", "#7EE7C4");
     c.clearRect(0, 0, w, h);
     c.strokeStyle = "rgba(126,231,196,.12)";
     c.lineWidth = 1;
@@ -1439,7 +1459,7 @@ if (window.matchMedia("(pointer:coarse)").matches) {
   const modeBtn = document.getElementById("dz-mode");
   const killBtn = document.getElementById("dz-kill");
   const canvas = document.getElementById("dz-canvas");
-  const MOSS = "#5B8A72";
+  const MOSS = cssVar("--c-state", "#5B8A72");
 
   /* state: a base spec + four perceptual macros; the layer editor edits the derived spec directly */
   const dz = { base: [], macros: { pitch: 0, length: 1, air: 1, space: 1 }, mode: "simple", spec: [], sel: 0 };

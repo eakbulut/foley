@@ -29,12 +29,14 @@ const store = { load() { return _mem; }, save(patch) { Object.assign(_mem, patch
   script = script.replace(/\/\* BEGIN-STORE[\s\S]*?\/\* END-STORE \*\//, stub);
   if (script.length === beforeStore) throw new Error("index.html: STORE markers not found");
 
-  const out =
+  let out =
     page.slice(0, m.index) +
     '<script type="module">\n' + lib + "\n" + script + "</script>" +
     page.slice(m.index + m[0].length);
 
+  out = out.replace(/^.*data-goatcounter.*\n/m, "");
   if (out.includes("localStorage")) throw new Error("standalone must not reference localStorage");
+  if (out.includes("goatcounter")) throw new Error("standalone must not include analytics");
   mkdirSync(dirname(outFile), { recursive: true });
   writeFileSync(outFile, out);
   return out;

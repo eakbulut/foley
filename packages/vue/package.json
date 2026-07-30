@@ -31,11 +31,19 @@
   },
   "homepage": "https://usefoley.dev/",
   "keywords": [
+    "ui sounds",
+    "sound effects",
+    "web audio",
+    "interaction sounds",
+    "audio feedback",
+    "sound design",
+    "microinteractions",
+    "haptics",
+    "ui sound library",
+    "sound set",
     "vue",
     "directive",
-    "web-audio",
-    "ui-sounds",
-    "sound-effects"
+    "plugin"
   ],
   "author": "eakbulut",
   "license": "MIT"
