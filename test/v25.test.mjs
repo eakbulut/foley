@@ -44,7 +44,7 @@ test("d.ts documents the new surface", () => {
 
 test("demo ships the sprite button and designer extras", () => {
   const page = readFileSync(join(root, "index.html"), "utf8");
-  for (const id of ['id="export-sprite"', 'id="dz-code"', 'id="dz-presets"']) {
+  for (const id of ['id="export-sprite"', 'id="dz-code"', 'id="dz-presets"', "requestMIDIAccess"]) {
     assert.ok(page.includes(id), "demo missing " + id);
   }
 });

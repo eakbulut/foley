@@ -386,6 +386,9 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
 .dz-reroll:hover{color:var(--ink)}
 .dz-reroll:focus-visible{outline:2px solid var(--c-toggle)}
 .quotes-cap{margin:34px 0 -24px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+.midi-bar{margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1px solid var(--card-edge);border-radius:14px;padding:12px 16px}
+.midi-bar label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)}
+.midi-bar .btn{padding:8px 13px;font-size:13px}
 </style>
 </head>
 <body>
@@ -502,6 +505,13 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
           <span class="sub">Synthesized room reverb.</span>
         </div>
       </div>
+    </div>
+
+    <div class="midi-bar" id="midi-bar" hidden>
+      <label for="midi-cue">MIDI in</label>
+      <select class="dz-seed" id="midi-cue" title="The cue your keyboard plays, chromatically"></select>
+      <button class="btn btn-ghost" id="midi-connect">Connect a device</button>
+      <span class="mini-status" id="midi-status">plug in a keyboard or pads — middle C plays the cue as tuned</span>
     </div>
   </section>
 
@@ -1047,6 +1057,61 @@ document.addEventListener("keydown", (e) => {
     const onNow = mute.getAttribute("aria-pressed") !== "true";
     mute.setAttribute("aria-pressed", String(onNow));
     if (!onNow) { set({ muted: false }); play("on"); } else { play("off"); setTimeout(() => set({ muted: true }), 220); }
+  });
+})();
+
+/* WebMIDI: plug in a keyboard, play any cue chromatically. Page-only; the
+   library needs nothing new - pitch and volume options already exist. */
+(function midi() {
+  if (!("requestMIDIAccess" in navigator)) return; /* Safari et al: the bar never appears */
+  const bar = document.getElementById("midi-bar");
+  const cueSel = document.getElementById("midi-cue");
+  const status = document.getElementById("midi-status");
+  const btn = document.getElementById("midi-connect");
+  bar.hidden = false;
+
+  Object.keys(cues).forEach((n) => {
+    const o = document.createElement("option");
+    o.value = n; o.textContent = n;
+    cueSel.appendChild(o);
+  });
+  cueSel.value = "chime";
+  cueSel.addEventListener("change", () => play(cueSel.value));
+
+  const NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  const noteName = (n) => NOTES[n % 12] + (Math.floor(n / 12) - 1);
+
+  function wire(access) {
+    let count = 0;
+    access.inputs.forEach((input) => {
+      count++;
+      input.onmidimessage = (e) => {
+        const [st, note, vel] = e.data;
+        if ((st & 0xF0) !== 0x90 || vel === 0) return; /* note-on only; cues are one-shots */
+        const cue = cueSel.value;
+        /* per-note cooldown ids so chords work; the id doubles as the scope label */
+        playSpec(getSpec(cue), {
+          id: cue + " " + noteName(note),
+          pitch: note - 60,                      /* middle C = the cue as tuned */
+          volume: Math.max(0.15, vel / 127),     /* velocity plays the dynamics */
+        });
+      };
+    });
+    const names = [];
+    access.inputs.forEach((i) => names.push(i.name || "device"));
+    status.textContent = count
+      ? "listening to " + names.join(", ") + " \u2014 middle C plays the cue as tuned"
+      : "connected \u2014 now plug a device in";
+    btn.textContent = count ? "Connected" : "Waiting\u2026";
+    btn.disabled = true;
+    access.onstatechange = () => wire(access);
+  }
+
+  btn.addEventListener("click", () => {
+    navigator.requestMIDIAccess().then(wire).catch(() => {
+      status.textContent = "permission denied \u2014 allow MIDI access and try again";
+      play("error");
+    });
   });
 })();
 

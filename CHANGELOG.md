@@ -6,7 +6,7 @@
 - Ducking: `set({ duck: 0.3 })` attenuates everything temporarily — for videos, calls, or focus modes.
 - Custom themes: `set({ theme: { pitch, decay, ... } })` accepts a transform object, not just a named theme.
 - `toSprite()`: render all 28 cues into one WAV plus a JSON offset map — the classic audio-sprite format for games and low-latency apps. Sprite download button on the demo.
-- Demo: designer preset gallery (marimba, coin, woodblock, raindrop, laser), per-dial randomize, Space-to-replay, "Copy code" (a paste-ready `playSpec()` call), and a favicon. npm releases now publish from CI with provenance on version tags.
+- Demo: designer preset gallery (marimba, coin, woodblock, raindrop, laser), per-dial randomize, Space-to-replay, "Copy code" (a paste-ready `playSpec()` call), a favicon — and WebMIDI: plug in a keyboard and play any cue chromatically, velocity and all (Chrome/Edge/Firefox). npm releases now publish from CI with provenance on version tags.
 
 
 ## 2.4.0
