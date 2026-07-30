@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.1
+- npm package keywords for discoverability.
+- Site: analytics, SEO metadata (canonical, structured data, sitemap), tightened copy, quote-card polish, contributor docs.
+
+
 ## 2.6.0
 - **Sound sets**: a portable sonic identity — `{ name, transform, cues }` — loaded with `set({ theme: soundSet })`. A global transform reshapes every cue; per-cue specs replace the ones that matter. `getSet()` snapshots the active identity, JSON-safe and lossless through `set()`. Assigning any named theme clears the whole identity.
 - `getSpec(name)` now returns the *effective* spec (the active set's override, or the built-in) — so the designer, WAV export, board envelopes, and sprite all honor the set.

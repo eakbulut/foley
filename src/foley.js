@@ -5,7 +5,7 @@
    https://github.com/eakbulut/foley
    ============================================================ */
 
-export const version = "2.6.0";
+export const version = "2.6.1";
 
 /* ---------------- engine ---------------- */
 const T = {
