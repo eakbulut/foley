@@ -5,7 +5,7 @@
    https://github.com/eakbulut/foley
    ============================================================ */
 
-export const version = "2.3.0";
+export const version = "2.4.0";
 
 /* ---------------- engine ---------------- */
 const T = {
@@ -87,7 +87,7 @@ export function on(ev, cb) {
   };
 }
 
-/* ---------------- themes: one transform reshapes all 28 cues ---------------- */
+/* ---------------- themes: one transform reshapes every spec ---------------- */
 function mkTheme(o) {
   return Object.assign({ label: "", wave: null, pitch: 1, attack: 1, decay: 1, send: 1, noiseLvl: 1, noiseF: 1, q: 1, shimmer: false }, o);
 }
@@ -103,7 +103,7 @@ let theme = THEMES.default;
 
 export const themes = Object.freeze(Object.keys(THEMES));
 
-/* ---------------- synth helpers ---------------- */
+/* ---------------- synth voices ---------------- */
 function tone(o) {
   const th = theme, ctx = T.ctx, t0 = o.t0;
   const osc = ctx.createOscillator();
@@ -160,60 +160,169 @@ function noise(o) {
   src.stop(t0 + a + d + 0.1);
 }
 
-function bellPartials(t0, f, peak, decay, send) {
-  const ratios = [1, 2.76, 5.40, 8.93];
-  const gains = [1, 0.42, 0.18, 0.07];
-  for (let i = 0; i < ratios.length; i++) {
-    tone({ t0, f: f * ratios[i], peak: peak * gains[i], a: 0.002, d: decay * (1 - i * 0.16), send });
+/* ---------------- specs: cues as data ----------------
+   A cue is an array of layers. Layer kinds:
+   tone:    { kind, at, wave, f, f2, glide, a, d, peak, send }
+   noise:   { kind, at, filter, f, f2, glide, q, a, d, peak, send }
+   cluster: { kind, at, n, step, fMin, fMax, d, peak, send, seed } - seeded random grains */
+
+function mulberry32(seed) {
+  let s = seed >>> 0;
+  return function () {
+    s |= 0; s = (s + 0x6D2B79F5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function L(kind, at, o) { return Object.assign({ kind, at }, o); }
+function bellLayers(at, f, peak, decay, send) {
+  const ratios = [1, 2.76, 5.40, 8.93], gains = [1, 0.42, 0.18, 0.07];
+  return ratios.map((r, i) =>
+    L("tone", at, { wave: "sine", f: f * r, f2: null, glide: 0.06, a: 0.002, d: decay * (1 - i * 0.16), peak: peak * gains[i], send })
+  );
+}
+
+function runSpec(spec, t0) {
+  for (const lay of spec) {
+    const at = t0 + (lay.at || 0);
+    if (lay.kind === "tone") {
+      tone({ t0: at, type: lay.wave, f: lay.f, f2: lay.f2 || null, glide: lay.glide, a: lay.a, d: lay.d, peak: lay.peak, send: lay.send || 0 });
+    } else if (lay.kind === "noise") {
+      noise({ t0: at, type: lay.filter, f: lay.f, f2: lay.f2 || null, glide: lay.glide, q: lay.q, a: lay.a, d: lay.d, peak: lay.peak, send: lay.send || 0 });
+    } else if (lay.kind === "cluster") {
+      const rnd = mulberry32(lay.seed != null ? lay.seed : 1);
+      for (let i = 0; i < lay.n; i++) {
+        tone({ t0: at + i * lay.step, type: "sine", f: lay.fMin + rnd() * (lay.fMax - lay.fMin), a: 0.004, d: lay.d, peak: lay.peak, send: lay.send || 0 });
+      }
+    }
   }
 }
 
 /* ---------------- the 28 cues ---------------- */
 const CUES = {
   /* pointer */
-  tick:    { cat: "pointer", key: "1", ds: "a grain as the pointer crosses", fn(t) { noise({ t0: t, f: 5200, q: 2.5, d: 0.018, peak: 0.10 }); tone({ t0: t, f: 2400, d: 0.02, peak: 0.05 }); } },
-  hover:   { cat: "pointer", key: "2", ds: "a breath of pitch, barely there", fn(t) { tone({ t0: t, f: 880, f2: 1150, glide: 0.05, d: 0.07, peak: 0.06 }); } },
-  glide:   { cat: "pointer", key: "3", ds: "a longer sweep for big targets", fn(t) { tone({ t0: t, f: 420, f2: 940, glide: 0.11, d: 0.13, peak: 0.09, send: 0.2 }); } },
-  pop:     { cat: "pointer", key: "4", ds: "a bubble bursting under the cursor", fn(t) { tone({ t0: t, f: 640, f2: 190, glide: 0.05, d: 0.06, peak: 0.2 }); noise({ t0: t, f: 3000, q: 1, d: 0.012, peak: 0.06 }); } },
+  tick:    { cat: "pointer", key: "1", ds: "a grain as the pointer crosses", spec: [
+    L("noise", 0, { filter: "bandpass", f: 5200, f2: null, glide: 0.1, q: 2.5, a: 0.002, d: 0.018, peak: 0.10, send: 0 }),
+    L("tone", 0, { wave: "sine", f: 2400, f2: null, glide: 0.06, a: 0.004, d: 0.02, peak: 0.05, send: 0 }),
+  ]},
+  hover:   { cat: "pointer", key: "2", ds: "a breath of pitch, barely there", spec: [
+    L("tone", 0, { wave: "sine", f: 880, f2: 1150, glide: 0.05, a: 0.004, d: 0.07, peak: 0.06, send: 0 }),
+  ]},
+  glide:   { cat: "pointer", key: "3", ds: "a longer sweep for big targets", spec: [
+    L("tone", 0, { wave: "sine", f: 420, f2: 940, glide: 0.11, a: 0.004, d: 0.13, peak: 0.09, send: 0.2 }),
+  ]},
+  pop:     { cat: "pointer", key: "4", ds: "a bubble bursting under the cursor", spec: [
+    L("tone", 0, { wave: "sine", f: 640, f2: 190, glide: 0.05, a: 0.004, d: 0.06, peak: 0.2, send: 0 }),
+    L("noise", 0, { filter: "bandpass", f: 3000, f2: null, glide: 0.1, q: 1, a: 0.002, d: 0.012, peak: 0.06, send: 0 }),
+  ]},
 
   /* press */
-  press:   { cat: "press", key: "5", ds: "the down-stroke, weighted", fn(t) { tone({ t0: t, type: "triangle", f: 190, f2: 150, glide: 0.03, d: 0.06, peak: 0.28 }); noise({ t0: t, f: 1800, q: 0.8, d: 0.012, peak: 0.12 }); } },
-  release: { cat: "press", key: "6", ds: "the up-stroke, lighter", fn(t) { tone({ t0: t, type: "triangle", f: 300, f2: 250, glide: 0.02, d: 0.045, peak: 0.18 }); noise({ t0: t, f: 3200, q: 0.8, d: 0.01, peak: 0.08 }); } },
-  tap:     { cat: "press", key: "7", ds: "a neutral single click", fn(t) { noise({ t0: t, f: 2200, q: 1.4, d: 0.02, peak: 0.16 }); tone({ t0: t, f: 1100, d: 0.025, peak: 0.07 }); } },
-  thock:   { cat: "press", key: "8", ds: "mechanical keyboard, lubed", fn(t) { tone({ t0: t, type: "sine", f: 120, f2: 95, glide: 0.03, d: 0.055, peak: 0.3 }); noise({ t0: t, type: "lowpass", f: 900, d: 0.02, peak: 0.2 }); } },
+  press:   { cat: "press", key: "5", ds: "the down-stroke, weighted", spec: [
+    L("tone", 0, { wave: "triangle", f: 190, f2: 150, glide: 0.03, a: 0.004, d: 0.06, peak: 0.28, send: 0 }),
+    L("noise", 0, { filter: "bandpass", f: 1800, f2: null, glide: 0.1, q: 0.8, a: 0.002, d: 0.012, peak: 0.12, send: 0 }),
+  ]},
+  release: { cat: "press", key: "6", ds: "the up-stroke, lighter", spec: [
+    L("tone", 0, { wave: "triangle", f: 300, f2: 250, glide: 0.02, a: 0.004, d: 0.045, peak: 0.18, send: 0 }),
+    L("noise", 0, { filter: "bandpass", f: 3200, f2: null, glide: 0.1, q: 0.8, a: 0.002, d: 0.01, peak: 0.08, send: 0 }),
+  ]},
+  tap:     { cat: "press", key: "7", ds: "a neutral single click", spec: [
+    L("noise", 0, { filter: "bandpass", f: 2200, f2: null, glide: 0.1, q: 1.4, a: 0.002, d: 0.02, peak: 0.16, send: 0 }),
+    L("tone", 0, { wave: "sine", f: 1100, f2: null, glide: 0.06, a: 0.004, d: 0.025, peak: 0.07, send: 0 }),
+  ]},
+  thock:   { cat: "press", key: "8", ds: "mechanical keyboard, lubed", spec: [
+    L("tone", 0, { wave: "sine", f: 120, f2: 95, glide: 0.03, a: 0.004, d: 0.055, peak: 0.3, send: 0 }),
+    L("noise", 0, { filter: "lowpass", f: 900, f2: null, glide: 0.1, q: 1, a: 0.002, d: 0.02, peak: 0.2, send: 0 }),
+  ]},
 
   /* toggle */
-  on:      { cat: "toggle", key: "9", ds: "two notes stepping up", fn(t) { tone({ t0: t, f: 660, d: 0.05, peak: 0.14 }); tone({ t0: t + 0.07, f: 990, d: 0.09, peak: 0.16, send: 0.15 }); } },
-  off:     { cat: "toggle", key: "0", ds: "the same figure, descending", fn(t) { tone({ t0: t, f: 990, d: 0.05, peak: 0.14 }); tone({ t0: t + 0.07, f: 620, d: 0.09, peak: 0.15 }); } },
-  switch:  { cat: "toggle", key: "Q", ds: "a hard mode-change snap", fn(t) { noise({ t0: t, f: 2600, q: 3, d: 0.015, peak: 0.18 }); tone({ t0: t + 0.01, f: 520, d: 0.05, peak: 0.12 }); } },
-  latch:   { cat: "toggle", key: "W", ds: "a low clunk that stays put", fn(t) { tone({ t0: t, type: "triangle", f: 140, f2: 110, glide: 0.04, d: 0.09, peak: 0.3 }); noise({ t0: t, type: "lowpass", f: 500, d: 0.03, peak: 0.18 }); } },
+  on:      { cat: "toggle", key: "9", ds: "two notes stepping up", spec: [
+    L("tone", 0, { wave: "sine", f: 660, f2: null, glide: 0.06, a: 0.004, d: 0.05, peak: 0.14, send: 0 }),
+    L("tone", 0.07, { wave: "sine", f: 990, f2: null, glide: 0.06, a: 0.004, d: 0.09, peak: 0.16, send: 0.15 }),
+  ]},
+  off:     { cat: "toggle", key: "0", ds: "the same figure, descending", spec: [
+    L("tone", 0, { wave: "sine", f: 990, f2: null, glide: 0.06, a: 0.004, d: 0.05, peak: 0.14, send: 0 }),
+    L("tone", 0.07, { wave: "sine", f: 620, f2: null, glide: 0.06, a: 0.004, d: 0.09, peak: 0.15, send: 0 }),
+  ]},
+  switch:  { cat: "toggle", key: "Q", ds: "a hard mode-change snap", spec: [
+    L("noise", 0, { filter: "bandpass", f: 2600, f2: null, glide: 0.1, q: 3, a: 0.002, d: 0.015, peak: 0.18, send: 0 }),
+    L("tone", 0.01, { wave: "sine", f: 520, f2: null, glide: 0.06, a: 0.004, d: 0.05, peak: 0.12, send: 0 }),
+  ]},
+  latch:   { cat: "toggle", key: "W", ds: "a low clunk that stays put", spec: [
+    L("tone", 0, { wave: "triangle", f: 140, f2: 110, glide: 0.04, a: 0.004, d: 0.09, peak: 0.3, send: 0 }),
+    L("noise", 0, { filter: "lowpass", f: 500, f2: null, glide: 0.1, q: 1, a: 0.002, d: 0.03, peak: 0.18, send: 0 }),
+  ]},
 
   /* feedback */
-  success: { cat: "feedback", key: "E", ds: "a small major lift", fn(t) { tone({ t0: t, f: 523.25, d: 0.1, peak: 0.13 }); tone({ t0: t + 0.09, f: 659.25, d: 0.12, peak: 0.13 }); tone({ t0: t + 0.18, f: 783.99, d: 0.22, peak: 0.15, send: 0.3 }); } },
-  error:   { cat: "feedback", key: "R", ds: "two flat buzzes, no drama", fn(t) { tone({ t0: t, type: "sawtooth", f: 220, d: 0.09, peak: 0.09 }); tone({ t0: t + 0.13, type: "sawtooth", f: 185, d: 0.13, peak: 0.09 }); } },
-  warning: { cat: "feedback", key: "T", ds: "the same note, twice", fn(t) { tone({ t0: t, type: "triangle", f: 493.88, d: 0.07, peak: 0.13 }); tone({ t0: t + 0.15, type: "triangle", f: 493.88, d: 0.1, peak: 0.13 }); } },
-  denied:  { cat: "feedback", key: "Y", ds: "a thud against the limit", fn(t) { tone({ t0: t, type: "triangle", f: 160, f2: 120, glide: 0.05, d: 0.08, peak: 0.26 }); noise({ t0: t, type: "lowpass", f: 400, d: 0.04, peak: 0.14 }); } },
+  success: { cat: "feedback", key: "E", ds: "a small major lift", spec: [
+    L("tone", 0, { wave: "sine", f: 523.25, f2: null, glide: 0.06, a: 0.004, d: 0.1, peak: 0.13, send: 0 }),
+    L("tone", 0.09, { wave: "sine", f: 659.25, f2: null, glide: 0.06, a: 0.004, d: 0.12, peak: 0.13, send: 0 }),
+    L("tone", 0.18, { wave: "sine", f: 783.99, f2: null, glide: 0.06, a: 0.004, d: 0.22, peak: 0.15, send: 0.3 }),
+  ]},
+  error:   { cat: "feedback", key: "R", ds: "two flat buzzes, no drama", spec: [
+    L("tone", 0, { wave: "sawtooth", f: 220, f2: null, glide: 0.06, a: 0.004, d: 0.09, peak: 0.09, send: 0 }),
+    L("tone", 0.13, { wave: "sawtooth", f: 185, f2: null, glide: 0.06, a: 0.004, d: 0.13, peak: 0.09, send: 0 }),
+  ]},
+  warning: { cat: "feedback", key: "T", ds: "the same note, twice", spec: [
+    L("tone", 0, { wave: "triangle", f: 493.88, f2: null, glide: 0.06, a: 0.004, d: 0.07, peak: 0.13, send: 0 }),
+    L("tone", 0.15, { wave: "triangle", f: 493.88, f2: null, glide: 0.06, a: 0.004, d: 0.1, peak: 0.13, send: 0 }),
+  ]},
+  denied:  { cat: "feedback", key: "Y", ds: "a thud against the limit", spec: [
+    L("tone", 0, { wave: "triangle", f: 160, f2: 120, glide: 0.05, a: 0.004, d: 0.08, peak: 0.26, send: 0 }),
+    L("noise", 0, { filter: "lowpass", f: 400, f2: null, glide: 0.1, q: 1, a: 0.002, d: 0.04, peak: 0.14, send: 0 }),
+  ]},
 
   /* notify */
-  chime:   { cat: "notify", key: "U", ds: "a struck bar with partials", fn(t) { bellPartials(t, 880, 0.14, 0.7, 0.45); } },
-  ping:    { cat: "notify", key: "I", ds: "one bright point of light", fn(t) { tone({ t0: t, f: 1318.5, d: 0.28, peak: 0.12, send: 0.35 }); tone({ t0: t, f: 1324, d: 0.24, peak: 0.05, send: 0.3 }); } },
-  bell:    { cat: "notify", key: "O", ds: "rounder and further away", fn(t) { bellPartials(t, 523.25, 0.13, 0.9, 0.55); } },
-  bubble:  { cat: "notify", key: "P", ds: "a message surfacing", fn(t) { tone({ t0: t, f: 320, f2: 900, glide: 0.09, d: 0.1, peak: 0.14, send: 0.2 }); } },
+  chime:   { cat: "notify", key: "U", ds: "a struck bar with partials", spec: bellLayers(0, 880, 0.14, 0.7, 0.45) },
+  ping:    { cat: "notify", key: "I", ds: "one bright point of light", spec: [
+    L("tone", 0, { wave: "sine", f: 1318.5, f2: null, glide: 0.06, a: 0.004, d: 0.28, peak: 0.12, send: 0.35 }),
+    L("tone", 0, { wave: "sine", f: 1324, f2: null, glide: 0.06, a: 0.004, d: 0.24, peak: 0.05, send: 0.3 }),
+  ]},
+  bell:    { cat: "notify", key: "O", ds: "rounder and further away", spec: bellLayers(0, 523.25, 0.13, 0.9, 0.55) },
+  bubble:  { cat: "notify", key: "P", ds: "a message surfacing", spec: [
+    L("tone", 0, { wave: "sine", f: 320, f2: 900, glide: 0.09, a: 0.004, d: 0.1, peak: 0.14, send: 0.2 }),
+  ]},
 
   /* motion */
-  swoosh:  { cat: "motion", key: "A", ds: "air moving forward", fn(t) { noise({ t0: t, f: 350, f2: 3400, glide: 0.22, q: 1.6, a: 0.03, d: 0.22, peak: 0.14, send: 0.25 }); } },
-  whoosh:  { cat: "motion", key: "S", ds: "the same air, leaving", fn(t) { noise({ t0: t, f: 3200, f2: 320, glide: 0.22, q: 1.6, a: 0.03, d: 0.2, peak: 0.13 }); } },
-  drop:    { cat: "motion", key: "D", ds: "something set down", fn(t) { tone({ t0: t, f: 620, f2: 130, glide: 0.16, d: 0.18, peak: 0.16 }); noise({ t0: t + 0.15, type: "lowpass", f: 700, d: 0.03, peak: 0.12 }); } },
-  rise:    { cat: "motion", key: "F", ds: "something lifting off", fn(t) { tone({ t0: t, f: 210, f2: 860, glide: 0.18, d: 0.2, peak: 0.13, send: 0.25 }); noise({ t0: t + 0.1, f: 2400, f2: 5200, glide: 0.1, d: 0.1, peak: 0.05 }); } },
+  swoosh:  { cat: "motion", key: "A", ds: "air moving forward", spec: [
+    L("noise", 0, { filter: "bandpass", f: 350, f2: 3400, glide: 0.22, q: 1.6, a: 0.03, d: 0.22, peak: 0.14, send: 0.25 }),
+  ]},
+  whoosh:  { cat: "motion", key: "S", ds: "the same air, leaving", spec: [
+    L("noise", 0, { filter: "bandpass", f: 3200, f2: 320, glide: 0.22, q: 1.6, a: 0.03, d: 0.2, peak: 0.13, send: 0 }),
+  ]},
+  drop:    { cat: "motion", key: "D", ds: "something set down", spec: [
+    L("tone", 0, { wave: "sine", f: 620, f2: 130, glide: 0.16, a: 0.004, d: 0.18, peak: 0.16, send: 0 }),
+    L("noise", 0.15, { filter: "lowpass", f: 700, f2: null, glide: 0.1, q: 1, a: 0.002, d: 0.03, peak: 0.12, send: 0 }),
+  ]},
+  rise:    { cat: "motion", key: "F", ds: "something lifting off", spec: [
+    L("tone", 0, { wave: "sine", f: 210, f2: 860, glide: 0.18, a: 0.004, d: 0.2, peak: 0.13, send: 0.25 }),
+    L("noise", 0.1, { filter: "bandpass", f: 2400, f2: 5200, glide: 0.1, q: 1, a: 0.002, d: 0.1, peak: 0.05, send: 0 }),
+  ]},
 
   /* state */
-  loading:  { cat: "state", key: "G", ds: "three patient ticks", fn(t) { for (let i = 0; i < 3; i++) tone({ t0: t + i * 0.12, f: 700 + i * 120, d: 0.035, peak: 0.09 }); } },
-  ready:    { cat: "state", key: "H", ds: "a warm open third", fn(t) { tone({ t0: t, f: 440, d: 0.3, peak: 0.1, send: 0.25 }); tone({ t0: t, f: 554.37, d: 0.3, peak: 0.09, send: 0.25 }); } },
-  complete: { cat: "state", key: "J", ds: "arpeggio, then shimmer", fn(t) { const seq = [523.25, 659.25, 783.99, 1046.5]; seq.forEach((f, i) => tone({ t0: t + i * 0.08, f, d: 0.16 + i * 0.05, peak: 0.12, send: 0.3 })); for (let i = 0; i < 4; i++) tone({ t0: t + 0.34 + i * 0.03, f: 2000 + Math.random() * 2500, d: 0.09, peak: 0.03, send: 0.5 }); } },
-  sparkle:  { cat: "state", key: "K", ds: "a handful of glitter", fn(t) { for (let i = 0; i < 6; i++) tone({ t0: t + i * 0.035, f: 1600 + Math.random() * 3000, d: 0.1, peak: 0.045, send: 0.5 }); } },
+  loading:  { cat: "state", key: "G", ds: "three patient ticks", spec: [
+    L("tone", 0, { wave: "sine", f: 700, f2: null, glide: 0.06, a: 0.004, d: 0.035, peak: 0.09, send: 0 }),
+    L("tone", 0.12, { wave: "sine", f: 820, f2: null, glide: 0.06, a: 0.004, d: 0.035, peak: 0.09, send: 0 }),
+    L("tone", 0.24, { wave: "sine", f: 940, f2: null, glide: 0.06, a: 0.004, d: 0.035, peak: 0.09, send: 0 }),
+  ]},
+  ready:    { cat: "state", key: "H", ds: "a warm open third", spec: [
+    L("tone", 0, { wave: "sine", f: 440, f2: null, glide: 0.06, a: 0.004, d: 0.3, peak: 0.1, send: 0.25 }),
+    L("tone", 0, { wave: "sine", f: 554.37, f2: null, glide: 0.06, a: 0.004, d: 0.3, peak: 0.09, send: 0.25 }),
+  ]},
+  complete: { cat: "state", key: "J", ds: "arpeggio, then shimmer", spec: [
+    L("tone", 0, { wave: "sine", f: 523.25, f2: null, glide: 0.06, a: 0.004, d: 0.16, peak: 0.12, send: 0.3 }),
+    L("tone", 0.08, { wave: "sine", f: 659.25, f2: null, glide: 0.06, a: 0.004, d: 0.21, peak: 0.12, send: 0.3 }),
+    L("tone", 0.16, { wave: "sine", f: 783.99, f2: null, glide: 0.06, a: 0.004, d: 0.26, peak: 0.12, send: 0.3 }),
+    L("tone", 0.24, { wave: "sine", f: 1046.5, f2: null, glide: 0.06, a: 0.004, d: 0.31, peak: 0.12, send: 0.3 }),
+    L("cluster", 0.34, { n: 4, step: 0.03, fMin: 2000, fMax: 4500, d: 0.09, peak: 0.03, send: 0.5, seed: 7 }),
+  ]},
+  sparkle:  { cat: "state", key: "K", ds: "a handful of glitter", spec: [
+    L("cluster", 0, { n: 6, step: 0.035, fMin: 1600, fMax: 4600, d: 0.1, peak: 0.045, send: 0.5, seed: 11 }),
+  ]},
 };
 
-/** Cue metadata: { family, key, description } per cue name. Synth functions stay private. */
+/** Cue metadata: { family, key, description } per cue name. Specs stay behind getSpec(). */
 export const cues = Object.freeze(Object.fromEntries(
   Object.entries(CUES).map(([n, c]) => [n, Object.freeze({ family: c.cat, key: c.key, description: c.ds })])
 ));
@@ -223,11 +332,87 @@ export const families = Object.freeze({
   pointer:  Object.freeze({ name: "Pointer",  description: "grains and breaths for hover and focus" }),
   press:    Object.freeze({ name: "Press",    description: "weight for down-strokes and keys" }),
   toggle:   Object.freeze({ name: "Toggle",   description: "paired figures for binary state" }),
-  feedback: Object.freeze({ name: "Feedback", description: "verdicts \u2014 lifted, flat, or blocked" }),
+  feedback: Object.freeze({ name: "Feedback", description: "verdicts - lifted, flat, or blocked" }),
   notify:   Object.freeze({ name: "Notify",   description: "bells and pings for the unasked-for" }),
   motion:   Object.freeze({ name: "Motion",   description: "air and travel for transitions" }),
   state:    Object.freeze({ name: "State",    description: "loading, ready, and the arrival" }),
 });
+
+/* ---------------- spec validation ---------------- */
+const LIMITS = {
+  at: [0, 1.5], f: [40, 8000], f2: [40, 8000], glide: [0.005, 1],
+  a: [0, 0.5], d: [0.005, 2.5], peak: [0, 0.4], send: [0, 1], q: [0.3, 12],
+  n: [1, 12], step: [0, 0.2], fMin: [40, 8000], fMax: [40, 8000],
+};
+const WAVES = ["sine", "triangle", "square", "sawtooth"];
+const FILTERS = ["bandpass", "lowpass", "highpass"];
+const MAX_LAYERS = 8;
+
+function clampNum(v, key, fallback) {
+  const lim = LIMITS[key];
+  const n = Number(v);
+  if (!isFinite(n)) return fallback != null ? fallback : lim[0];
+  return Math.min(lim[1], Math.max(lim[0], n));
+}
+
+/** Validate and clamp a spec (array of layers) into a safe, playable copy.
+    Unknown kinds are dropped; unknown fields are stripped; at most 8 layers. */
+export function normalizeSpec(spec) {
+  if (!Array.isArray(spec)) return [];
+  const out = [];
+  for (const raw of spec) {
+    if (!raw || typeof raw !== "object") continue;
+    const at = clampNum(raw.at, "at", 0);
+    if (raw.kind === "tone") {
+      out.push({
+        kind: "tone", at,
+        wave: WAVES.includes(raw.wave) ? raw.wave : "sine",
+        f: clampNum(raw.f, "f", 440),
+        f2: raw.f2 ? clampNum(raw.f2, "f2") : null,
+        glide: clampNum(raw.glide, "glide", 0.06),
+        a: clampNum(raw.a, "a", 0.004),
+        d: clampNum(raw.d, "d", 0.15),
+        peak: clampNum(raw.peak, "peak", 0.15),
+        send: clampNum(raw.send, "send", 0),
+      });
+    } else if (raw.kind === "noise") {
+      out.push({
+        kind: "noise", at,
+        filter: FILTERS.includes(raw.filter) ? raw.filter : "bandpass",
+        f: clampNum(raw.f, "f", 2000),
+        f2: raw.f2 ? clampNum(raw.f2, "f2") : null,
+        glide: clampNum(raw.glide, "glide", 0.1),
+        q: clampNum(raw.q, "q", 1),
+        a: clampNum(raw.a, "a", 0.002),
+        d: clampNum(raw.d, "d", 0.05),
+        peak: clampNum(raw.peak, "peak", 0.12),
+        send: clampNum(raw.send, "send", 0),
+      });
+    } else if (raw.kind === "cluster") {
+      const fMin = clampNum(raw.fMin, "fMin", 1600);
+      out.push({
+        kind: "cluster", at,
+        n: Math.round(clampNum(raw.n, "n", 5)),
+        step: clampNum(raw.step, "step", 0.035),
+        fMin,
+        fMax: Math.max(fMin, clampNum(raw.fMax, "fMax", 4600)),
+        d: clampNum(raw.d, "d", 0.1),
+        peak: clampNum(raw.peak, "peak", 0.04),
+        send: clampNum(raw.send, "send", 0.5),
+        seed: Math.round(Number(raw.seed)) || 1,
+      });
+    }
+    if (out.length >= MAX_LAYERS) break;
+  }
+  return out;
+}
+
+/** A deep copy of a built-in cue's spec, ready to edit. */
+export function getSpec(name) {
+  const cue = CUES[name];
+  if (!cue) return null;
+  return JSON.parse(JSON.stringify(cue.spec));
+}
 
 /* ---------------- public API ---------------- */
 
@@ -237,7 +422,7 @@ export function unlock() { T.ensure(); }
 /** The engine's AnalyserNode (2048-point), or null before the first unlock. For scopes and meters. */
 export function getAnalyser() { return T.analyser; }
 
-/** Update engine settings: volume (0\u20131), transpose (semitones), space (0\u20131 reverb), muted, hover, theme. */
+/** Update engine settings: volume (0-1), transpose (semitones), space (0-1 reverb), muted, hover, theme. */
 export function set(opts) {
   if (!opts) return;
   if (opts.volume != null) {
@@ -263,26 +448,39 @@ export function set(opts) {
 /** A snapshot of the current settings. */
 export function get() { return Object.assign({}, T.settings); }
 
-/** Play a cue by name. Options: { pitch: semitones, volume: 0\u20131 multiplier }. */
-export function play(name, opts) {
-  const cue = CUES[name];
-  if (!cue) return;
-  /* per-cue cooldown: a cue re-fires at most every 60ms, so event storms stay musical */
+/* shared performance path: cooldown, humanization, emit */
+function perform(key, spec, opts, emitName, emitFamily) {
   const nowMs = performance.now();
-  if (nowMs - (T._cool[name] || 0) < 60) return;
-  T._cool[name] = nowMs;
+  if (nowMs - (T._cool[key] || 0) < 60) return;
+  T._cool[key] = nowMs;
   T.ensure();
   opts = opts || {};
   const t0 = T.ctx.currentTime + 0.015;
   const prevT = T.settings.transpose;
-  /* humanization: \u00b130 cents and \u00b18% level per performance \u2014 whole cue shifts together */
+  /* humanization: +/-30 cents and +/-8% level per performance - whole cue shifts together */
   const drift = Math.random() * 0.6 - 0.3;
   T.settings.transpose = prevT + (opts.pitch || 0) + drift;
   T._scale = (opts.volume != null ? opts.volume : 1) * (0.92 + Math.random() * 0.16);
-  cue.fn(t0);
+  runSpec(spec, t0);
   T._scale = 1;
   T.settings.transpose = prevT;
-  emit("play", { name, family: cue.cat });
+  emit("play", { name: emitName, family: emitFamily });
+}
+
+/** Play a cue by name. Options: { pitch: semitones, volume: 0-1 multiplier }. */
+export function play(name, opts) {
+  const cue = CUES[name];
+  if (!cue) return;
+  perform(name, cue.spec, opts, name, cue.cat);
+}
+
+/** Play a custom spec (array of layers). It is normalized/clamped first.
+    Options: { pitch, volume, id } - id keys the 60ms cooldown (default "custom"). */
+export function playSpec(spec, opts) {
+  const s = normalizeSpec(spec);
+  if (!s.length) return;
+  const id = (opts && opts.id) || "custom";
+  perform("spec:" + id, s, opts, id, null);
 }
 
 /** Wire every data-foley-* attribute under root (default: document).
@@ -327,11 +525,7 @@ export function bind(root) {
 
 /* ---------------- offline render & WAV export ---------------- */
 
-/** Offline-render a cue to an AudioBuffer, honoring the current transpose, space, and theme.
-    Deterministic: no humanization drift. For envelopes, meters, or custom encoding. */
-export async function toBuffer(name) {
-  const cue = CUES[name];
-  if (!cue) return null;
+function renderSpecOffline(spec) {
   const rate = 44100;
   const off = new OfflineAudioContext(2, Math.ceil(rate * 2.8), rate);
   /* temporarily point the engine at the offline graph; scheduling is synchronous */
@@ -346,12 +540,27 @@ export async function toBuffer(name) {
   T.verb = off.createConvolver(); T.verb.buffer = T.makeIR(1.4, 3.2);
   T.wet = off.createGain(); T.wet.gain.value = T.settings.space;
   T.verb.connect(T.wet); T.wet.connect(T.master);
-  try { cue.fn(0.03); }
+  try { runSpec(spec, 0.03); }
   finally {
     T.ctx = saved.ctx; T.dry = saved.dry; T.verb = saved.verb;
     T.wet = saved.wet; T.master = saved.master; T._noise = saved.noise;
   }
   return off.startRendering();
+}
+
+/** Offline-render a cue to an AudioBuffer, honoring the current transpose, space, and theme.
+    Deterministic: no humanization drift. For envelopes, meters, or custom encoding. */
+export async function toBuffer(name) {
+  const cue = CUES[name];
+  if (!cue) return null;
+  return renderSpecOffline(cue.spec);
+}
+
+/** Offline-render a custom spec to an AudioBuffer (normalized first). */
+export async function toBufferSpec(spec) {
+  const s = normalizeSpec(spec);
+  if (!s.length) return null;
+  return renderSpecOffline(s);
 }
 
 /** Render a cue to a 16-bit 44.1kHz stereo WAV Blob, honoring the current transpose, space, and theme.
@@ -362,18 +571,25 @@ export async function toWav(name) {
   return encodeWav(trimAndNormalize(buf), 44100);
 }
 
+/** Render a custom spec to a WAV Blob (normalized first). */
+export async function toWavSpec(spec) {
+  const buf = await toBufferSpec(spec);
+  if (!buf) return null;
+  return encodeWav(trimAndNormalize(buf), 44100);
+}
+
 function trimAndNormalize(buf) {
-  const L = buf.getChannelData(0), R = buf.getChannelData(1);
-  let end = L.length - 1, peak = 0;
-  for (let i = 0; i < L.length; i++) {
-    const m = Math.max(Math.abs(L[i]), Math.abs(R[i]));
+  const Lc = buf.getChannelData(0), R = buf.getChannelData(1);
+  let end = 0, peak = 0;
+  for (let i = 0; i < Lc.length; i++) {
+    const m = Math.max(Math.abs(Lc[i]), Math.abs(R[i]));
     if (m > peak) peak = m;
-    if (m > 0.001) end = i;
+    if (m > 0.002) end = i;
   }
-  const len = Math.min(L.length, end + Math.floor(buf.sampleRate * 0.08));
+  const len = Math.min(Lc.length, end + Math.floor(buf.sampleRate * 0.08));
   const scale = peak > 0 ? 0.891 / peak : 1; /* about -1 dBFS */
   return {
-    left: Float32Array.prototype.slice.call(L, 0, len).map((v) => v * scale),
+    left: Float32Array.prototype.slice.call(Lc, 0, len).map((v) => v * scale),
     right: Float32Array.prototype.slice.call(R, 0, len).map((v) => v * scale),
     length: len,
   };

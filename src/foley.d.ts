@@ -79,6 +79,44 @@ export declare function toWav(name: CueName): Promise<Blob>;
 /** Offline-render a cue to an AudioBuffer for envelopes, meters, or custom encoding. */
 export declare function toBuffer(name: CueName): Promise<AudioBuffer>;
 
+export type WaveName = "sine" | "triangle" | "square" | "sawtooth";
+export type FilterName = "bandpass" | "lowpass" | "highpass";
+
+export interface ToneLayer {
+  kind: "tone"; at: number; wave: WaveName; f: number; f2: number | null;
+  glide: number; a: number; d: number; peak: number; send: number;
+}
+export interface NoiseLayer {
+  kind: "noise"; at: number; filter: FilterName; f: number; f2: number | null;
+  glide: number; q: number; a: number; d: number; peak: number; send: number;
+}
+export interface ClusterLayer {
+  kind: "cluster"; at: number; n: number; step: number; fMin: number; fMax: number;
+  d: number; peak: number; send: number; seed: number;
+}
+export type Layer = ToneLayer | NoiseLayer | ClusterLayer;
+export type Spec = Layer[];
+
+export interface PlaySpecOptions extends PlayOptions {
+  /** Keys the 60ms per-cue cooldown. Default "custom". */
+  id?: string;
+}
+
+/** A deep, editable copy of a built-in cue's spec. */
+export declare function getSpec(name: CueName): Spec;
+
+/** Validate and clamp a spec into a safe, playable copy (max 8 layers). */
+export declare function normalizeSpec(spec: unknown): Spec;
+
+/** Play a custom spec through the engine (normalized first). */
+export declare function playSpec(spec: Spec, opts?: PlaySpecOptions): void;
+
+/** Offline-render a custom spec to an AudioBuffer (normalized first). */
+export declare function toBufferSpec(spec: Spec): Promise<AudioBuffer | null>;
+
+/** Render a custom spec to a 16-bit 44.1 kHz stereo WAV Blob (normalized first). */
+export declare function toWavSpec(spec: Spec): Promise<Blob | null>;
+
 /** Resume/create the AudioContext. Call from a user gesture, or let play()/bind() handle it. */
 export declare function unlock(): void;
 

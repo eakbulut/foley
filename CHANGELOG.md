@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.4.0
+- **Cues are now data.** Every built-in cue is defined as a spec — an array of tone / noise / cluster layers — interpreted by the engine. Sound is unchanged; the four cues with random grains now use seeded scatter, so exports are fully deterministic.
+- **Cue Designer** on the demo: start from any cue, edit layers with live audition and an envelope preview, export as .wav or .json, import designs, and share them as URL links.
+- New core API: `getSpec(name)`, `playSpec(spec, {id, pitch, volume})`, `toBufferSpec(spec)`, `toWavSpec(spec)`, and `normalizeSpec(spec)` (validates and clamps untrusted specs — imports and URL payloads go through it).
+
+
 ## 2.3.1 (packages)
 - New packages: `@foleyjs/react` (`useFoley` hook) and `@foleyjs/vue` (`v-foley` directive + `FoleyPlugin`), replacing the copy-paste `recipes/` folder. Both re-export the core and pin it as a peer dependency.
 

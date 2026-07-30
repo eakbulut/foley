@@ -83,11 +83,32 @@ import { play, bind, set, get, toWav, unlock, getAnalyser, on, cues, families, t
 - **`set({ volume?, transpose?, space?, muted?, hover?, theme? })`** — update global settings.
 - **`get()`** — snapshot of current settings.
 - **`toBuffer(name)`** — `Promise<AudioBuffer>`: same offline render, raw — for envelope drawings, meters, or custom encoding.
+- **`getSpec(name)`** — a deep, editable copy of a built-in cue's layer spec.
+- **`playSpec(spec, { id?, pitch?, volume? })`** — play a custom spec; it is validated and clamped first.
+- **`toWavSpec(spec)` / `toBufferSpec(spec)`** — offline-render a custom spec.
+- **`normalizeSpec(spec)`** — the validator itself, for checking untrusted specs (max 8 layers, all params clamped).
 - **`toWav(name)`** — `Promise<Blob>`: offline-render a cue to 16-bit 44.1 kHz stereo WAV, honoring transpose, space, and theme. Exports are deterministic (no humanization drift).
 - **`unlock()`** — resume/create the AudioContext from a user gesture.
 - **`getAnalyser()`** — the engine's `AnalyserNode` for scopes and meters, or `null` before unlock.
 - **`on("play" | "unlock", cb)`** — subscribe to engine events; returns an unsubscribe function.
 - **`cues` / `families` / `themes` / `version`** — metadata for building your own pickers and playgrounds.
+
+## Design your own cues
+
+Every cue is data: an array of `tone`, `noise`, and `cluster` layers. Grab one, reshape it, play it:
+
+```js
+import { getSpec, playSpec, toWavSpec } from "@foleyjs/core";
+
+const mySound = getSpec("success");
+mySound[2].f = 880;                  // raise the last note
+mySound.push({ kind: "noise", at: 0.2, filter: "highpass", f: 6000,
+               a: 0.01, d: 0.2, peak: 0.05, send: 0.4 });
+playSpec(mySound);
+const wav = await toWavSpec(mySound);
+```
+
+Or use the visual [Cue Designer on the demo](https://usefoley.dev/#designer) — edit with live playback, then export .wav/.json or share the design as a link.
 
 ## Themes
 

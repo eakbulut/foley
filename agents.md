@@ -67,3 +67,7 @@ play("complete");  // a long task finishing
    autoplay cues on page load.
 5. Respect users: expose a mute (`set({ muted: true })`) in app settings.
 6. WAV assets for native/video use: `const blob = await toWav("chime")`.
+7. Custom sounds: get a cue's layers with `getSpec(name)`, modify them, and play with
+   `playSpec(spec)` — specs are validated and clamped automatically. Render custom
+   specs with `toWavSpec(spec)`. Prefer adjusting an existing cue over building from
+   scratch; the built-ins are tuned.
