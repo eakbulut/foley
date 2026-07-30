@@ -19,6 +19,14 @@ jobs:
           npm --version
           node -e "const [m, n] = require('child_process').execSync('npm -v').toString().split('.'); if (+m < 11 || (+m === 11 && +n < 5)) { console.error('npm too old for trusted publishing'); process.exit(1); }"
       - run: npm install --no-audit --no-fund
+      - name: Tag must match the package version
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          TAG="${GITHUB_REF_NAME#v}"
+          if [ "$PKG" != "$TAG" ]; then
+            echo "::error::Tag v$TAG but package.json says $PKG - bump the versions and re-tag (see RELEASING.md)"
+            exit 1
+          fi
       - name: Tests gate the release
         run: npm test
       # No tokens anywhere: each publish authenticates via the workflow's own
