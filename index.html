@@ -12,6 +12,7 @@
 <meta property="og:image" content="https://usefoley.dev/assets/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://usefoley.dev/assets/og-image.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23171B19'/%3E%3Ccircle cx='16' cy='16' r='5.5' fill='%23E8EAE7'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -379,13 +380,17 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
 .dz-modebtn{margin-top:18px;font-size:13px;font-weight:500;color:var(--ink-soft);background:none;border:none;cursor:pointer;padding:4px 0}
 .dz-modebtn:hover{color:var(--ink);text-decoration:underline}
 .dz-modebtn:focus-visible{outline:2px solid var(--c-toggle);outline-offset:2px}
+#dz-presets{display:inline-flex;gap:6px;flex-wrap:wrap}
+.dz-reroll{margin-left:6px;font-size:11px;background:none;border:none;color:var(--ink-faint);cursor:pointer;padding:0 2px;border-radius:4px}
+.dz-reroll:hover{color:var(--ink)}
+.dz-reroll:focus-visible{outline:2px solid var(--c-toggle)}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="wrap top-in">
     <a class="logo" href="#"><span class="logo-jack" aria-hidden="true"></span>foley</a>
-    <span class="ver">v2.4.0 · 7.4 kB</span>
+    <span class="ver">v2.5.0 · 8.4 kB</span>
     <div class="head-scope" aria-hidden="true" title="Live output">
       <canvas id="scope"></canvas>
       <span class="head-cue" id="scope-label">idle</span>
@@ -452,6 +457,7 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
     <div class="board" id="board"><!-- built by JS --></div>
     <div class="board-tools">
       <button class="btn btn-ghost" id="export-all">⤓&nbsp; Download all 28 (.zip)</button>
+      <button class="btn btn-ghost" id="export-sprite" title="One WAV with all 28 cues plus a JSON offset map">⤓&nbsp; Audio sprite</button>
       <p class="board-note" style="margin:0">Keyboard mode: press the key on each cue — <kbd>1</kbd>–<kbd>0</kbd>, <kbd>Q</kbd>–<kbd>P</kbd>, <kbd>A</kbd>–<kbd>K</kbd>. The <strong>⤓</strong> on a cue exports it as a 16-bit .wav, rendered with your current transpose and space — ready for Figma, video, or native apps.</p>
     </div>
 
@@ -610,6 +616,10 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
             <select class="dz-seed" id="dz-seed"></select>
             <button class="dz-add" id="dz-surprise" title="Random cue, random dials">⚄ Surprise me</button>
           </div>
+          <div class="dz-row" id="dz-presets-row">
+            <label>Or try</label>
+            <span id="dz-presets"></span>
+          </div>
           <div id="dz-simple">
             <div class="dz-params" id="dz-macros"></div>
           </div>
@@ -626,11 +636,12 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
             <button class="btn btn-primary" id="dz-play">▶&nbsp; Play</button>
             <button class="btn btn-ghost" id="dz-wav">⤓ .wav</button>
             <button class="btn btn-ghost" id="dz-json">⤓ .json</button>
+            <button class="btn btn-ghost" id="dz-code">Copy code</button>
             <button class="btn btn-ghost" id="dz-import">Import</button>
             <button class="btn btn-ghost" id="dz-link">Copy link</button>
             <input type="file" id="dz-file" accept=".json,application/json" hidden>
           </div>
-          <p class="dz-note" id="dz-note">Exports honor your transpose, space, and theme. Designs also live in the URL — copy the link to share one.</p>
+          <p class="dz-note" id="dz-note">Space replays. Exports honor your transpose, space, and theme — and designs live in the URL, so copy the link to share one.</p>
         </div>
       </div>
     </div>
@@ -709,7 +720,7 @@ app.use(FoleyPlugin, { theme: <span class="st">"soft"</span> });
   <div class="wrap foot-in">
     <span><strong>foley</strong> · MIT licensed · <a href="https://github.com/eakbulut/foley" target="_blank" rel="noopener">GitHub</a> · <a href="agents.md" target="_blank" rel="noopener">agents.md</a> — point your coding agent at it</span>
     <span class="sp"></span>
-    <span>28 cues · 4 themes · 7.4 kB · synthesized live — or designed, then rendered to .wav</span>
+    <span>28 cues · 4 themes · 8.4 kB · synthesized live — or designed, then rendered to .wav</span>
   </div>
 </footer>
 <script type="module">
@@ -717,7 +728,7 @@ app.use(FoleyPlugin, { theme: <span class="st">"soft"</span> });
    Demo page wiring. Everything sonic comes from the real
    package: this page runs exactly what `npm install foley` ships.
    ============================================================ */
-import { bind, play, set, get, on, unlock, getAnalyser, toWav, toBuffer, cues, families, version, getSpec, playSpec, toWavSpec, toBufferSpec, normalizeSpec } from "./src/foley.js";
+import { bind, play, set, get, on, unlock, getAnalyser, toWav, toBuffer, cues, families, version, getSpec, playSpec, toWavSpec, toBufferSpec, normalizeSpec, toSprite } from "./src/foley.js";
 
 /* page-side state: colors are a design decision, so they live here, not in the library */
 const FAM = {
@@ -1118,6 +1129,30 @@ async function exportCue(name, btn) {
   });
 })();
 
+/* audio sprite: one WAV + JSON offset map */
+(function spriteExport() {
+  const btn = document.getElementById("export-sprite");
+  if (!btn) return;
+  let busy = false;
+  btn.addEventListener("click", async () => {
+    if (busy) return;
+    busy = true;
+    const orig = btn.innerHTML;
+    try {
+      btn.textContent = "Rendering sprite\u2026";
+      const { blob, map } = await toSprite();
+      saveBlob(blob, "foley-sprite.wav");
+      saveBlob(new Blob([JSON.stringify(map, null, 2)], { type: "application/json" }), "foley-sprite.json");
+      play("complete");
+    } catch (e) {
+      play("error");
+    } finally {
+      btn.innerHTML = orig;
+      busy = false;
+    }
+  });
+})();
+
 /* demo: save button */
 (function saveDemo() {
   const btn = document.getElementById("save-btn");
@@ -1421,6 +1456,12 @@ if (window.matchMedia("(pointer:coarse)").matches) {
       const out = document.createElement("output");
       lab.textContent = label + " ";
       lab.appendChild(out);
+      const reroll = document.createElement("button");
+      reroll.className = "dz-reroll";
+      reroll.textContent = "\u27f3";
+      reroll.title = "Random " + label.toLowerCase();
+      reroll.setAttribute("aria-label", "Randomize " + label.toLowerCase());
+      lab.appendChild(reroll);
       const input = document.createElement("input");
       input.type = "range"; input.min = min; input.max = max; input.step = step;
       const subEl = document.createElement("span");
@@ -1434,6 +1475,13 @@ if (window.matchMedia("(pointer:coarse)").matches) {
       }
       input.addEventListener("input", () => {
         dz.macros[key] = step === 1 ? Math.round(Number(input.value)) : Number(input.value);
+        sync();
+        changed();
+      });
+      reroll.addEventListener("click", () => {
+        const span = max - min;
+        const v = min + Math.random() * span;
+        dz.macros[key] = step === 1 ? Math.round(v) : +v.toFixed(2);
         sync();
         changed();
       });
@@ -1681,6 +1729,63 @@ if (window.matchMedia("(pointer:coarse)").matches) {
       play("success");
       document.getElementById("dz-note").textContent = "Link copied — anyone who opens it lands on this exact design.";
     }).catch(() => play("error"));
+  });
+
+  /* presets: named designs that show the range */
+  const PRESETS = {
+    marimba: [
+      { kind: "tone", at: 0, wave: "sine", f: 380, f2: null, glide: 0.06, a: 0.003, d: 0.28, peak: 0.2, send: 0.3 },
+      { kind: "tone", at: 0, wave: "sine", f: 1520, f2: null, glide: 0.06, a: 0.002, d: 0.09, peak: 0.06, send: 0.2 },
+      { kind: "noise", at: 0, filter: "lowpass", f: 1200, f2: null, glide: 0.1, q: 1, a: 0.001, d: 0.012, peak: 0.1, send: 0 },
+    ],
+    coin: [
+      { kind: "tone", at: 0, wave: "square", f: 988, f2: null, glide: 0.06, a: 0.002, d: 0.07, peak: 0.07, send: 0 },
+      { kind: "tone", at: 0.08, wave: "square", f: 1319, f2: null, glide: 0.06, a: 0.002, d: 0.3, peak: 0.07, send: 0.2 },
+    ],
+    woodblock: [
+      { kind: "tone", at: 0, wave: "sine", f: 640, f2: 600, glide: 0.02, a: 0.002, d: 0.05, peak: 0.24, send: 0.1 },
+      { kind: "noise", at: 0, filter: "bandpass", f: 1800, f2: null, glide: 0.1, q: 3, a: 0.001, d: 0.02, peak: 0.14, send: 0 },
+    ],
+    raindrop: [
+      { kind: "tone", at: 0, wave: "sine", f: 1400, f2: 700, glide: 0.08, a: 0.004, d: 0.12, peak: 0.12, send: 0.6 },
+    ],
+    laser: [
+      { kind: "tone", at: 0, wave: "sawtooth", f: 1800, f2: 200, glide: 0.12, a: 0.002, d: 0.15, peak: 0.1, send: 0.15 },
+      { kind: "noise", at: 0, filter: "highpass", f: 3000, f2: null, glide: 0.1, q: 1, a: 0.002, d: 0.05, peak: 0.04, send: 0.2 },
+    ],
+  };
+  const presetsEl = document.getElementById("dz-presets");
+  Object.keys(PRESETS).forEach((name) => {
+    const b = document.createElement("button");
+    b.className = "dz-add";
+    b.textContent = name;
+    b.addEventListener("click", () => {
+      seedSel.value = "";
+      loadBase(PRESETS[name]);
+      audition();
+    });
+    presetsEl.appendChild(b);
+  });
+
+  /* copy as code: a paste-ready playSpec() call */
+  document.getElementById("dz-code").addEventListener("click", () => {
+    const code = 'import { playSpec } from "@foleyjs/core";\n\nplaySpec(' + JSON.stringify(current()) + ');';
+    navigator.clipboard.writeText(code).then(() => {
+      play("success");
+      document.getElementById("dz-note").textContent = "Code copied \u2014 paste it anywhere @foleyjs/core is installed.";
+    }).catch(() => play("error"));
+  });
+
+  /* space replays while working in the designer */
+  document.addEventListener("keydown", (e) => {
+    if (e.code !== "Space" || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    const t = e.target;
+    if (t && (t.tagName === "INPUT" && t.type !== "range" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.tagName === "BUTTON")) return;
+    const active = document.activeElement;
+    if (active && active.closest && active.closest(".designer")) {
+      e.preventDefault();
+      audition();
+    }
   });
 
   /* initial state: URL hash > saved design > the "on" cue */

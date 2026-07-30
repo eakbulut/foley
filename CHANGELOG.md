@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.5.0
+- `play()` and `playSpec()` return a handle with `stop()` — each performance runs on its own bus and fades out in ~20ms without touching other sounds.
+- Looping: `play("loading", { loop: true })` repeats until stopped (spacing defaults to the sound's own duration; override with `every`).
+- Ducking: `set({ duck: 0.3 })` attenuates everything temporarily — for videos, calls, or focus modes.
+- Custom themes: `set({ theme: { pitch, decay, ... } })` accepts a transform object, not just a named theme.
+- `toSprite()`: render all 28 cues into one WAV plus a JSON offset map — the classic audio-sprite format for games and low-latency apps. Sprite download button on the demo.
+- Demo: designer preset gallery (marimba, coin, woodblock, raindrop, laser), per-dial randomize, Space-to-replay, "Copy code" (a paste-ready `playSpec()` call), and a favicon. npm releases now publish from CI with provenance on version tags.
+
+
 ## 2.4.0
 - **Cues are now data.** Every built-in cue is defined as a spec — an array of tone / noise / cluster layers — interpreted by the engine. Sound is unchanged; the four cues with random grains now use seeded scatter, so exports are fully deterministic.
 - **Cue Designer** on the demo: start from any cue, edit layers with live audition and an envelope preview, export as .wav or .json, import designs, and share them as URL links.

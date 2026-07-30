@@ -19,6 +19,21 @@ export interface PlayOptions {
   pitch?: number;
   /** Level multiplier for this play only, 0–1. */
   volume?: number;
+  /** Repeat until .stop() is called — for loading states. */
+  loop?: boolean;
+  /** Loop period in seconds (default: the sound's own duration). */
+  every?: number;
+}
+
+export interface ThemeTransform {
+  pitch?: number; attack?: number; decay?: number; send?: number;
+  noiseLvl?: number; noiseF?: number; q?: number; shimmer?: boolean;
+  wave?: Partial<Record<WaveName, WaveName>> | null;
+}
+
+export interface PlayHandle {
+  /** Fade this performance out (~20ms) and, if looping, stop the loop. */
+  stop(): void;
 }
 
 export interface Settings {
@@ -32,8 +47,10 @@ export interface Settings {
   muted: boolean;
   /** Whether data-foley-hover elements play on pointerenter. Default true. */
   hover: boolean;
-  /** Active sound theme. Default "default". */
-  theme: ThemeName;
+  /** Active sound theme name; "custom" when a ThemeTransform object was set. */
+  theme: ThemeName | "custom";
+  /** Temporary attenuation multiplier (0-1), e.g. while a video plays. Default 1. */
+  duck: number;
 }
 
 export interface CueMeta {
@@ -60,14 +77,16 @@ export declare const families: Readonly<Record<FamilyName, Readonly<{ name: stri
 /** Available theme names. */
 export declare const themes: readonly ThemeName[];
 
-/** Play a cue. Applies the per-cue 60ms cooldown and ±30-cent humanization. */
-export declare function play(name: CueName, opts?: PlayOptions): void;
+/** Play a cue. Applies the per-cue 60ms cooldown and ±30-cent humanization.
+    Returns a handle whose stop() fades the performance out. */
+export declare function play(name: CueName, opts?: PlayOptions): PlayHandle | undefined;
 
 /** Wire every data-foley-* attribute under root (default: document). Idempotent. */
 export declare function bind(root?: ParentNode): void;
 
-/** Update engine settings. Only the provided keys change. */
-export declare function set(opts: Partial<Settings>): void;
+/** Update engine settings. Only the provided keys change.
+    theme accepts a name or a custom ThemeTransform object. */
+export declare function set(opts: Partial<Omit<Settings, "theme">> & { theme?: ThemeName | ThemeTransform }): void;
 
 /** A snapshot of the current settings. */
 export declare function get(): Settings;
@@ -109,13 +128,16 @@ export declare function getSpec(name: CueName): Spec;
 export declare function normalizeSpec(spec: unknown): Spec;
 
 /** Play a custom spec through the engine (normalized first). */
-export declare function playSpec(spec: Spec, opts?: PlaySpecOptions): void;
+export declare function playSpec(spec: Spec, opts?: PlaySpecOptions): PlayHandle | undefined;
 
 /** Offline-render a custom spec to an AudioBuffer (normalized first). */
 export declare function toBufferSpec(spec: Spec): Promise<AudioBuffer | null>;
 
 /** Render a custom spec to a 16-bit 44.1 kHz stereo WAV Blob (normalized first). */
 export declare function toWavSpec(spec: Spec): Promise<Blob | null>;
+
+/** Render all 28 cues into one audio sprite: a WAV Blob plus { name: { start, duration } } offsets in seconds. */
+export declare function toSprite(gap?: number): Promise<{ blob: Blob; map: Record<CueName, { start: number; duration: number }> }>;
 
 /** Resume/create the AudioContext. Call from a user gesture, or let play()/bind() handle it. */
 export declare function unlock(): void;

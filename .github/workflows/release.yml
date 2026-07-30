@@ -1,0 +1,32 @@
+name: Publish to npm (trusted publishing)
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+  id-token: write   # the OIDC handshake npm's trusted publishing verifies
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+      - name: Trusted publishing needs npm >= 11.5
+        run: npm install -g npm@latest && npm --version
+      - run: npm install --no-audit --no-fund
+      - name: Tests gate the release
+        run: npm test
+      # No tokens anywhere: each publish authenticates via the workflow's own
+      # OIDC identity, which must match the Trusted Publisher configured on
+      # the npm package. Provenance is included automatically.
+      - name: Publish @foleyjs/core
+        run: npm publish
+      - name: Publish @foleyjs/react
+        run: npm publish
+        working-directory: packages/react
+      - name: Publish @foleyjs/vue
+        run: npm publish
+        working-directory: packages/vue

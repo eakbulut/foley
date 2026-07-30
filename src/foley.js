@@ -5,13 +5,19 @@
    https://github.com/eakbulut/foley
    ============================================================ */
 
-export const version = "2.4.0";
+export const version = "2.5.0";
 
 /* ---------------- engine ---------------- */
 const T = {
   ctx: null, master: null, limiter: null, analyser: null, dry: null, verb: null, wet: null,
-  settings: { volume: 0.7, transpose: 0, space: 0.22, muted: false, hover: true, theme: "default" },
-  _scale: 1, _cool: {}, _noise: null, _unlocked: false,
+  settings: { volume: 0.7, transpose: 0, space: 0.22, muted: false, hover: true, theme: "default", duck: 1 },
+  _scale: 1, _cool: {}, _noise: null, _unlocked: false, _bus: null, _sendBus: null,
+
+  applyGain() {
+    if (!this.ctx) return;
+    const g = this.settings.muted ? 0 : this.settings.volume * this.settings.duck;
+    this.master.gain.setTargetAtTime(g, this.ctx.currentTime, 0.02);
+  },
 
   ensure() {
     if (this.ctx) { if (this.ctx.state === "suspended") this.ctx.resume(); return; }
@@ -121,12 +127,12 @@ function tone(o) {
   g.gain.linearRampToValueAtTime(peak, t0 + a);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
   osc.connect(g);
-  g.connect(T.dry);
+  g.connect(T._bus || T.dry);
   const sendAmt = (o.send || 0) * th.send;
   if (sendAmt > 0.01) {
     const s = ctx.createGain();
     s.gain.value = sendAmt;
-    g.connect(s); s.connect(T.verb);
+    g.connect(s); s.connect(T._sendBus || T.verb);
   }
   osc.start(t0);
   osc.stop(t0 + a + d + 0.15);
@@ -149,12 +155,12 @@ function noise(o) {
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.linearRampToValueAtTime(peak, t0 + a);
   g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
-  src.connect(fl); fl.connect(g); g.connect(T.dry);
+  src.connect(fl); fl.connect(g); g.connect(T._bus || T.dry);
   const sendAmt = (o.send || 0) * th.send;
   if (sendAmt > 0.01) {
     const s = ctx.createGain();
     s.gain.value = sendAmt;
-    g.connect(s); s.connect(T.verb);
+    g.connect(s); s.connect(T._sendBus || T.verb);
   }
   src.start(t0);
   src.stop(t0 + a + d + 0.1);
@@ -425,53 +431,105 @@ export function getAnalyser() { return T.analyser; }
 /** Update engine settings: volume (0-1), transpose (semitones), space (0-1 reverb), muted, hover, theme. */
 export function set(opts) {
   if (!opts) return;
-  if (opts.volume != null) {
-    T.settings.volume = opts.volume;
-    if (T.ctx && !T.settings.muted) T.master.gain.setTargetAtTime(opts.volume, T.ctx.currentTime, 0.02);
-  }
+  if (opts.volume != null) { T.settings.volume = opts.volume; T.applyGain(); }
+  if (opts.duck != null) { T.settings.duck = Math.min(1, Math.max(0, opts.duck)); T.applyGain(); }
   if (opts.space != null) {
     T.settings.space = opts.space;
     if (T.ctx) T.wet.gain.setTargetAtTime(opts.space, T.ctx.currentTime, 0.02);
   }
-  if (opts.muted != null) {
-    T.settings.muted = opts.muted;
-    if (T.ctx) T.master.gain.setTargetAtTime(opts.muted ? 0 : T.settings.volume, T.ctx.currentTime, 0.02);
-  }
+  if (opts.muted != null) { T.settings.muted = opts.muted; T.applyGain(); }
   if (opts.transpose != null) T.settings.transpose = opts.transpose;
   if (opts.hover != null) T.settings.hover = opts.hover;
-  if (opts.theme != null && THEMES[opts.theme]) {
-    T.settings.theme = opts.theme;
-    theme = THEMES[opts.theme];
+  if (opts.theme != null) {
+    if (typeof opts.theme === "string" && THEMES[opts.theme]) {
+      T.settings.theme = opts.theme;
+      theme = THEMES[opts.theme];
+    } else if (typeof opts.theme === "object") {
+      /* custom theme: a partial transform object; unknown fields ignored, values clamped */
+      const c = opts.theme, lim = (v, lo, hi, fb) => { const n = Number(v); return isFinite(n) ? Math.min(hi, Math.max(lo, n)) : fb; };
+      theme = mkTheme({
+        label: "Custom",
+        pitch: lim(c.pitch, 0.25, 4, 1), attack: lim(c.attack, 0.1, 6, 1), decay: lim(c.decay, 0.1, 6, 1),
+        send: lim(c.send, 0, 3, 1), noiseLvl: lim(c.noiseLvl, 0, 3, 1), noiseF: lim(c.noiseF, 0.25, 4, 1),
+        q: lim(c.q, 0.1, 6, 1), shimmer: !!c.shimmer,
+        wave: (c.wave && typeof c.wave === "object") ? c.wave : null,
+      });
+      T.settings.theme = "custom";
+    }
   }
 }
 
 /** A snapshot of the current settings. */
 export function get() { return Object.assign({}, T.settings); }
 
-/* shared performance path: cooldown, humanization, emit */
+/* the audible length of a spec, for loop scheduling */
+function specDuration(spec) {
+  let end = 0;
+  for (const lay of spec) {
+    const at = lay.at || 0;
+    let tail;
+    if (lay.kind === "cluster") tail = (lay.n - 1) * lay.step + (lay.d || 0.1) + 0.01;
+    else tail = (lay.a || 0.004) + (lay.d || 0.15);
+    if (at + tail > end) end = at + tail;
+  }
+  return end;
+}
+
+/* shared performance path: cooldown, humanization, loop, stop handle, emit */
 function perform(key, spec, opts, emitName, emitFamily) {
   const nowMs = performance.now();
   if (nowMs - (T._cool[key] || 0) < 60) return;
   T._cool[key] = nowMs;
   T.ensure();
   opts = opts || {};
-  const t0 = T.ctx.currentTime + 0.015;
-  const prevT = T.settings.transpose;
-  /* humanization: +/-30 cents and +/-8% level per performance - whole cue shifts together */
-  const drift = Math.random() * 0.6 - 0.3;
-  T.settings.transpose = prevT + (opts.pitch || 0) + drift;
-  T._scale = (opts.volume != null ? opts.volume : 1) * (0.92 + Math.random() * 0.16);
-  runSpec(spec, t0);
-  T._scale = 1;
-  T.settings.transpose = prevT;
+  const ctx = T.ctx;
+  /* every performance gets its own bus, so it can be stopped without touching the rest */
+  const bus = ctx.createGain(); bus.connect(T.dry);
+  const sendBus = ctx.createGain(); sendBus.connect(T.verb);
+
+  function once() {
+    const t0 = ctx.currentTime + 0.015;
+    const prevT = T.settings.transpose;
+    /* humanization: +/-30 cents and +/-8% level per performance - whole cue shifts together */
+    const drift = Math.random() * 0.6 - 0.3;
+    T.settings.transpose = prevT + (opts.pitch || 0) + drift;
+    T._scale = (opts.volume != null ? opts.volume : 1) * (0.92 + Math.random() * 0.16);
+    T._bus = bus; T._sendBus = sendBus;
+    runSpec(spec, t0);
+    T._bus = null; T._sendBus = null;
+    T._scale = 1;
+    T.settings.transpose = prevT;
+  }
+  once();
+
+  let iv = null;
+  if (opts.loop) {
+    const period = ((opts.every != null ? opts.every : specDuration(spec)) + 0.06) * 1000;
+    iv = setInterval(() => { if (!T.settings.muted) once(); }, Math.max(80, period));
+  }
   emit("play", { name: emitName, family: emitFamily });
+
+  let stopped = false;
+  return {
+    stop() {
+      if (stopped) return;
+      stopped = true;
+      if (iv) clearInterval(iv);
+      const t = ctx.currentTime;
+      bus.gain.setTargetAtTime(0, t, 0.02);
+      sendBus.gain.setTargetAtTime(0, t, 0.02);
+      setTimeout(() => { try { bus.disconnect(); sendBus.disconnect(); } catch (e) { /* already gone */ } }, 300);
+    },
+  };
 }
 
-/** Play a cue by name. Options: { pitch: semitones, volume: 0-1 multiplier }. */
+/** Play a cue by name. Options: { pitch, volume, loop, every }.
+    Returns a handle: { stop() }. With loop: true the cue repeats (spaced by its own
+    duration, or opts.every seconds) until stopped - for loading states. */
 export function play(name, opts) {
   const cue = CUES[name];
   if (!cue) return;
-  perform(name, cue.spec, opts, name, cue.cat);
+  return perform(name, cue.spec, opts, name, cue.cat);
 }
 
 /** Play a custom spec (array of layers). It is normalized/clamped first.
@@ -480,7 +538,7 @@ export function playSpec(spec, opts) {
   const s = normalizeSpec(spec);
   if (!s.length) return;
   const id = (opts && opts.id) || "custom";
-  perform("spec:" + id, s, opts, id, null);
+  return perform("spec:" + id, s, opts, id, null);
 }
 
 /** Wire every data-foley-* attribute under root (default: document).
@@ -576,6 +634,31 @@ export async function toWavSpec(spec) {
   const buf = await toBufferSpec(spec);
   if (!buf) return null;
   return encodeWav(trimAndNormalize(buf), 44100);
+}
+
+/** Render all 28 cues into one audio sprite: a single WAV Blob plus a map of
+    { name: { start, duration } } offsets in seconds. gap defaults to 50ms. */
+export async function toSprite(gap) {
+  const g = gap != null ? gap : 0.05;
+  const rate = 44100;
+  const parts = [], map = {};
+  let cursor = 0;
+  for (const name of Object.keys(CUES)) {
+    const buf = await renderSpecOffline(CUES[name].spec);
+    const t = trimAndNormalize(buf);
+    map[name] = { start: +cursor.toFixed(4), duration: +(t.length / rate).toFixed(4) };
+    parts.push(t);
+    cursor += t.length / rate + g;
+  }
+  const total = Math.ceil(cursor * rate);
+  const left = new Float32Array(total), right = new Float32Array(total);
+  let o = 0;
+  for (let i = 0; i < parts.length; i++) {
+    left.set(parts[i].left, o);
+    right.set(parts[i].right, o);
+    o += parts[i].length + Math.round(g * rate);
+  }
+  return { blob: encodeWav({ left, right, length: total }, rate), map };
 }
 
 function trimAndNormalize(buf) {

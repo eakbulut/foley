@@ -78,15 +78,16 @@ Every attribute accepts a cue name as its value to override the default.
 import { play, bind, set, get, toWav, unlock, getAnalyser, on, cues, families, themes, version } from "@foleyjs/core";
 ```
 
-- **`play(name, { pitch?, volume? })`** — play a cue, with optional per-play transpose (semitones) and level (0–1).
+- **`play(name, { pitch?, volume?, loop?, every? })`** — play a cue; returns `{ stop() }`. With `loop: true` it repeats until stopped — ideal for loading states.
 - **`bind(root?)`** — wire all `data-foley-*` attributes under `root` (default `document`). Idempotent.
-- **`set({ volume?, transpose?, space?, muted?, hover?, theme? })`** — update global settings.
+- **`set({ volume?, transpose?, space?, muted?, hover?, theme?, duck? })`** — update global settings. `duck` (0–1) temporarily attenuates everything, e.g. while a video plays. `theme` accepts a name or a custom transform object (`{ pitch, decay, send, ... }`).
 - **`get()`** — snapshot of current settings.
 - **`toBuffer(name)`** — `Promise<AudioBuffer>`: same offline render, raw — for envelope drawings, meters, or custom encoding.
 - **`getSpec(name)`** — a deep, editable copy of a built-in cue's layer spec.
 - **`playSpec(spec, { id?, pitch?, volume? })`** — play a custom spec; it is validated and clamped first.
 - **`toWavSpec(spec)` / `toBufferSpec(spec)`** — offline-render a custom spec.
 - **`normalizeSpec(spec)`** — the validator itself, for checking untrusted specs (max 8 layers, all params clamped).
+- **`toSprite(gap?)`** — all 28 cues in one WAV plus a `{ name: { start, duration } }` offset map, for game engines and audio-sprite players.
 - **`toWav(name)`** — `Promise<Blob>`: offline-render a cue to 16-bit 44.1 kHz stereo WAV, honoring transpose, space, and theme. Exports are deterministic (no humanization drift).
 - **`unlock()`** — resume/create the AudioContext from a user gesture.
 - **`getAnalyser()`** — the engine's `AnalyserNode` for scopes and meters, or `null` before unlock.
@@ -154,7 +155,7 @@ npm run build    # regenerate the single-file demo at dist/foley-demo.html
 npm run demo     # serve the demo locally
 ```
 
-CI runs the tests on every push; merges to `main` deploy the demo to GitHub Pages (enable Pages with the "GitHub Actions" source in repo settings, once).
+CI runs the tests on every push; merges to `main` deploy the demo to GitHub Pages (enable Pages with the "GitHub Actions" source in repo settings, once). Pushing a `v*` tag publishes all three packages to npm from CI via [trusted publishing](https://docs.npmjs.com/trusted-publishers) — no tokens. One-time setup: publish each package manually once, then in each package’s npm settings add a Trusted Publisher pointing at this repo and `release.yml`. Provenance is automatic.
 
 ## License
 

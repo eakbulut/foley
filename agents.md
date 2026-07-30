@@ -44,6 +44,11 @@ play("success");   // after an async save resolves
 play("error");     // after it rejects
 play("ping");      // an incoming message
 play("complete");  // a long task finishing
+
+const h = play("loading", { loop: true }); // repeats until stopped
+await work();
+h.stop();          // ~20ms fade; then play("complete")
+set({ duck: 0.3 }); // attenuate everything while a video/call plays; duck: 1 restores
 ```
 
 ## Cue selection guide
@@ -67,7 +72,46 @@ play("complete");  // a long task finishing
    autoplay cues on page load.
 5. Respect users: expose a mute (`set({ muted: true })`) in app settings.
 6. WAV assets for native/video use: `const blob = await toWav("chime")`.
-7. Custom sounds: get a cue's layers with `getSpec(name)`, modify them, and play with
-   `playSpec(spec)` — specs are validated and clamped automatically. Render custom
-   specs with `toWavSpec(spec)`. Prefer adjusting an existing cue over building from
-   scratch; the built-ins are tuned.
+7. Custom sounds: see "Custom sound specs" below. Prefer adjusting an existing cue
+   over building from scratch; the built-ins are tuned.
+
+## Custom sound specs
+
+Every cue is data: an array of layers. `getSpec(name)` returns an editable copy;
+`playSpec(spec)` plays it (validated and clamped first — max 8 layers);
+`toWavSpec(spec)` renders it to a WAV Blob. Layer shapes:
+
+```js
+{ kind: "tone",  at: 0,    wave: "sine|triangle|square|sawtooth",
+  f: 440, f2: null,        // Hz; set f2 for a pitch sweep (40–8000)
+  glide: 0.06,             // sweep time, s
+  a: 0.004, d: 0.15,       // attack / decay, s
+  peak: 0.15, send: 0 }    // level (0–0.4), reverb send (0–1)
+
+{ kind: "noise", at: 0,    filter: "bandpass|lowpass|highpass",
+  f: 2000, f2: null, glide: 0.1, q: 1,   // filter freq, sweep, resonance
+  a: 0.002, d: 0.05, peak: 0.12, send: 0 }
+
+{ kind: "cluster", at: 0,  // seeded random grains (sparkle, shimmer)
+  n: 5, step: 0.035,       // grain count and spacing
+  fMin: 1600, fMax: 4600, d: 0.1, peak: 0.04, send: 0.5, seed: 1 }
+```
+
+Common adjustments, expressed as spec edits:
+
+- **Lower / higher**: multiply every `f`, `f2`, `fMin`, `fMax` by `2^(semitones/12)`.
+- **Snappier / longer**: multiply every `d` (and `at`, to keep the gesture's rhythm).
+- **Softer texture**: reduce `peak` on noise/cluster layers; prefer sine/triangle waves.
+- **More distant**: raise `send` on each layer (the room itself is `set({ space })`).
+
+```js
+import { getSpec, playSpec, toWavSpec } from "@foleyjs/core";
+const s = getSpec("success");
+s.forEach((l) => { l.d *= 1.4; if (l.f) l.f *= 0.84; });  // longer, ~3 st lower
+playSpec(s);
+```
+
+Humans can do this visually at https://usefoley.dev/#designer — its JSON export is a
+valid spec and can be pasted straight into `playSpec()`, and its share links
+(`#spec=...`) encode the same format. If a user hands you a designer link or JSON
+file, use it verbatim rather than reconstructing the sound.
