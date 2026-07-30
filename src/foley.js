@@ -5,7 +5,7 @@
    https://github.com/eakbulut/foley
    ============================================================ */
 
-export const version = "2.5.0";
+export const version = "2.6.0";
 
 /* ---------------- engine ---------------- */
 const T = {
@@ -106,6 +106,20 @@ const THEMES = {
                         noiseLvl: 0.45, noiseF: 1.9, q: 3.2, shimmer: true }),
 };
 let theme = THEMES.default;
+let overrides = {}; /* per-cue spec overrides from the active sound set */
+
+function effectiveSpec(name) { return overrides[name] || CUES[name].spec; }
+
+function sanitizeTransform(c) {
+  const lim = (v, lo, hi, fb) => { const n = Number(v); return isFinite(n) ? Math.min(hi, Math.max(lo, n)) : fb; };
+  return {
+    label: "Custom",
+    pitch: lim(c.pitch, 0.25, 4, 1), attack: lim(c.attack, 0.1, 6, 1), decay: lim(c.decay, 0.1, 6, 1),
+    send: lim(c.send, 0, 3, 1), noiseLvl: lim(c.noiseLvl, 0, 3, 1), noiseF: lim(c.noiseF, 0.25, 4, 1),
+    q: lim(c.q, 0.1, 6, 1), shimmer: !!c.shimmer,
+    wave: (c.wave && typeof c.wave === "object") ? c.wave : null,
+  };
+}
 
 export const themes = Object.freeze(Object.keys(THEMES));
 
@@ -413,11 +427,29 @@ export function normalizeSpec(spec) {
   return out;
 }
 
-/** A deep copy of a built-in cue's spec, ready to edit. */
+/** A deep, editable copy of the cue's effective spec - the sound set's override
+    if one is active, the built-in otherwise. */
 export function getSpec(name) {
   const cue = CUES[name];
   if (!cue) return null;
-  return JSON.parse(JSON.stringify(cue.spec));
+  return JSON.parse(JSON.stringify(effectiveSpec(name)));
+}
+
+/** A snapshot of the active sonic identity as a portable sound set:
+    { name, transform, cues }. Feed it back through set({ theme: soundSet }). */
+export function getSet() {
+  const base = mkTheme({});
+  const tr = {};
+  for (const k of ["pitch", "attack", "decay", "send", "noiseLvl", "noiseF", "q"]) {
+    if (theme[k] !== base[k]) tr[k] = theme[k];
+  }
+  if (theme.shimmer) tr.shimmer = true;
+  if (theme.wave) tr.wave = Object.assign({}, theme.wave);
+  return {
+    name: T.settings.theme,
+    transform: tr,
+    cues: JSON.parse(JSON.stringify(overrides)),
+  };
 }
 
 /* ---------------- public API ---------------- */
@@ -442,19 +474,25 @@ export function set(opts) {
   if (opts.hover != null) T.settings.hover = opts.hover;
   if (opts.theme != null) {
     if (typeof opts.theme === "string" && THEMES[opts.theme]) {
+      /* a theme assignment replaces the whole sonic identity, overrides included */
       T.settings.theme = opts.theme;
       theme = THEMES[opts.theme];
-    } else if (typeof opts.theme === "object") {
-      /* custom theme: a partial transform object; unknown fields ignored, values clamped */
-      const c = opts.theme, lim = (v, lo, hi, fb) => { const n = Number(v); return isFinite(n) ? Math.min(hi, Math.max(lo, n)) : fb; };
-      theme = mkTheme({
-        label: "Custom",
-        pitch: lim(c.pitch, 0.25, 4, 1), attack: lim(c.attack, 0.1, 6, 1), decay: lim(c.decay, 0.1, 6, 1),
-        send: lim(c.send, 0, 3, 1), noiseLvl: lim(c.noiseLvl, 0, 3, 1), noiseF: lim(c.noiseF, 0.25, 4, 1),
-        q: lim(c.q, 0.1, 6, 1), shimmer: !!c.shimmer,
-        wave: (c.wave && typeof c.wave === "object") ? c.wave : null,
-      });
-      T.settings.theme = "custom";
+      overrides = {};
+    } else if (typeof opts.theme === "object" && opts.theme) {
+      const o = opts.theme;
+      const isSet = ("cues" in o) || ("transform" in o) || ("name" in o);
+      theme = mkTheme(sanitizeTransform(isSet ? (o.transform || {}) : o));
+      overrides = {};
+      if (isSet && o.cues && typeof o.cues === "object") {
+        for (const [n, sp] of Object.entries(o.cues)) {
+          if (!CUES[n]) continue;           /* unknown cue names are dropped */
+          const norm = normalizeSpec(sp);
+          if (norm.length) overrides[n] = norm;
+        }
+      }
+      T.settings.theme = (isSet && typeof o.name === "string" && o.name.trim())
+        ? String(o.name).trim().slice(0, 40)
+        : "custom";
     }
   }
 }
@@ -529,7 +567,7 @@ function perform(key, spec, opts, emitName, emitFamily) {
 export function play(name, opts) {
   const cue = CUES[name];
   if (!cue) return;
-  return perform(name, cue.spec, opts, name, cue.cat);
+  return perform(name, effectiveSpec(name), opts, name, cue.cat);
 }
 
 /** Play a custom spec (array of layers). It is normalized/clamped first.
@@ -611,7 +649,7 @@ function renderSpecOffline(spec) {
 export async function toBuffer(name) {
   const cue = CUES[name];
   if (!cue) return null;
-  return renderSpecOffline(cue.spec);
+  return renderSpecOffline(effectiveSpec(name));
 }
 
 /** Offline-render a custom spec to an AudioBuffer (normalized first). */
@@ -644,7 +682,7 @@ export async function toSprite(gap) {
   const parts = [], map = {};
   let cursor = 0;
   for (const name of Object.keys(CUES)) {
-    const buf = await renderSpecOffline(CUES[name].spec);
+    const buf = await renderSpecOffline(effectiveSpec(name));
     const t = trimAndNormalize(buf);
     map[name] = { start: +cursor.toFixed(4), duration: +(t.length / rate).toFixed(4) };
     parts.push(t);

@@ -45,6 +45,15 @@ test("every data-foley-* attribute in bind() is documented in README and agents.
   }
 });
 
+test("the demo never advertises a data-foley-* attribute bind() doesn't implement", () => {
+  const page = readFileSync(join(root, "index.html"), "utf8");
+  const real = new Set([...src.matchAll(/data-foley-(\w+)/g)].map((m) => m[1]));
+  for (const m of page.matchAll(/data-foley-(\w+)/g)) {
+    assert.ok(real.has(m[1]),
+      `demo mentions data-foley-${m[1]} but bind() does not implement it`);
+  }
+});
+
 test("every cue and family name appears in the README", () => {
   for (const name of Object.keys(foley.cues)) {
     assert.ok(readme.includes("`" + name + "`"), `README cue table missing "${name}"`);
