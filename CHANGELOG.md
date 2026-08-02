@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.7.0
+- **Spatial audio**: `play()` and `playSpec()` take `pan` (-1..1, stereo) or `pos` ([x, y, z], HRTF with inverse distance) — `pos` wins if both are given. Placement is fixed at the trigger and lives on the performance bus, so a looping cue's repetitions inherit it. The reverb send stays center: rooms don't pan, sources do.
+- **`set({ localize: 0.6 })`**: every `data-foley-*` cue pans to where its element sits on screen, so a toolbar on the right clicks on the right. `panFor(el)` exposes the same derivation for hand-written `play()` calls. Default 0 (centered, unchanged).
+- Deliberately not built, since cues are ~200ms one-shots that are over before anything could move them: listener position/orientation, sound cones, distance attributes, and repositioning through the handle. Offline renders (`toWav`, `toBuffer`, `toSprite`) stay deterministic and centered — position is a property of the performance, not of the sound, the same line humanization draws. A WebXR listener API would be issue-driven, not speculative.
+- Demo: a "Localize cues to their elements" toggle in the inspector, persisted like the other settings.
+
+
 ## 2.6.1
 - npm package keywords for discoverability.
 - Site: analytics, SEO metadata (canonical, structured data, sitemap), tightened copy, quote-card polish, contributor docs.

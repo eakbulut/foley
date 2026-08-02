@@ -1,6 +1,6 @@
 {
   "name": "@foleyjs/core",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "description": "Sound effects for the interface, performed live. 28 interaction cues synthesized with Web Audio \u2014 zero dependencies, zero audio files.",
   "type": "module",
   "main": "./src/foley.js",

@@ -5,12 +5,12 @@
    https://github.com/eakbulut/foley
    ============================================================ */
 
-export const version = "2.6.1";
+export const version = "2.7.0";
 
 /* ---------------- engine ---------------- */
 const T = {
   ctx: null, master: null, limiter: null, analyser: null, dry: null, verb: null, wet: null,
-  settings: { volume: 0.7, transpose: 0, space: 0.22, muted: false, hover: true, theme: "default", duck: 1 },
+  settings: { volume: 0.7, transpose: 0, space: 0.22, muted: false, hover: true, theme: "default", duck: 1, localize: 0 },
   _scale: 1, _cool: {}, _noise: null, _unlocked: false, _bus: null, _sendBus: null,
 
   applyGain() {
@@ -460,9 +460,11 @@ export function unlock() { T.ensure(); }
 /** The engine's AnalyserNode (2048-point), or null before the first unlock. For scopes and meters. */
 export function getAnalyser() { return T.analyser; }
 
-/** Update engine settings: volume (0-1), transpose (semitones), space (0-1 reverb), muted, hover, theme. */
+/** Update engine settings: volume (0-1), transpose (semitones), space (0-1 reverb),
+    muted, hover, theme, duck (0-1), localize (0-1 stereo spread for bind()'s cues). */
 export function set(opts) {
   if (!opts) return;
+  if (opts.localize != null) T.settings.localize = Math.min(1, Math.max(0, Number(opts.localize) || 0));
   if (opts.volume != null) { T.settings.volume = opts.volume; T.applyGain(); }
   if (opts.duck != null) { T.settings.duck = Math.min(1, Math.max(0, opts.duck)); T.applyGain(); }
   if (opts.space != null) {
@@ -513,6 +515,36 @@ function specDuration(spec) {
   return end;
 }
 
+/* ---------------- spatial placement ----------------
+   A cue is a ~200ms one-shot: it is over long before anything could move. So
+   position is a play option, fixed at the moment of the trigger, and not a
+   property of the sound. Deliberately absent, and not an oversight: listener
+   position/orientation, cones, distance attributes, repositioning through the
+   handle, and panned exports. Those exist to serve long-running sources; here
+   they would be surface with nothing behind it. A WebXR listener API, if it is
+   ever wanted, is an issue-driven follow-up. */
+
+function clampPan(v) {
+  const n = Number(v);
+  return isFinite(n) ? Math.min(1, Math.max(-1, n)) : 0;
+}
+
+function validPos(p) {
+  if (!Array.isArray(p) || p.length !== 3) return null;
+  const xyz = p.map(Number);
+  return xyz.every((n) => isFinite(n)) ? xyz : null;
+}
+
+/** The pan (-1..1) that the current `localize` setting derives for an element from
+    where it sits horizontally on screen; 0 when localize is 0. bind() applies this
+    to every data-foley-* cue - use it when you call play() yourself. */
+export function panFor(el) {
+  const lz = T.settings.localize;
+  if (!lz || !el || typeof el.getBoundingClientRect !== "function") return 0;
+  const r = el.getBoundingClientRect();
+  return clampPan(((r.left + r.width / 2) / window.innerWidth * 2 - 1) * lz);
+}
+
 /* shared performance path: cooldown, humanization, loop, stop handle, emit */
 function perform(key, spec, opts, emitName, emitFamily) {
   const nowMs = performance.now();
@@ -522,7 +554,27 @@ function perform(key, spec, opts, emitName, emitFamily) {
   opts = opts || {};
   const ctx = T.ctx;
   /* every performance gets its own bus, so it can be stopped without touching the rest */
-  const bus = ctx.createGain(); bus.connect(T.dry);
+  const bus = ctx.createGain();
+  /* placement sits on the bus, not on the voices, so a looping cue's repetitions
+     - which re-run through this same bus - inherit it without rescheduling. */
+  const xyz = validPos(opts.pos);
+  const pan = xyz ? 0 : clampPan(opts.pan);
+  let place = null;
+  if (xyz) {
+    place = ctx.createPanner();
+    place.panningModel = "HRTF";
+    place.distanceModel = "inverse";
+    place.refDistance = 1;
+    place.rolloffFactor = 1;
+    if (place.positionX) { place.positionX.value = xyz[0]; place.positionY.value = xyz[1]; place.positionZ.value = xyz[2]; }
+    else place.setPosition(xyz[0], xyz[1], xyz[2]); /* older Safari */
+  } else if (pan) {
+    place = ctx.createStereoPanner();
+    place.pan.value = pan;
+  }
+  if (place) { bus.connect(place); place.connect(T.dry); } else bus.connect(T.dry);
+  /* the reverb send stays center and unpanned on purpose: rooms don't pan, sources
+     do. A tail that swings with the source reads as the walls moving, not the button. */
   const sendBus = ctx.createGain(); sendBus.connect(T.verb);
 
   function once() {
@@ -556,14 +608,16 @@ function perform(key, spec, opts, emitName, emitFamily) {
       const t = ctx.currentTime;
       bus.gain.setTargetAtTime(0, t, 0.02);
       sendBus.gain.setTargetAtTime(0, t, 0.02);
-      setTimeout(() => { try { bus.disconnect(); sendBus.disconnect(); } catch (e) { /* already gone */ } }, 300);
+      setTimeout(() => { try { bus.disconnect(); sendBus.disconnect(); if (place) place.disconnect(); } catch (e) { /* already gone */ } }, 300);
     },
   };
 }
 
-/** Play a cue by name. Options: { pitch, volume, loop, every }.
+/** Play a cue by name. Options: { pitch, volume, loop, every, pan, pos }.
     Returns a handle: { stop() }. With loop: true the cue repeats (spaced by its own
-    duration, or opts.every seconds) until stopped - for loading states. */
+    duration, or opts.every seconds) until stopped - for loading states.
+    pan (-1..1) places it in the stereo field; pos ([x,y,z]) places it in 3D and
+    wins over pan. Both are fixed for the life of the performance. */
 export function play(name, opts) {
   const cue = CUES[name];
   if (!cue) return;
@@ -571,7 +625,7 @@ export function play(name, opts) {
 }
 
 /** Play a custom spec (array of layers). It is normalized/clamped first.
-    Options: { pitch, volume, id } - id keys the 60ms cooldown (default "custom"). */
+    Options: { pitch, volume, pan, pos, id } - id keys the 60ms cooldown (default "custom"). */
 export function playSpec(spec, opts) {
   const s = normalizeSpec(spec);
   if (!s.length) return;
@@ -580,37 +634,38 @@ export function playSpec(spec, opts) {
 }
 
 /** Wire every data-foley-* attribute under root (default: document).
-    Attributes: data-foley-hover, -press, -release, -click, -toggle, -type. Safe to call again. */
+    Attributes: data-foley-hover, -press, -release, -click, -toggle, -type. Safe to call again.
+    With set({ localize }) nonzero, every cue is panned to its element's place on screen. */
 export function bind(root) {
   root = root || document;
   root.querySelectorAll("[data-foley-hover]").forEach((el) => {
     if (el._fyH) return; el._fyH = 1;
-    el.addEventListener("pointerenter", () => { if (T.settings.hover) play(el.getAttribute("data-foley-hover") || "tick"); });
+    el.addEventListener("pointerenter", () => { if (T.settings.hover) play(el.getAttribute("data-foley-hover") || "tick", { pan: panFor(el) }); });
   });
   root.querySelectorAll("[data-foley-press]").forEach((el) => {
     if (el._fyP) return; el._fyP = 1;
-    el.addEventListener("pointerdown", () => play(el.getAttribute("data-foley-press") || "press"));
+    el.addEventListener("pointerdown", () => play(el.getAttribute("data-foley-press") || "press", { pan: panFor(el) }));
   });
   root.querySelectorAll("[data-foley-release]").forEach((el) => {
     if (el._fyR) return; el._fyR = 1;
-    el.addEventListener("pointerup", () => play(el.getAttribute("data-foley-release") || "release"));
+    el.addEventListener("pointerup", () => play(el.getAttribute("data-foley-release") || "release", { pan: panFor(el) }));
   });
   root.querySelectorAll("[data-foley-click]").forEach((el) => {
     if (el._fyC) return; el._fyC = 1;
-    el.addEventListener("click", () => play(el.getAttribute("data-foley-click") || "tap"));
+    el.addEventListener("click", () => play(el.getAttribute("data-foley-click") || "tap", { pan: panFor(el) }));
   });
   root.querySelectorAll("[data-foley-toggle]").forEach((el) => {
     if (el._fyT) return; el._fyT = 1;
     el.addEventListener("click", () => {
       const pressed = el.getAttribute("aria-pressed") === "true";
-      play(pressed ? "on" : "off");
+      play(pressed ? "on" : "off", { pan: panFor(el) });
     });
   });
   root.querySelectorAll("[data-foley-type]").forEach((el) => {
     if (el._fyY) return; el._fyY = 1;
     el.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { play("complete"); return; }
-      if (e.key.length === 1 || e.key === "Backspace") play(el.getAttribute("data-foley-type") || "thock", { pitch: (Math.random() * 2 - 1) });
+      if (e.key === "Enter") { play("complete", { pan: panFor(el) }); return; }
+      if (e.key.length === 1 || e.key === "Backspace") play(el.getAttribute("data-foley-type") || "thock", { pitch: (Math.random() * 2 - 1), pan: panFor(el) });
     });
   });
   /* first gesture anywhere unlocks audio */

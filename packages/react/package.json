@@ -1,6 +1,6 @@
 {
   "name": "@foleyjs/react",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "description": "React bindings for Foley \u2014 sound effects for the interface, performed live.",
   "type": "module",
   "main": "./src/index.js",
@@ -18,7 +18,7 @@
   ],
   "sideEffects": false,
   "peerDependencies": {
-    "@foleyjs/core": "^2.6.1",
+    "@foleyjs/core": "^2.7.0",
     "react": ">=17"
   },
   "publishConfig": {
