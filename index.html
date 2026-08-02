@@ -406,6 +406,12 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
 .dz-set{margin-top:16px;padding-top:14px;border-top:1px dashed var(--card-edge)}
 .dz-set .dz-row{margin-bottom:10px}
 .dz-set .dz-seed{max-width:150px}
+/* iOS overflow fix: grid/flex children default to min-width:auto, so a wide code
+   block silently widens its column past the viewport - the pre's own scrollbar
+   never engages because the pre "fits". Allow shrinking, and clip the page. */
+.steps>*,.dz-grid>*,.demo-card{min-width:0}
+html,body{overflow-x:clip}
+@supports not (overflow-x:clip){html,body{overflow-x:hidden}}
 </style>
 <script data-goatcounter="https://foley.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
@@ -1988,6 +1994,11 @@ if (window.matchMedia("(pointer:coarse)").matches) {
   }
   else { seedSel.value = "on"; loadBase(getSpec("on")); }
 })();
+
+/* iOS: Web Audio is muted by the hardware silent switch by default. The library
+   respects that (UI sounds arguably should), but this page exists to be heard -
+   so the demo opts into the playback audio session where the API exists. */
+try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) { /* older iOS */ }
 
 /* unlock audio on first gesture */
 ["pointerdown", "keydown"].forEach((ev) => document.addEventListener(ev, () => unlock(), { once: true, capture: true }));
