@@ -335,7 +335,12 @@ const CUES = {
     L("tone", 0.08, { wave: "sine", f: 659.25, f2: null, glide: 0.06, a: 0.004, d: 0.21, peak: 0.12, send: 0.3 }),
     L("tone", 0.16, { wave: "sine", f: 783.99, f2: null, glide: 0.06, a: 0.004, d: 0.26, peak: 0.12, send: 0.3 }),
     L("tone", 0.24, { wave: "sine", f: 1046.5, f2: null, glide: 0.06, a: 0.004, d: 0.31, peak: 0.12, send: 0.3 }),
-    L("cluster", 0.34, { n: 4, step: 0.03, fMin: 2000, fMax: 4500, d: 0.09, peak: 0.03, send: 0.5, seed: 7 }),
+    /* the shimmer is the arpeggio's own chord, two octaves up - C7 E7 G7 C8.
+       Random grains across 2-4.5k clashed with the C major underneath them. */
+    L("tone", 0.34, { wave: "sine", f: 2093, f2: null, glide: 0.06, a: 0.004, d: 0.09, peak: 0.03, send: 0.5 }),
+    L("tone", 0.37, { wave: "sine", f: 2637, f2: null, glide: 0.06, a: 0.004, d: 0.09, peak: 0.03, send: 0.5 }),
+    L("tone", 0.40, { wave: "sine", f: 3135.96, f2: null, glide: 0.06, a: 0.004, d: 0.09, peak: 0.03, send: 0.5 }),
+    L("tone", 0.43, { wave: "sine", f: 4186, f2: null, glide: 0.06, a: 0.004, d: 0.09, peak: 0.03, send: 0.5 }),
   ]},
   sparkle:  { cat: "state", key: "K", ds: "a handful of glitter", spec: [
     L("cluster", 0, { n: 6, step: 0.035, fMin: 1600, fMax: 4600, d: 0.1, peak: 0.045, send: 0.5, seed: 11 }),

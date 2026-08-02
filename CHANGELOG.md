@@ -4,6 +4,7 @@
 - **Spatial audio**: `play()` and `playSpec()` take `pan` (-1..1, stereo) or `pos` ([x, y, z], HRTF with inverse distance) — `pos` wins if both are given. Placement is fixed at the trigger and lives on the performance bus, so a looping cue's repetitions inherit it. The reverb send stays center: rooms don't pan, sources do.
 - **`set({ localize: 0.6 })`**: every `data-foley-*` cue pans to where its element sits on screen, so a toolbar on the right clicks on the right. `panFor(el)` exposes the same derivation for hand-written `play()` calls. Default 0 (centered, unchanged).
 - Deliberately not built, since cues are ~200ms one-shots that are over before anything could move them: listener position/orientation, sound cones, distance attributes, and repositioning through the handle. Offline renders (`toWav`, `toBuffer`, `toSprite`) stay deterministic and centered — position is a property of the performance, not of the sound, the same line humanization draws. A WebXR listener API would be issue-driven, not speculative.
+- The `complete` shimmer now stays in key — thanks to launch feedback. Its four grains were random across 2–4.5 kHz and clashed with the C major arpeggio underneath; they are now the same chord two octaves up (C7 E7 G7 C8), which also makes the cue fully deterministic instead of seeded-random.
 - Demo: a "Localize cues to their elements" toggle in the inspector, persisted like the other settings.
 
 
