@@ -23,6 +23,11 @@ export interface PlayOptions {
   loop?: boolean;
   /** Loop period in seconds (default: the sound's own duration). */
   every?: number;
+  /** Stereo placement for this play only, -1 (left) to 1 (right). Fixed at trigger. */
+  pan?: number;
+  /** 3D placement for this play only, [x, y, z] (HRTF, inverse distance).
+      Wins over `pan`. Fixed at trigger — cues are one-shots, nothing repositions. */
+  pos?: [number, number, number];
 }
 
 export interface ThemeTransform {
@@ -62,6 +67,9 @@ export interface Settings {
   theme: ThemeName | "custom";
   /** Temporary attenuation multiplier (0-1), e.g. while a video plays. Default 1. */
   duck: number;
+  /** Stereo spread for bind()'s cues, 0–1: each one pans to its element's place
+      on screen. 0 (default) keeps everything centered. */
+  localize: number;
 }
 
 export interface CueMeta {
@@ -92,8 +100,13 @@ export declare const themes: readonly ThemeName[];
     Returns a handle whose stop() fades the performance out. */
 export declare function play(name: CueName, opts?: PlayOptions): PlayHandle | undefined;
 
-/** Wire every data-foley-* attribute under root (default: document). Idempotent. */
+/** Wire every data-foley-* attribute under root (default: document). Idempotent.
+    With a nonzero `localize` setting, each cue pans to its element's screen position. */
 export declare function bind(root?: ParentNode): void;
+
+/** The pan (-1..1) the current `localize` setting derives for an element, or 0 when
+    localize is off. bind() applies it automatically; use it for your own play() calls. */
+export declare function panFor(el: Element | null): number;
 
 /** Update engine settings. Only the provided keys change.
     theme accepts a name or a custom ThemeTransform object. */

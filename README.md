@@ -11,7 +11,8 @@ Foley is a tiny, dependency-free library of **28 interaction sounds**, named for
 - **28 cues in 7 families** — pointer, press, toggle, feedback, notify, motion, state
 - **4 themes** — default, soft, mechanical, glass — or your own transform, or a full [sound set](#sound-sets)
 - **Cues are data** — edit any cue's layers with `getSpec()`/`playSpec()`, or visually in the [Cue Designer](https://usefoley.dev/#designer)
-- **9.6 kB**, zero dependencies, one ES module
+- **10.8 kB**, zero dependencies, one ES module
+- **Placed in space** — `pan` or 3D `pos` per play, or `set({ localize })` to pan every bound cue to where its element sits on screen
 - **Defensive by design** — master limiter, 60ms per-cue cooldown, ±30-cent humanization; `stop()` handles, looping, and ducking built in
 - **WAV export** — any cue, any custom design, or all 28 as an audio sprite with an offset map
 
@@ -79,13 +80,14 @@ Every attribute accepts a cue name as its value to override the default.
 import { play, bind, set, get, toWav, unlock, getAnalyser, on, cues, families, themes, version } from "@foleyjs/core";
 ```
 
-- **`play(name, { pitch?, volume?, loop?, every? })`** — play a cue; returns `{ stop() }`. With `loop: true` it repeats until stopped — ideal for loading states.
+- **`play(name, { pitch?, volume?, loop?, every?, pan?, pos? })`** — play a cue; returns `{ stop() }`. With `loop: true` it repeats until stopped — ideal for loading states.
 - **`bind(root?)`** — wire all `data-foley-*` attributes under `root` (default `document`). Idempotent.
-- **`set({ volume?, transpose?, space?, muted?, hover?, theme?, duck? })`** — update global settings. `duck` (0–1) temporarily attenuates everything, e.g. while a video plays. `theme` accepts a name or a custom transform object (`{ pitch, decay, send, ... }`).
+- **`set({ volume?, transpose?, space?, muted?, hover?, theme?, duck?, localize? })`** — update global settings. `duck` (0–1) temporarily attenuates everything, e.g. while a video plays. `localize` (0–1) pans every bound cue to its element's place on screen. `theme` accepts a name or a custom transform object (`{ pitch, decay, send, ... }`).
+- **`panFor(el)`** — the pan `localize` would derive for an element, for your own `play()` calls.
 - **`get()`** — snapshot of current settings.
 - **`toBuffer(name)`** — `Promise<AudioBuffer>`: same offline render, raw — for envelope drawings, meters, or custom encoding.
 - **`getSpec(name)`** — a deep, editable copy of a built-in cue's layer spec.
-- **`playSpec(spec, { id?, pitch?, volume? })`** — play a custom spec; it is validated and clamped first.
+- **`playSpec(spec, { id?, pitch?, volume?, pan?, pos? })`** — play a custom spec; it is validated and clamped first.
 - **`toWavSpec(spec)` / `toBufferSpec(spec)`** — offline-render a custom spec.
 - **`normalizeSpec(spec)`** — the validator itself, for checking untrusted specs (max 8 layers, all params clamped).
 - **`toSprite(gap?)`** — all 28 cues in one WAV plus a `{ name: { start, duration } }` offset map, for game engines and audio-sprite players.
@@ -94,6 +96,27 @@ import { play, bind, set, get, toWav, unlock, getAnalyser, on, cues, families, t
 - **`getAnalyser()`** — the engine's `AnalyserNode` for scopes and meters, or `null` before unlock.
 - **`on("play" | "unlock", cb)`** — subscribe to engine events; returns an unsubscribe function.
 - **`cues` / `families` / `themes` / `version`** — metadata for building your own pickers and playgrounds.
+
+## Placement
+
+A cue can come from somewhere. `pan` puts it in the stereo field; `pos` puts it in 3D
+(HRTF, inverse distance) for WebXR and canvas scenes.
+
+```js
+play("tick", { pan: -0.7 });              // over on the left
+play("ping", { pos: [2, 0, -3] });        // up and to the right, a few metres out
+set({ localize: 0.6 });                   // every bound cue pans to its own button
+```
+
+One setting and the interface stops sounding like it comes from a single point — a
+toolbar on the right clicks on the right, which is the thing a screen-shaped sound
+library can do that a game audio engine never bothered to.
+
+Placement is fixed at the trigger: cues are ~200ms one-shots, over before anything
+could move, so there is no listener, no cones, and nothing to reposition mid-flight.
+The reverb send stays center — rooms don't pan, sources do. Exports (`toWav`,
+`toSprite`) stay centered too: position is a property of the performance, not of the
+sound, the same rule humanization follows.
 
 ## Design your own cues
 

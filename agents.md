@@ -51,6 +51,22 @@ h.stop();          // ~20ms fade; then play("complete")
 set({ duck: 0.3 }); // attenuate everything while a video/call plays; duck: 1 restores
 ```
 
+## Placement
+
+Cues can be positioned. `pan` (-1..1) is stereo, `pos` ([x, y, z]) is 3D (HRTF) for
+WebXR and canvas scenes; both are set at the trigger and never move, because a cue is
+a ~200ms one-shot. There is no listener API and no repositioning — do not look for one.
+
+```js
+play("tick", { pan: -0.7 });         // left side of the screen
+play("ping", { pos: [2, 0, -3] });   // 3D scenes
+set({ localize: 0.6 });              // every data-foley-* cue pans to its own element
+```
+
+Prefer `set({ localize })` over hand-computing pans for DOM UI: `bind()` derives each
+element's position for you. For a `play()` call you make yourself, `panFor(el)` returns
+the same value. Exports (`toWav`, `toSprite`) are always centered.
+
 ## Cue selection guide
 
 - Button press feel: `press` + `release` (two-part), or `tap` (single)

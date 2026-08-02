@@ -420,7 +420,7 @@ html,body{overflow-x:clip}
 <header class="top">
   <div class="wrap top-in">
     <a class="logo" href="#"><span class="logo-jack" aria-hidden="true"></span>foley</a>
-    <span class="ver">v2.6.1 · 9.6 kB</span>
+    <span class="ver">v2.7.0 · 10.8 kB</span>
     <div class="head-scope" aria-hidden="true" title="Live output">
       <canvas id="scope"></canvas>
       <span class="head-cue" id="scope-label">idle</span>
@@ -510,6 +510,7 @@ html,body{overflow-x:clip}
         </div>
         <div class="insp-toggles">
           <button class="pill-toggle" id="hover-toggle" aria-pressed="false"><span class="sw" aria-hidden="true"></span>Play cues on hover</button>
+          <button class="pill-toggle" id="localize-toggle" aria-pressed="false"><span class="sw" aria-hidden="true"></span>Localize cues to their elements</button>
           <button class="pill-toggle" id="mute-toggle" aria-pressed="false"><span class="sw" aria-hidden="true"></span>Mute everything</button>
         </div>
       </div>
@@ -782,7 +783,7 @@ app.use(FoleyPlugin, { theme: <span class="st">"soft"</span> });
    Demo page wiring. Everything sonic comes from the real
    package: this page runs exactly what `npm install foley` ships.
    ============================================================ */
-import { bind, play, set, get, on, unlock, getAnalyser, toWav, toBuffer, cues, families, version, getSpec, playSpec, toWavSpec, toBufferSpec, normalizeSpec, toSprite, getSet, themes } from "./src/foley.js";
+import { bind, play, set, get, on, unlock, getAnalyser, toWav, toBuffer, cues, families, version, getSpec, playSpec, toWavSpec, toBufferSpec, normalizeSpec, toSprite, getSet, themes, panFor } from "./src/foley.js";
 
 /* page-side state: colors are a design decision, so they live here, not in the library */
 /* design tokens are CSS custom properties; canvases read them here so a palette
@@ -1093,6 +1094,17 @@ document.addEventListener("keydown", (e) => {
     set({ hover: onNow });
     store.save({ hover: onNow });
     play(onNow ? "on" : "off");
+  });
+  /* localize: cues pan to where their element sits on screen. bind() does the
+     derivation, so the page only owns the on/off. */
+  const loc = document.getElementById("localize-toggle");
+  if (saved.localize) { loc.setAttribute("aria-pressed", "true"); set({ localize: 0.6 }); }
+  loc.addEventListener("click", () => {
+    const onNow = loc.getAttribute("aria-pressed") !== "true";
+    loc.setAttribute("aria-pressed", String(onNow));
+    set({ localize: onNow ? 0.6 : 0 });
+    store.save({ localize: onNow });
+    play(onNow ? "on" : "off", { pan: onNow ? panFor(loc) : 0 });
   });
   const mute = document.getElementById("mute-toggle");
   mute.addEventListener("click", () => {
