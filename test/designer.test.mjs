@@ -35,11 +35,15 @@ test("converted specs preserve the original synthesis parameters (spot checks)",
   assert.equal(chime.length, 4);
   assert.ok(Math.abs(chime[1].f - 880 * 2.76) < 0.01, "bell partial ratio lost");
 
+  /* the shimmer is chord-locked (2.7.0): the last four layers are C7 E7 G7 C8,
+     the arpeggio's own triad two octaves up, not random grains across the band */
   const complete = getSpec("complete");
-  const cluster = complete[complete.length - 1];
-  assert.equal(cluster.kind, "cluster");
-  assert.equal(cluster.n, 4);
-  assert.equal(cluster.seed, 7, "shimmer must be seeded for deterministic exports");
+  assert.equal(complete.length, 8);
+  const shimmer = complete.slice(-4);
+  assert.deepEqual(shimmer.map((l) => l.kind), ["tone", "tone", "tone", "tone"]);
+  assert.deepEqual(shimmer.map((l) => l.f), [2093, 2637, 3135.96, 4186]);
+  assert.deepEqual(shimmer.map((l) => l.at), [0.34, 0.37, 0.4, 0.43]);
+  for (const l of shimmer) assert.equal(l.peak, 0.03, "shimmer stays a quiet halo over the arpeggio");
 
   const swoosh = getSpec("swoosh");
   assert.equal(swoosh[0].f2, 3400);
