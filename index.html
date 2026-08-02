@@ -412,6 +412,7 @@ footer.site{margin-top:90px;border-top:1px solid var(--card-edge);padding:28px 0
 .steps>*,.dz-grid>*,.demo-card{min-width:0}
 html,body{overflow-x:clip}
 @supports not (overflow-x:clip){html,body{overflow-x:hidden}}
+.tour-stop{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:80}
 </style>
 <script data-goatcounter="https://foley.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
@@ -1423,11 +1424,33 @@ document.querySelectorAll(".copy-btn").forEach((b) => {
 /* the tour */
 (function tour() {
   const btn = document.getElementById("tour-btn");
-  let running = false;
+  let running = false, timers = [];
+  /* the user's page, not the tour's: any real gesture hands control back */
+  const CANCEL_EVENTS = ["wheel", "touchmove", "keydown", "pointerdown"];
+  let stopPill = null;
+  function stopTour(quiet) {
+    if (!running) return;
+    running = false;
+    timers.forEach(clearTimeout);
+    timers = [];
+    CANCEL_EVENTS.forEach((ev) => document.removeEventListener(ev, onGesture, true));
+    btn.innerHTML = "\u25B6&nbsp; Play the tour";
+    if (stopPill) { stopPill.remove(); stopPill = null; }
+    if (!quiet) play("off");
+  }
+  function onGesture(e) {
+    if (e.target === btn || btn.contains(e.target)) return; /* the button handles itself */
+    stopTour();
+  }
   btn.addEventListener("click", () => {
-    if (running) return;
+    if (running) { stopTour(); return; }
     running = true;
     btn.textContent = "Playing\u2026";
+    /* the tour scrolls away from the hero, so the stop control rides the viewport */
+    stopPill = document.createElement("button");
+    stopPill.className = "btn btn-primary tour-stop";
+    stopPill.innerHTML = "\u25A0&nbsp; Stop the tour";
+    document.body.appendChild(stopPill);
     /* board order, so the page scrolls one way and never chases backwards */
     const seq = Object.keys(cues);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1436,13 +1459,15 @@ document.querySelectorAll(".copy-btn").forEach((b) => {
       const target = window.scrollY + r.top - (window.innerHeight / 2) + (r.height / 2);
       window.scrollTo({ top: Math.max(0, target), behavior: reduced ? "auto" : "smooth" });
     }
+    /* our own smooth scrolling fires "scroll", never wheel/touchmove/keydown - no self-cancel */
+    setTimeout(() => { if (running) CANCEL_EVENTS.forEach((ev) => document.addEventListener(ev, onGesture, true)); }, 100);
     seq.forEach((name, i) => {
-      setTimeout(() => {
+      timers.push(setTimeout(() => {
         const chip = document.querySelector('.chip[data-cue="' + name + '"]');
         if (chip) center(chip);              /* scroll first\u2026 */
-        setTimeout(() => play(name), 200);   /* \u2026so the highlight is on screen when it fires */
-        if (i === seq.length - 1) setTimeout(() => { btn.innerHTML = "\u25B6&nbsp; Play the tour"; running = false; }, 1000);
-      }, i * 560);
+        timers.push(setTimeout(() => play(name), 200));   /* \u2026so the highlight is on screen when it fires */
+        if (i === seq.length - 1) timers.push(setTimeout(() => stopTour(true), 1000));
+      }, i * 560));
     });
   });
 })();
