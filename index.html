@@ -878,9 +878,11 @@ document.querySelectorAll(".hero-pill").forEach((b) => {
       b.style.setProperty("--cc", FAM[famId].css);
       b.innerHTML = "<kbd>" + c.key + '</kbd><span class="nm">' + name + '</span><canvas class="env" aria-hidden="true"></canvas><span class="ds">' + c.description + "</span>" +
         '<button class="dl" title="Download ' + name + ' as .wav" aria-label="Download ' + name + ' as WAV">\u2913</button>';
-      b.addEventListener("click", () => play(name));
-      b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); play(name); } });
-      b.addEventListener("pointerenter", () => { if (ui.hover) play(name); });
+      /* the board is the demo for localize: 28 chips across the viewport, so each
+         one sounds from where it sits. panFor() is 0 unless the toggle is on. */
+      b.addEventListener("click", () => play(name, { pan: panFor(b) }));
+      b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); play(name, { pan: panFor(b) }); } });
+      b.addEventListener("pointerenter", () => { if (ui.hover) play(name, { pan: panFor(b) }); });
       const dl = b.querySelector(".dl");
       dl.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -1477,7 +1479,8 @@ document.querySelectorAll(".copy-btn").forEach((b) => {
       timers.push(setTimeout(() => {
         const chip = document.querySelector('.chip[data-cue="' + name + '"]');
         if (chip) center(chip);              /* scroll first\u2026 */
-        timers.push(setTimeout(() => play(name), 200));   /* \u2026so the highlight is on screen when it fires */
+        /* the chip is centered vertically by now, so its pan is meaningful */
+        timers.push(setTimeout(() => play(name, { pan: panFor(chip) }), 200));   /* \u2026so the highlight is on screen when it fires */
         if (i === seq.length - 1) timers.push(setTimeout(() => stopTour(true), 1000));
       }, i * 560));
     });

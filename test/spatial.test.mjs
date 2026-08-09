@@ -100,6 +100,14 @@ test("demo exposes localize and persists it through the store adapter", () => {
     "the toggle must reuse the existing pill-toggle chrome, not invent new controls");
 });
 
+test("the demo's cue board actually localizes, or the toggle is theater", () => {
+  /* the board fires play() directly rather than through bind(), so localize does
+     nothing for it unless each chip passes its own pan. That shipped broken once. */
+  const page = read("index.html");
+  const wired = [...page.matchAll(/play\(name, \{ pan: panFor\(/g)].length;
+  assert.ok(wired >= 3, `cue board must pass panFor() to play(); found ${wired} call sites`);
+});
+
 test("the reverb send stays center: rooms don't pan, sources do", () => {
   const src = read("src/foley.js");
   assert.ok(/const sendBus = ctx\.createGain\(\); sendBus\.connect\(T\.verb\);/.test(src),

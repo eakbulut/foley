@@ -104,9 +104,14 @@ A cue can come from somewhere. `pan` puts it in the stereo field; `pos` puts it 
 
 ```js
 play("tick", { pan: -0.7 });              // over on the left
-play("ping", { pos: [2, 0, -3] });        // up and to the right, a few metres out
+play("ping", { pos: [1, 0, -0.5] });      // to the right, slightly in front
 set({ localize: 0.6 });                   // every bound cue pans to its own button
 ```
+
+`pos` is measured from a listener at the origin, and attenuates past about 1 unit
+(inverse distance). Keep cues within a unit or two unless you want them faint —
+`[1, 0, -0.5]` is full volume and clearly to the right, while `[2, 0, -3]` is
+already about 11 dB down.
 
 One setting and the interface stops sounding like it comes from a single point — a
 toolbar on the right clicks on the right, which is the thing a screen-shaped sound

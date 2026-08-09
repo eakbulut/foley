@@ -59,9 +59,13 @@ a ~200ms one-shot. There is no listener API and no repositioning — do not look
 
 ```js
 play("tick", { pan: -0.7 });         // left side of the screen
-play("ping", { pos: [2, 0, -3] });   // 3D scenes
+play("ping", { pos: [1, 0, -0.5] }); // 3D scenes: right, slightly in front
 set({ localize: 0.6 });              // every data-foley-* cue pans to its own element
 ```
+
+`pos` attenuates past ~1 unit from the listener at the origin (inverse distance):
+`[1, 0, -0.5]` is full volume, `[2, 0, -3]` is ~11 dB down. Keep cues close, or
+users will report the sound as broken rather than distant.
 
 Prefer `set({ localize })` over hand-computing pans for DOM UI: `bind()` derives each
 element's position for you. For a `play()` call you make yourself, `panFor(el)` returns
