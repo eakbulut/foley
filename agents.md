@@ -29,7 +29,7 @@ attributes already cover.
 | `data-foley-press` + `data-foley-release` | pointerdown / pointerup | press / release |
 | `data-foley-click` | click | tap |
 | `data-foley-toggle` | click (reads `aria-pressed`) | on / off |
-| `data-foley-hover` | pointerenter | tick |
+| `data-foley-hover` | pointerenter + keyboard focus | tick |
 | `data-foley-type` | keydown (Enter → complete) | thock |
 
 Any attribute takes a cue name as its value: `data-foley-click="success"`.
@@ -84,7 +84,9 @@ the same value. Exports (`toWav`, `toSprite`) are always centered.
 
 ## Rules
 
-1. Call `bind()` exactly once (it is idempotent, but once is the pattern).
+1. Call `bind()` exactly once, at startup. It delegates, so markup rendered later
+   (modals, routes, list items) is already covered — do NOT re-bind after renders,
+   and do not add your own listeners for attributes bind() handles.
 2. Never gate `play()` behind your own throttling — the engine has a 60ms
    per-cue cooldown and a master limiter built in.
 3. Do not preload, fetch, or bundle sound files for these cues; they are synthesized.

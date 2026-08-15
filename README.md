@@ -53,7 +53,7 @@ Browsers require a user gesture before audio can start; `bind()` installs a one-
 
 | Attribute | Fires on | Default cue |
 | --- | --- | --- |
-| `data-foley-hover` | `pointerenter` | `tick` |
+| `data-foley-hover` | `pointerenter`, `focusin` | `tick` |
 | `data-foley-press` | `pointerdown` | `press` |
 | `data-foley-release` | `pointerup` | `release` |
 | `data-foley-click` | `click` | `tap` |
@@ -61,6 +61,11 @@ Browsers require a user gesture before audio can start; `bind()` installs a one-
 | `data-foley-type` | `keydown` (Enter plays `complete`) | `thock` |
 
 Every attribute accepts a cue name as its value to override the default.
+
+`bind()` delegates from `root`, so it covers elements that don't exist yet — render a
+modal, change routes, append a list item, and they all sound without re-binding. Hover
+also fires on keyboard focus, so tabbing through an interface sounds like moving
+through it.
 
 ## The 28 cues
 
@@ -81,7 +86,7 @@ import { play, bind, set, get, toWav, unlock, getAnalyser, on, cues, families, t
 ```
 
 - **`play(name, { pitch?, volume?, loop?, every?, pan?, pos? })`** — play a cue; returns `{ stop() }`. With `loop: true` it repeats until stopped — ideal for loading states.
-- **`bind(root?)`** — wire all `data-foley-*` attributes under `root` (default `document`). Idempotent.
+- **`bind(root?)`** — wire all `data-foley-*` attributes under `root` (default `document`). Idempotent, and delegated: markup rendered later is covered without re-binding.
 - **`set({ volume?, transpose?, space?, muted?, hover?, theme?, duck?, localize? })`** — update global settings. `duck` (0–1) temporarily attenuates everything, e.g. while a video plays. `localize` (0–1) pans every bound cue to its element's place on screen. `theme` accepts a name or a custom transform object (`{ pitch, decay, send, ... }`).
 - **`panFor(el)`** — the pan `localize` would derive for an element, for your own `play()` calls.
 - **`get()`** — snapshot of current settings.

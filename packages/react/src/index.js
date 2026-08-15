@@ -8,8 +8,8 @@ import { bind, play, set, get, toWav, toBuffer, on } from "@foleyjs/core";
  *   const { play, set } = useFoley({ volume: 0.7, theme: "soft" });
  *   <button onClick={() => play("success")}>Save</button>
  *
- * bind() is idempotent, so StrictMode's double-invoke is harmless. For markup
- * rendered after mount, call bind() again (e.g. in that component's effect).
+ * bind() is idempotent, so StrictMode's double-invoke is harmless. It also delegates,
+ * so markup rendered after mount is covered - no re-binding on every render.
  */
 export function useFoley(options) {
   useEffect(() => {

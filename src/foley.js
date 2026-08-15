@@ -640,39 +640,63 @@ export function playSpec(spec, opts) {
 
 /** Wire every data-foley-* attribute under root (default: document).
     Attributes: data-foley-hover, -press, -release, -click, -toggle, -type. Safe to call again.
+    Delegated, so markup added later - modals, routes, list items - is covered too:
+    call this once at startup and never think about it again.
     With set({ localize }) nonzero, every cue is panned to its element's place on screen. */
 export function bind(root) {
   root = root || document;
-  root.querySelectorAll("[data-foley-hover]").forEach((el) => {
-    if (el._fyH) return; el._fyH = 1;
-    el.addEventListener("pointerenter", () => { if (T.settings.hover) play(el.getAttribute("data-foley-hover") || "tick", { pan: panFor(el) }); });
+  /* one delegated listener set per root. Binding both a subtree and the document
+     would double-fire, but the 60ms cooldown swallows the duplicate. */
+  if (root._fyBound) return;
+  root._fyBound = 1;
+
+  /* the nearest ancestor of the event target carrying this attribute, if any.
+     Attribute names stay literal here so the docs guards can enumerate them. */
+  const hit = (e, sel) => (e.target && e.target.closest) ? e.target.closest(sel) : null;
+  const at = (el, attr, fallback, opts) =>
+    play(el.getAttribute(attr) || fallback, Object.assign({ pan: panFor(el) }, opts));
+
+  root.addEventListener("pointerdown", (e) => {
+    const el = hit(e, "[data-foley-press]");
+    if (el) at(el, "data-foley-press", "press");
   });
-  root.querySelectorAll("[data-foley-press]").forEach((el) => {
-    if (el._fyP) return; el._fyP = 1;
-    el.addEventListener("pointerdown", () => play(el.getAttribute("data-foley-press") || "press", { pan: panFor(el) }));
+  root.addEventListener("pointerup", (e) => {
+    const el = hit(e, "[data-foley-release]");
+    if (el) at(el, "data-foley-release", "release");
   });
-  root.querySelectorAll("[data-foley-release]").forEach((el) => {
-    if (el._fyR) return; el._fyR = 1;
-    el.addEventListener("pointerup", () => play(el.getAttribute("data-foley-release") || "release", { pan: panFor(el) }));
+  root.addEventListener("click", (e) => {
+    const c = hit(e, "[data-foley-click]");
+    if (c) at(c, "data-foley-click", "tap");
+    const t = hit(e, "[data-foley-toggle]");   /* an element may carry both; both should sound */
+    if (t) play(t.getAttribute("aria-pressed") === "true" ? "on" : "off", { pan: panFor(t) });
   });
-  root.querySelectorAll("[data-foley-click]").forEach((el) => {
-    if (el._fyC) return; el._fyC = 1;
-    el.addEventListener("click", () => play(el.getAttribute("data-foley-click") || "tap", { pan: panFor(el) }));
+  root.addEventListener("keydown", (e) => {
+    const el = hit(e, "[data-foley-type]");
+    if (!el) return;
+    if (e.key === "Enter") { play("complete", { pan: panFor(el) }); return; }
+    if (e.key.length === 1 || e.key === "Backspace") at(el, "data-foley-type", "thock", { pitch: (Math.random() * 2 - 1) });
   });
-  root.querySelectorAll("[data-foley-toggle]").forEach((el) => {
-    if (el._fyT) return; el._fyT = 1;
-    el.addEventListener("click", () => {
-      const pressed = el.getAttribute("aria-pressed") === "true";
-      play(pressed ? "on" : "off", { pan: panFor(el) });
-    });
+
+  /* hover is the one event that resists delegation: pointerenter doesn't bubble, so
+     we listen to pointerover and fire only when the matched element actually changes
+     - sliding across a button's own children must stay silent. pointerout clears the
+     latch only when the pointer leaves the element entirely, not for a child. */
+  let hovered = null;
+  root.addEventListener("pointerover", (e) => {
+    const el = hit(e, "[data-foley-hover]");
+    if (el === hovered) return;
+    hovered = el;
+    if (el && T.settings.hover) at(el, "data-foley-hover", "tick");
   });
-  root.querySelectorAll("[data-foley-type]").forEach((el) => {
-    if (el._fyY) return; el._fyY = 1;
-    el.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { play("complete", { pan: panFor(el) }); return; }
-      if (e.key.length === 1 || e.key === "Backspace") play(el.getAttribute("data-foley-type") || "thock", { pitch: (Math.random() * 2 - 1), pan: panFor(el) });
-    });
+  root.addEventListener("pointerout", (e) => {
+    if (hovered && !hovered.contains(e.relatedTarget)) hovered = null;
   });
+  /* keyboard users get the same cue: focusin bubbles where focus does not */
+  root.addEventListener("focusin", (e) => {
+    const el = hit(e, "[data-foley-hover]");
+    if (el && T.settings.hover) at(el, "data-foley-hover", "tick");
+  });
+
   /* first gesture anywhere unlocks audio */
   ["pointerdown", "keydown"].forEach((ev) =>
     document.addEventListener(ev, () => T.ensure(), { once: true, capture: true })
