@@ -101,7 +101,9 @@ export declare const themes: readonly ThemeName[];
 export declare function play(name: CueName, opts?: PlayOptions): PlayHandle | undefined;
 
 /** Wire every data-foley-* attribute under root (default: document). Idempotent.
-    With a nonzero `localize` setting, each cue pans to its element's screen position. */
+    Delegated: markup added after this call — modals, routes, list items — is covered
+    too, so one call at startup is enough. `data-foley-hover` also fires on keyboard
+    focus. With a nonzero `localize` setting, each cue pans to its screen position. */
 export declare function bind(root?: ParentNode): void;
 
 /** The pan (-1..1) the current `localize` setting derives for an element, or 0 when
