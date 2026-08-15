@@ -35,6 +35,20 @@ up-to-date" and silently pushes nothing - the release simply never fires. This a
 step of the 2.7.0 release. Either name the tag as above, or create it with
 `git tag -a`; do not trust `--follow-tags` with a lightweight tag.
 
+**The size claim is minified + gzipped, not `gzip src/foley.js`.** Raw source is about
+double, because this file is deliberately comment-heavy — quoting it published a number
+nobody actually pays and made every added comment look like bloat. Remeasure with:
+
+```sh
+echo 'import * as f from "./src/foley.js"; globalThis.f = f;' > /tmp/all.js
+npx esbuild /tmp/all.js --bundle --minify --format=esm --outfile=/tmp/all.out.js
+gzip -9 -c /tmp/all.out.js | wc -c     # the badge number, in bytes
+```
+
+Swap the import for `{ bind, play, set }` to get the typical-usage figure the README
+also quotes. The tests can only check that the badge and README agree, not that either
+is true — so this is a by-hand step.
+
 Releasing off a PR instead of straight from main? Merge first, then tag the *merged*
 commit on main (`git checkout main && git pull`), since the tag must point at what
 CI will publish. The branch's own tip is the wrong commit if the merge rebased it.
