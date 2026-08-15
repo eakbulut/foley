@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.8.0
+- **`bind()` now delegates**, so markup rendered after the call — modals, route changes, list items — makes sound without re-binding. One call at startup is genuinely enough; the React package no longer has to tell you otherwise. Six per-element listener loops and the `_fy*` flags Foley used to write onto your DOM nodes are gone.
+- **`data-foley-hover` fires on keyboard focus too.** Mouse users heard a cue on hover and keyboard users heard nothing; now tabbing through an interface sounds like moving through it. Gated by the same `hover` setting.
+- **Looping cues fall silent in a hidden tab** and resume when it comes back — a forgotten `play("loading", { loop: true })` can't tick at someone from a tab they've left. One-shots still fire, because a `ping` for an incoming message is the point of a `ping`. No `visibilitychange` listener needed on your side.
+- Removed the retired `recipes/` folder, superseded by `@foleyjs/react` and `@foleyjs/vue` since 2.3.1. It was never published, and its copy of `useFoley` had started contradicting the real one.
+- Docs: the `pos` example was 3.6 units out and rendered ~11 dB down, which taught that 3D placement sounds broken. It's now `[1, 0, -0.5]`, with the inverse-distance falloff written down.
+
+
 ## 2.7.0
 - **Spatial audio**: `play()` and `playSpec()` take `pan` (-1..1, stereo) or `pos` ([x, y, z], HRTF with inverse distance) — `pos` wins if both are given. Placement is fixed at the trigger and lives on the performance bus, so a looping cue's repetitions inherit it. The reverb send stays center: rooms don't pan, sources do.
 - **`set({ localize: 0.6 })`**: every `data-foley-*` cue pans to where its element sits on screen, so a toolbar on the right clicks on the right. `panFor(el)` exposes the same derivation for hand-written `play()` calls. Default 0 (centered, unchanged).

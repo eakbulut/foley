@@ -11,9 +11,10 @@ Foley is a tiny, dependency-free library of **28 interaction sounds**, named for
 - **28 cues in 7 families** — pointer, press, toggle, feedback, notify, motion, state
 - **4 themes** — default, soft, mechanical, glass — or your own transform, or a full [sound set](#sound-sets)
 - **Cues are data** — edit any cue's layers with `getSpec()`/`playSpec()`, or visually in the [Cue Designer](https://usefoley.dev/#designer)
-- **10.9 kB**, zero dependencies, one ES module
+- **11.7 kB**, zero dependencies, one ES module
 - **Placed in space** — `pan` or 3D `pos` per play, or `set({ localize })` to pan every bound cue to where its element sits on screen
-- **Defensive by design** — master limiter, 60ms per-cue cooldown, ±30-cent humanization; `stop()` handles, looping, and ducking built in
+- **Markup, not wiring** — `data-foley-*` attributes on the elements you already have; one `bind()` covers the whole page, including markup rendered later and keyboard focus
+- **Defensive by design** — master limiter, 60ms per-cue cooldown, ±30-cent humanization; loops go quiet in background tabs; `stop()` handles, looping, and ducking built in
 - **WAV export** — any cue, any custom design, or all 28 as an audio sprite with an offset map
 
 ## Install
