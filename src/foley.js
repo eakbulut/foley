@@ -550,6 +550,15 @@ export function panFor(el) {
   return clampPan(((r.left + r.width / 2) / window.innerWidth * 2 - 1) * lz);
 }
 
+/* A loop in a backgrounded tab is noise from a page the user can't see, and an
+   AudioContext is not reliably suspended there - so repetitions are skipped while the
+   tab is hidden. One-shots are deliberately left alone: a ping for an incoming message
+   is exactly what a background tab should still be allowed to do. setInterval keeps
+   running either way, so the loop simply picks up again when the tab comes back. */
+function loopAudible() {
+  return !T.settings.muted && !(typeof document !== "undefined" && document.hidden);
+}
+
 /* shared performance path: cooldown, humanization, loop, stop handle, emit */
 function perform(key, spec, opts, emitName, emitFamily) {
   const nowMs = performance.now();
@@ -600,7 +609,7 @@ function perform(key, spec, opts, emitName, emitFamily) {
   let iv = null;
   if (opts.loop) {
     const period = ((opts.every != null ? opts.every : specDuration(spec)) + 0.06) * 1000;
-    iv = setInterval(() => { if (!T.settings.muted) once(); }, Math.max(80, period));
+    iv = setInterval(() => { if (loopAudible()) once(); }, Math.max(80, period));
   }
   emit("play", { name: emitName, family: emitFamily });
 

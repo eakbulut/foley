@@ -179,6 +179,7 @@ set({ theme: "glass" }); // "default" | "soft" | "mechanical" | "glass"
 - A **master limiter** (DynamicsCompressor as brick-wall safety) so overlapping cues never clip.
 - A **60ms per-cue cooldown** so hover storms and fast sliders stay musical instead of machine-gunning.
 - **Humanization**: each performance drifts up to ±30 cents in pitch and ±8% in level, applied to the whole cue at once — repeated ticks sound performed, not stamped.
+- **Looping cues fall silent in a background tab** and resume when it's visible again, so a forgotten `play("loading", { loop: true })` can't serenade someone from a tab they've left. One-shots still fire — a `ping` for an incoming message is the point.
 
 ## Framework packages
 
