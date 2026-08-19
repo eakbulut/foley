@@ -48,8 +48,10 @@ export interface SoundSet {
 }
 
 export interface PlayHandle {
-  /** Fade this performance out (~20ms) and, if looping, stop the loop. */
-  stop(): void;
+  /** Fade this performance out (~20ms) and, if looping, stop the loop.
+      A property, not a method: `const { stop } = play(...)` is a supported
+      pattern, and method syntax makes TypeScript's unbound-method rule object. */
+  stop: () => void;
 }
 
 export interface Settings {
