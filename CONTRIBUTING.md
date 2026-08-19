@@ -10,7 +10,7 @@ numbers matching reality). Read the failure message; it says what to do.
 
 ```sh
 npm install   # once - tests import the framework packages
-npm test      # 61 tests, plain node --test, no framework
+npm test      # plain node --test, no framework (one of them shells out to tsc)
 npm run demo  # serve the demo locally
 ```
 
@@ -18,6 +18,11 @@ npm run demo  # serve the demo locally
 
 - `src/foley.js` - the entire engine, one ES module. Cues are data (`CUES` specs).
 - `src/foley.d.ts` - types, hand-maintained, sync-tested against the module.
+- `types/consumer.ts` - the fixture `npm test` compiles with `tsc --strict` to
+  prove the published types work. Its `@ts-expect-error` lines must keep
+  erroring, so widening anything to `any` fails the build. Write interface
+  members as properties (`stop: () => void`), never method shorthand - the
+  method form makes `const { stop } = play(...)` trip unbound-method lint rules.
 - `index.html` - the demo. CSS in `<head>`, all page logic in ONE
   `<script type="module">` (the standalone build depends on this - see
   `scripts/build-standalone.mjs`). localStorage only between the

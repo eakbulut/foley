@@ -144,6 +144,14 @@ playSpec(mySound);
 const wav = await toWavSpec(mySound);
 ```
 
+In TypeScript, narrow on `kind` before touching a layer's fields — `Spec` is a union,
+and cluster layers carry `fMin`/`fMax` where tone and noise layers carry `f`:
+
+```ts
+const layer = mySound[2];
+if (layer.kind === "tone") layer.f = 880;
+```
+
 Or use the visual [Cue Designer on the demo](https://usefoley.dev/#designer) — edit with live playback, then export .wav/.json or share the design as a link.
 
 ## Sound sets
