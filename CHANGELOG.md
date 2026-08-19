@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.8.1
+- **Types: interface members are properties, not methods.** `const { play } = useFoley()` and `const { stop } = play(...)` are the patterns the docs recommend, but method-shorthand signatures tell TypeScript the member might depend on `this`, so typescript-eslint's `unbound-method` rule fired on documented usage. Reported and fixed for `@foleyjs/react` by [@DerTimonius](https://github.com/DerTimonius) in [#6](https://github.com/eakbulut/foley/pull/6); `PlayHandle.stop` in the core had the same problem and got the same fix. No runtime change.
+- The published types are now compiled in CI against a `tsc --strict` fixture whose `@ts-expect-error` lines must keep erroring, so a type widened to `any` fails the build. Until now every type guard only checked that declarations existed, never that they were right — which is why this had to be reported from outside.
+- Docs: the README's `mySound[2].f = 880` example doesn't typecheck, since `Spec` is a union and cluster layers carry `fMin`/`fMax`. Added the narrowing pattern.
+
+
 ## 2.8.0
 - **`bind()` now delegates**, so markup rendered after the call — modals, route changes, list items — makes sound without re-binding. One call at startup is genuinely enough; the React package no longer has to tell you otherwise. Six per-element listener loops and the `_fy*` flags Foley used to write onto your DOM nodes are gone.
 - **`data-foley-hover` fires on keyboard focus too.** Mouse users heard a cue on hover and keyboard users heard nothing; now tabbing through an interface sounds like moving through it. Gated by the same `hover` setting.
