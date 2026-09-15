@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.9.0
+- **`observe()`**: sound elements that appear, leave, or change state — `data-foley-enter`, `data-foley-exit`, `data-foley-change`. A toast mounting, a dialog unmounting, a drawer flipping `aria-expanded` all used to need a lifecycle hook or an effect; now they need an attribute. One `MutationObserver` per root.
+- Opt-in rather than started by `bind()`, because it watches for the life of the page: the usual `bind` + `play` + `set` bundle is byte-identical before and after this release (5.9 kB), since `observe` tree-shakes out when unused.
+- `-change` watches state attributes only — `aria-expanded`, `aria-selected`, `aria-checked`, `aria-pressed`, `open`, `data-state` — never `class`, which churns on every hover. It fires the same cue in both directions; `data-foley-toggle` remains the directional one.
+- Only changes *after* the call fire, so the initial render is silent. Exits play centered, since a removed element has no position left to read. A hundred rows appearing fire one cue, not a hundred — the existing 60ms cooldown already handles the storm.
+- Demo: the notification toasts now sound because they mounted. The page's `toast()` no longer calls `play()` at all.
+
+
 ## 2.8.1
 - **Types: interface members are properties, not methods.** `const { play } = useFoley()` and `const { stop } = play(...)` are the patterns the docs recommend, but method-shorthand signatures tell TypeScript the member might depend on `this`, so typescript-eslint's `unbound-method` rule fired on documented usage. Reported and fixed for `@foleyjs/react` by [@DerTimonius](https://github.com/DerTimonius) in [#6](https://github.com/eakbulut/foley/pull/6); `PlayHandle.stop` in the core had the same problem and got the same fix. No runtime change.
 - The published types are now compiled in CI against a `tsc --strict` fixture whose `@ts-expect-error` lines must keep erroring, so a type widened to `any` fails the build. Until now every type guard only checked that declarations existed, never that they were right — which is why this had to be reported from outside.
