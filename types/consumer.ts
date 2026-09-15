@@ -6,7 +6,7 @@
       of them stops erroring, which is what keeps the types from going vacuous:
       a d.ts full of `any` would pass job 1 alone. */
 
-import { play, set, get, on, bind, panFor, getSpec, playSpec, toWav, toSprite } from "../src/foley.js";
+import { play, set, get, on, bind, observe, panFor, getSpec, playSpec, toWav, toSprite } from "../src/foley.js";
 import { useFoley } from "../packages/react/src/index.js";
 
 /* ---------- detaching: the pattern unbound-method complains about ---------- */
@@ -43,6 +43,9 @@ play("ping", { pos: [1, 0, -0.5] });
 set({ localize: 0.6, duck: 0.3, theme: "glass" });
 set({ theme: { name: "Acme", transform: { pitch: 0.9 }, cues: { success: getSpec("success") } } });
 bind(document);
+const stopObserving: () => void = observe();
+stopObserving();
+observe(document.body);
 const pan: number = panFor(document.body);
 void pan;
 

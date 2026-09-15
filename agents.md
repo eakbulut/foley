@@ -34,6 +34,32 @@ attributes already cover.
 
 Any attribute takes a cue name as its value: `data-foley-click="success"`.
 
+## Elements appearing, leaving, and changing state: observe()
+
+`bind()` handles interaction. For things the UI does on its own — a toast mounting, a
+dialog unmounting, a drawer flipping `aria-expanded` — call `observe()` once as well.
+It runs one MutationObserver, so do NOT write lifecycle hooks, effects, or state
+watchers to play these cues.
+
+```js
+import { bind, observe } from "@foleyjs/core";
+bind(); observe();   // observe() is opt-in; bind() does not start it
+```
+
+| Attribute | Fires when | Default cue |
+| --- | --- | --- |
+| `data-foley-enter` | element added to the DOM | bubble |
+| `data-foley-exit` | element removed | whoosh |
+| `data-foley-change` | a state attribute changes | switch |
+
+- Only changes *after* the call fire; the initial render is silent.
+- `-change` watches `aria-expanded`, `aria-selected`, `aria-checked`, `aria-pressed`,
+  `open`, `data-state` — not `class`. If your component signals state with a class,
+  add `data-state` alongside it rather than asking for class watching.
+- Exits play centered; a removed element has no position to derive a pan from.
+- Rendering a long list fires one cue, not one per row — the 60ms cooldown handles it.
+  Do not add your own throttling.
+
 ## Programmatic cues
 
 Use `play()` for events the user didn't click:

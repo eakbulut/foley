@@ -68,6 +68,44 @@ modal, change routes, append a list item, and they all sound without re-binding.
 also fires on keyboard focus, so tabbing through an interface sounds like moving
 through it.
 
+## Sounds the user didn't trigger
+
+`bind()` covers what someone does. `observe()` covers what the interface does on its
+own — a toast arriving, a dialog closing, a drawer flipping open:
+
+```html
+<div role="status" data-foley-enter="bubble">Saved</div>
+<div class="modal" data-foley-exit="whoosh">…</div>
+<details data-foley-change="switch" open>…</details>
+```
+
+```js
+import { bind, observe } from "@foleyjs/core";
+bind();      // interaction
+observe();   // appearance and state change
+```
+
+| Attribute | Fires when | Default cue |
+| --- | --- | --- |
+| `data-foley-enter` | the element is added to the DOM | `bubble` |
+| `data-foley-exit` | the element is removed | `whoosh` |
+| `data-foley-change` | a state attribute on it changes | `switch` |
+
+One `MutationObserver`, so no lifecycle hooks and no state plumbing — mount a toast and
+it sounds. It's a separate call from `bind()` on purpose: it watches for the life of the
+page, and most apps only want interaction sounds.
+
+- **Only changes after the call fire**, so the initial render is silent. Call it once the
+  first paint is done.
+- **`-change` watches state attributes, not `class`**: `aria-expanded`, `aria-selected`,
+  `aria-checked`, `aria-pressed`, `open`, `data-state`. Class churns on every hover, which
+  would turn the page into a rattle.
+- **Exits play centered** even under `localize` — a removed element has no position left
+  to read.
+- A list rendering 100 rows fires 100 enters; the 60ms per-cue cooldown collapses them
+  into one, so you don't need to throttle.
+- `observe()` returns a stop function, and is a no-op if called twice on the same root.
+
 ## The 28 cues
 
 | Family | Cues |
@@ -89,6 +127,7 @@ import { play, bind, set, get, toWav, unlock, getAnalyser, on, cues, families, t
 - **`play(name, { pitch?, volume?, loop?, every?, pan?, pos? })`** — play a cue; returns `{ stop() }`. With `loop: true` it repeats until stopped — ideal for loading states.
 - **`bind(root?)`** — wire all `data-foley-*` attributes under `root` (default `document`). Idempotent, and delegated: markup rendered later is covered without re-binding.
 - **`set({ volume?, transpose?, space?, muted?, hover?, theme?, duck?, localize? })`** — update global settings. `duck` (0–1) temporarily attenuates everything, e.g. while a video plays. `localize` (0–1) pans every bound cue to its element's place on screen. `theme` accepts a name or a custom transform object (`{ pitch, decay, send, ... }`).
+- **`observe(root?)`** — sound elements that appear, leave, or change state (`data-foley-enter` / `-exit` / `-change`) via one `MutationObserver`. Opt-in; returns a stop function.
 - **`panFor(el)`** — the pan `localize` would derive for an element, for your own `play()` calls.
 - **`get()`** — snapshot of current settings.
 - **`toBuffer(name)`** — `Promise<AudioBuffer>`: same offline render, raw — for envelope drawings, meters, or custom encoding.

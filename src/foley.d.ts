@@ -112,6 +112,12 @@ export declare function bind(root?: ParentNode): void;
     localize is off. bind() applies it automatically; use it for your own play() calls. */
 export declare function panFor(el: Element | null): number;
 
+/** Sound elements that appear, leave, or change state under root (default: document),
+    via one MutationObserver — `data-foley-enter`, `-exit`, `-change`. Opt-in, because
+    it watches for the life of the page. Only changes after this call fire, so the
+    initial render is silent. Returns a function that stops observing. */
+export declare function observe(root?: Node): () => void;
+
 /** Update engine settings. Only the provided keys change.
     theme accepts a name or a custom ThemeTransform object. */
 export declare function set(opts: Partial<Omit<Settings, "theme">> & { theme?: ThemeName | ThemeTransform | SoundSet }): void;

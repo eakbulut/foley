@@ -712,6 +712,61 @@ export function bind(root) {
   );
 }
 
+/* ---------------- observing the DOM itself ----------------
+   bind() covers what the user does. This covers what the interface does on its
+   own: a toast arriving, a dialog leaving, a drawer flipping aria-expanded. One
+   MutationObserver per root, and opt-in rather than folded into bind(), because
+   it watches for the life of the page and most apps only want click sounds.
+
+   Only state attributes are watched, never class - class churns on every hover
+   and focus, which would turn the page into a rattle. */
+const STATE_ATTRS = ["aria-expanded", "aria-selected", "aria-checked", "aria-pressed", "open", "data-state"];
+
+/** Sound elements that appear, leave, or change state under root (default: document).
+    Attributes: data-foley-enter, data-foley-exit, data-foley-change.
+    Only fires for changes after this call, so the initial render stays silent.
+    Returns a function that stops observing; calling again on the same root is a no-op. */
+export function observe(root) {
+  root = root || document;
+  if (root._fyObserve) return root._fyObserve;
+  if (typeof MutationObserver === "undefined") return () => {}; /* SSR, old engines */
+
+  const sound = (el, attr, fallback, pan) =>
+    play(el.getAttribute(attr) || fallback, { pan });
+  /* a subtree is reported by its root only, so the match may be nested inside */
+  const each = (node, sel, fn) => {
+    if (!node || node.nodeType !== 1) return; /* text nodes, comments */
+    if (node.matches(sel)) fn(node);
+    node.querySelectorAll(sel).forEach(fn);
+  };
+
+  const obs = new MutationObserver((records) => {
+    for (const r of records) {
+      if (r.type === "attributes") {
+        if (r.target.hasAttribute("data-foley-change")) {
+          sound(r.target, "data-foley-change", "switch", panFor(r.target));
+        }
+        continue;
+      }
+      r.addedNodes.forEach((n) => each(n, "[data-foley-enter]", (el) =>
+        sound(el, "data-foley-enter", "bubble", panFor(el))));
+      /* a removed node is already detached, so getBoundingClientRect reads all
+         zeros and panFor would hard-pan every exit to the left. Exits stay center. */
+      r.removedNodes.forEach((n) => each(n, "[data-foley-exit]", (el) =>
+        sound(el, "data-foley-exit", "whoosh", 0)));
+    }
+  });
+  obs.observe(root === document ? document.documentElement : root, {
+    childList: true, subtree: true, attributes: true, attributeFilter: STATE_ATTRS,
+  });
+
+  /* a list rendering 100 rows fires 100 enters; the 60ms per-cue cooldown in
+     perform() collapses them to one, which is why this needs no throttle here. */
+  const stop = () => { obs.disconnect(); root._fyObserve = null; };
+  root._fyObserve = stop;
+  return stop;
+}
+
 /* ---------------- offline render & WAV export ---------------- */
 
 function renderSpecOffline(spec) {
