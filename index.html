@@ -726,10 +726,13 @@ html,body{overflow-x:clip}
 &lt;button <span class="at">data-foley-press</span> <span class="at">data-foley-release</span>&gt;Save&lt;/button&gt;
 &lt;a <span class="at">data-foley-hover</span>=<span class="st">"tick"</span>&gt;Docs&lt;/a&gt;
 &lt;button <span class="at">data-foley-toggle</span>&gt;Dark mode&lt;/button&gt;
-&lt;input <span class="at">data-foley-type</span>=<span class="st">"thock"</span>&gt;</code></pre>
-          <pre class="code"><button class="copy-btn" data-copy="#code-js">copy</button><code id="code-js"><span class="kw">import</span> { bind, play, set } <span class="kw">from</span> <span class="st">"@foleyjs/core"</span>;
+&lt;input <span class="at">data-foley-type</span>=<span class="st">"thock"</span>&gt;
+<span class="cm">&lt;!-- and things nobody clicked --&gt;</span>
+&lt;div <span class="at">data-foley-enter</span>=<span class="st">"bubble"</span>&gt;Saved&lt;/div&gt;</code></pre>
+          <pre class="code"><button class="copy-btn" data-copy="#code-js">copy</button><code id="code-js"><span class="kw">import</span> { bind, observe, play, set } <span class="kw">from</span> <span class="st">"@foleyjs/core"</span>;
 
 bind();                     <span class="cm">// wires every data-foley-*</span>
+observe();                  <span class="cm">// …and elements appearing or changing state</span>
 set({ volume: 0.7,          <span class="cm">// 0 – 1</span>
       transpose: 0,         <span class="cm">// semitones, ±12</span>
       space: 0.2,           <span class="cm">// reverb send</span>
@@ -783,7 +786,7 @@ app.use(FoleyPlugin, { theme: <span class="st">"soft"</span> });
    Demo page wiring. Everything sonic comes from the real
    package: this page runs exactly what `npm install foley` ships.
    ============================================================ */
-import { bind, play, set, get, on, unlock, getAnalyser, toWav, toBuffer, cues, families, version, getSpec, playSpec, toWavSpec, toBufferSpec, normalizeSpec, toSprite, getSet, themes, panFor } from "./src/foley.js";
+import { bind, play, set, get, on, unlock, getAnalyser, toWav, toBuffer, cues, families, version, getSpec, playSpec, toWavSpec, toBufferSpec, normalizeSpec, toSprite, getSet, themes, panFor, observe } from "./src/foley.js";
 
 /* page-side state: colors are a design decision, so they live here, not in the library */
 /* design tokens are CSS custom properties; canvases read them here so a palette
@@ -1177,12 +1180,15 @@ const TOASTS = {
   success: { cue: "chime", color: "var(--c-feedback)", title: "Deploy finished", body: "production \u00b7 14s \u00b7 all checks green" },
   error:   { cue: "error", color: "var(--err)",        title: "Build failed",    body: "tests: 2 failing \u00b7 see logs" },
 };
+/* No play() call here on purpose: the toast carries data-foley-enter, and
+   observe() sounds it because it mounted. This is the feature demonstrating
+   itself - the page has no idea which cue fired, or when. */
 function toast(kind) {
   const t = TOASTS[kind];
-  play(t.cue);
   const box = document.getElementById("toasts");
   const el = document.createElement("div");
   el.className = "toast";
+  el.setAttribute("data-foley-enter", t.cue);
   el.innerHTML = '<span class="td" style="background:' + t.color + '"></span><div><b>' + t.title + "</b><span>" + t.body + "</span></div>";
   box.appendChild(el);
   setTimeout(() => { el.style.opacity = "0"; el.style.transition = "opacity .3s"; setTimeout(() => el.remove(), 320); }, 3400);
@@ -2045,6 +2051,10 @@ try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } ca
 
 /* wire declarative attributes used in the markup */
 bind();
+/* and watch the DOM itself, so toasts sound because they mounted, not because
+   something remembered to call play(). Safe to start now: observe() only reacts
+   to changes after this point, so the page you are reading stays silent. */
+observe();
 
 console.log("foley v" + version + " \u2014 " + Object.keys(cues).length + " cues, " + get().theme + " theme");
 </script>
