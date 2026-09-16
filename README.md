@@ -8,6 +8,8 @@
 
 Foley is a tiny, dependency-free library of **28 interaction sounds**, named for the film artists who perform footsteps and door-latches in sync with the picture. It does the same for your interface: every cue is synthesized with Web Audio at the instant of the action. No audio files, no network requests, no build step.
 
+Sibling to [Dolly](https://usedolly.dev) ([repo](https://github.com/eakbulut/dolly)), which does scroll-driven motion the same way — one attribute, no JavaScript.
+
 - **28 cues in 7 families** — pointer, press, toggle, feedback, notify, motion, state
 - **4 themes** — default, soft, mechanical, glass — or your own transform, or a full [sound set](#sound-sets)
 - **Cues are data** — edit any cue's layers with `getSpec()`/`playSpec()`, or visually in the [Cue Designer](https://usefoley.dev/#designer)

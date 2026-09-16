@@ -16,10 +16,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
       - name: Install dev dependencies
         run: npm install --no-audit --no-fund
       - name: Tests must pass before deploy
@@ -34,9 +34,9 @@ jobs:
           echo "usefoley.dev" > _site/CNAME
           printf 'User-agent: *\nAllow: /\nSitemap: https://usefoley.dev/sitemap.xml\n' > _site/robots.txt
           printf '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>https://usefoley.dev/</loc></url>\n<url><loc>https://usefoley.dev/docs.html</loc></url>\n<url><loc>https://usefoley.dev/agents.md</loc></url>\n</urlset>\n' > _site/sitemap.xml
-      - uses: actions/configure-pages@v4
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: "_site"
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
