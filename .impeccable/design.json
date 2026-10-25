@@ -1,0 +1,560 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-25T14:42:57.455Z",
+  "title": "Design System: Foley",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242424",
+          "#424242",
+          "#636363",
+          "#868686",
+          "#ABABAB",
+          "#CECECE",
+          "#EEEEEE"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(18.2% 0.000 89.9)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242424",
+          "#424242",
+          "#636363",
+          "#868686",
+          "#ABABAB",
+          "#CECECE",
+          "#EEEEEE"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "canonical": "oklch(35.2% 0.000 89.9)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242424",
+          "#424242",
+          "#636363",
+          "#868686",
+          "#ABABAB",
+          "#CECECE",
+          "#EEEEEE"
+        ]
+      },
+      "ink-faint": {
+        "role": "neutral",
+        "displayName": "Faint Ink",
+        "canonical": "oklch(50.9% 0.005 106.6)",
+        "tonalRamp": [
+          "#0B0B0A",
+          "#242422",
+          "#424240",
+          "#636360",
+          "#868683",
+          "#ABABA8",
+          "#CECECB",
+          "#EFEFEC"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Rule",
+        "canonical": "oklch(88.7% 0.005 106.5)",
+        "tonalRamp": [
+          "#0B0B0A",
+          "#242422",
+          "#424240",
+          "#636361",
+          "#868683",
+          "#ABABA7",
+          "#CECECA",
+          "#EFEFEB"
+        ]
+      },
+      "yellow": {
+        "role": "primary",
+        "displayName": "Process Yellow",
+        "canonical": "oklch(90.5% 0.184 98.8)",
+        "tonalRamp": [
+          "#160700",
+          "#332100",
+          "#544100",
+          "#786200",
+          "#9E8500",
+          "#C6AB00",
+          "#ECCE00",
+          "#FFEF44"
+        ]
+      },
+      "yellow-deep": {
+        "role": "primary",
+        "displayName": "Deep Yellow",
+        "canonical": "oklch(84.7% 0.173 92.3)",
+        "tonalRamp": [
+          "#1A0500",
+          "#371E00",
+          "#5A3D00",
+          "#7F5E00",
+          "#A68100",
+          "#CFA600",
+          "#F6C907",
+          "#FFEB5B"
+        ]
+      },
+      "cyan": {
+        "role": "tertiary",
+        "displayName": "Focus Cyan",
+        "canonical": "oklch(67.7% 0.133 -129.8)",
+        "tonalRamp": [
+          "#000D29",
+          "#00294A",
+          "#004B71",
+          "#006E99",
+          "#0093C4",
+          "#3FB9EC",
+          "#72DCFF",
+          "#9CFDFF"
+        ]
+      },
+      "magenta": {
+        "role": "tertiary",
+        "displayName": "Caret Magenta",
+        "canonical": "oklch(59.4% 0.235 -2.5)",
+        "tonalRamp": [
+          "#34000B",
+          "#5C0024",
+          "#8A0043",
+          "#B90064",
+          "#E82887",
+          "#FF63AB",
+          "#FF8FCE",
+          "#FFB6EF"
+        ]
+      },
+      "night": {
+        "role": "neutral",
+        "displayName": "Night",
+        "canonical": "oklch(18.2% 0.000 89.9)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242424",
+          "#424242",
+          "#636363",
+          "#868686",
+          "#ABABAB",
+          "#CECECE",
+          "#EEEEEE"
+        ]
+      },
+      "night-ink": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "canonical": "oklch(96.6% 0.005 106.5)",
+        "tonalRamp": [
+          "#0B0B0A",
+          "#242422",
+          "#424240",
+          "#636361",
+          "#868683",
+          "#ABABA8",
+          "#CECECA",
+          "#EFEFEB"
+        ]
+      },
+      "c-pointer": {
+        "role": "secondary",
+        "displayName": "Pointer Marigold",
+        "canonical": "oklch(81.4% 0.167 83.9)",
+        "tonalRamp": [
+          "#1D0200",
+          "#3C1A00",
+          "#613900",
+          "#875900",
+          "#B07C00",
+          "#DAA000",
+          "#FFC32E",
+          "#FFE568"
+        ]
+      },
+      "c-press": {
+        "role": "secondary",
+        "displayName": "Press Fire Red",
+        "canonical": "oklch(61.0% 0.215 28.8)",
+        "tonalRamp": [
+          "#350000",
+          "#5E0000",
+          "#8B0000",
+          "#BB0909",
+          "#EB3B2F",
+          "#FF6F5D",
+          "#FF9986",
+          "#FFBFAB"
+        ]
+      },
+      "c-toggle": {
+        "role": "secondary",
+        "displayName": "Toggle Cobalt",
+        "canonical": "oklch(54.6% 0.215 -97.1)",
+        "tonalRamp": [
+          "#06004F",
+          "#000378",
+          "#0030A7",
+          "#1A55D8",
+          "#3F7DFF",
+          "#68A5FF",
+          "#8FCBFF",
+          "#B4EDFF"
+        ]
+      },
+      "c-feedback": {
+        "role": "secondary",
+        "displayName": "Feedback Green",
+        "canonical": "oklch(61.9% 0.162 150.9)",
+        "tonalRamp": [
+          "#001500",
+          "#003200",
+          "#005513",
+          "#007A31",
+          "#14A04F",
+          "#57C578",
+          "#84E89E",
+          "#ABFFC1"
+        ]
+      },
+      "c-notify": {
+        "role": "secondary",
+        "displayName": "Notify Magenta",
+        "canonical": "oklch(59.4% 0.235 -2.5)",
+        "tonalRamp": [
+          "#34000B",
+          "#5C0024",
+          "#8A0043",
+          "#B90064",
+          "#E82887",
+          "#FF63AB",
+          "#FF8FCE",
+          "#FFB6EF"
+        ]
+      },
+      "c-motion": {
+        "role": "secondary",
+        "displayName": "Motion Cyan",
+        "canonical": "oklch(67.7% 0.133 -129.8)",
+        "tonalRamp": [
+          "#000D29",
+          "#00294A",
+          "#004B71",
+          "#006E99",
+          "#0093C4",
+          "#3FB9EC",
+          "#72DCFF",
+          "#9CFDFF"
+        ]
+      },
+      "c-state": {
+        "role": "secondary",
+        "displayName": "State Violet",
+        "canonical": "oklch(54.1% 0.247 -67.0)",
+        "tonalRamp": [
+          "#1B0051",
+          "#32007A",
+          "#5000AA",
+          "#702CDB",
+          "#915BFF",
+          "#B388FF",
+          "#D5B0FF",
+          "#F4D4FF"
+        ]
+      },
+      "err": {
+        "role": "tertiary",
+        "displayName": "Alarm Red",
+        "canonical": "oklch(56.7% 0.212 28.8)",
+        "tonalRamp": [
+          "#360000",
+          "#5E0000",
+          "#8C0000",
+          "#BC0506",
+          "#E84135",
+          "#FF7362",
+          "#FF9C8A",
+          "#FFC2AF"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The H1 only; second line fully lettered."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section heads on the 7:5 head grid."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Step titles, family names."
+      },
+      "sfx-tile": {
+        "displayName": "SFX Tile",
+        "purpose": "Cue names on tiles."
+      },
+      "lede": {
+        "displayName": "Lede",
+        "purpose": "Splash lede, 44ch."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Prose."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Buttons, options, labels."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Caption boxes, balloons, notes."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Code, values, tags."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sfx-lettering",
+        "value": "8-way 0.035em ink outline + .05em .06em 0 ink, .065em .08em 0 ink (text-shadow)",
+        "purpose": "Outline and extrusion for SFX lettering only; the system has no box-shadows."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-press",
+        "value": "cubic-bezier(.2,.9,.3,1)",
+        "purpose": "Button press, pill tilt, toggle thumb (0.12-0.2s)."
+      },
+      {
+        "name": "ease-slam",
+        "value": "cubic-bezier(.16,1,.3,1)",
+        "purpose": "Stage word slam and burst (0.5s), pop-words (0.85s), toast entry (0.35s), tile name scale."
+      },
+      {
+        "name": "flood",
+        "value": "background-color .2s",
+        "purpose": "Family flood on tiles and stage."
+      },
+      {
+        "name": "marquee",
+        "value": "70s linear infinite",
+        "purpose": "Letters-page balloon track; pauses on hover, stops under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "masthead-shed",
+        "value": "1040px"
+      },
+      {
+        "name": "cue-board-narrow",
+        "value": "1180px"
+      },
+      {
+        "name": "menu",
+        "value": "920px"
+      },
+      {
+        "name": "stack",
+        "value": "960px"
+      },
+      {
+        "name": "compact",
+        "value": "600px"
+      },
+      {
+        "name": "tiny",
+        "value": "380px"
+      }
+    ],
+    "halftone": {
+      "value": "radial-gradient(circle, rgb(18 18 18 / .16) 1.3px, transparent 1.7px)",
+      "tiles": "6-9px",
+      "purpose": "Hover texture; family floods swap ink for the plate at 70-75%."
+    },
+    "lines": {
+      "panel": "3px",
+      "control": "2-2.5px",
+      "divider": "2px",
+      "tag": "1.5px"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one yellow action per panel; presses down on click.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Get started</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-weight:800;font-size:16px;line-height:1;padding:13px 20px;border:2.5px solid var(--ink,#121212);border-radius:10px;color:var(--ink,#121212);cursor:pointer;transition:transform .12s cubic-bezier(.2,.9,.3,1),background-color .15s;background:var(--paper,#FFFFFF)} .ds-btn-primary{background:var(--yellow,#FFE01B)} .ds-btn-primary:hover{background:radial-gradient(circle, rgb(18 18 18 / .16) 1.3px, transparent 1.7px) 0 0/6px 6px,var(--yellow-deep,#F5C800)} .ds-btn:focus-visible{outline:3px solid var(--cyan,#0EA5D9);outline-offset:2px} .ds-btn:active{transform:translateY(2px)}"
+    },
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Default paper button; hover lays halftone over yellow.",
+      "html": "<button class=\"ds-btn-default\">Play the tour</button>",
+      "css": ".ds-btn-default{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-weight:800;font-size:16px;line-height:1;padding:13px 20px;border:2.5px solid var(--ink,#121212);border-radius:10px;color:var(--ink,#121212);cursor:pointer;transition:transform .12s cubic-bezier(.2,.9,.3,1),background-color .15s;background:var(--paper,#FFFFFF)} .ds-btn-default:hover{background:radial-gradient(circle, rgb(18 18 18 / .16) 1.3px, transparent 1.7px) 0 0/6px 6px,var(--yellow,#FFE01B)} .ds-btn-default:focus-visible{outline:3px solid var(--cyan,#0EA5D9);outline-offset:2px} .ds-btn-default:active{transform:translateY(2px)}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "chip",
+      "refersTo": "seg-option-on",
+      "description": "Inked option group; the pressed option inverts to ink.",
+      "html": "<div class=\"ds-seg\"><button aria-pressed=\"true\">default</button><button aria-pressed=\"false\">soft</button><button aria-pressed=\"false\">mechanical</button><button aria-pressed=\"false\">glass</button></div>",
+      "css": ".ds-seg{display:inline-flex;border:2.5px solid var(--ink,#121212);border-radius:10px;overflow:hidden;background:var(--paper,#FFFFFF)} .ds-seg button{border:0;border-right:2px solid var(--ink,#121212);background:none;padding:9px 14px;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-weight:700;font-size:14.5px;color:var(--ink,#121212);cursor:pointer} .ds-seg button:last-child{border-right:0} .ds-seg button:hover{background:radial-gradient(circle, rgb(18 18 18 / .16) 1.3px, transparent 1.7px) 0 0/6px 6px,var(--paper,#FFFFFF)} .ds-seg button:focus-visible{outline:3px solid var(--cyan,#0EA5D9);outline-offset:2px} .ds-seg button[aria-pressed=\"true\"]{background:var(--ink,#121212);color:var(--paper,#FFFFFF)}"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "text-input",
+      "description": "Paper field in 2.5px ink with the global cyan focus ring.",
+      "html": "<input class=\"ds-input\" placeholder=\"Type to hear keys\">",
+      "css": ".ds-input{width:260px;border:2.5px solid var(--ink,#121212);border-radius:10px;padding:11px 12px;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-size:15px;background:var(--paper,#FFFFFF);color:var(--ink,#121212)} .ds-input::placeholder{color:var(--ink-faint,#666663)} .ds-input:focus-visible{outline:3px solid var(--cyan,#0EA5D9);outline-offset:2px}"
+    },
+    {
+      "name": "Masthead",
+      "kind": "nav",
+      "description": "Sticky paper masthead: lettered logo, version box, yellow-hover links.",
+      "html": "<header class=\"ds-top\"><a class=\"ds-logo\" href=\"#\">FOLEY</a><span class=\"ds-ver\">v2.9.0 · 7.6 kB</span><nav class=\"ds-nav\"><a href=\"#\">Cues</a><a href=\"#\">Playground</a><a href=\"#\">Designer</a><a href=\"#\">Install</a></nav></header>",
+      "css": ".ds-top{display:flex;align-items:center;gap:16px;height:68px;padding:0 24px;background:var(--paper,#FFFFFF);border-bottom:3px solid var(--ink,#121212);font-family:'Schibsted Grotesk',system-ui,sans-serif;color:var(--ink,#121212)} .ds-logo{font-family:'Bangers','Schibsted Grotesk',system-ui,sans-serif;font-weight:400;letter-spacing:.02em;line-height:.9;color:var(--fc,var(--yellow,#FFE01B));text-shadow:-.035em -.035em 0 var(--ink,#121212),0 -.035em 0 var(--ink,#121212),.035em -.035em 0 var(--ink,#121212),.035em 0 0 var(--ink,#121212),.035em .035em 0 var(--ink,#121212),0 .035em 0 var(--ink,#121212),-.035em .035em 0 var(--ink,#121212),-.035em 0 0 var(--ink,#121212),.05em .06em 0 var(--ink,#121212),.065em .08em 0 var(--ink,#121212);font-size:38px;text-decoration:none} .ds-ver{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;font-weight:600;border:2px solid var(--ink,#121212);padding:3px 7px} .ds-nav{margin-left:auto;display:flex;gap:2px} .ds-nav a{font-weight:700;font-size:15px;text-decoration:none;color:var(--ink,#121212);padding:8px 11px;border-radius:8px} .ds-nav a:hover{background:var(--yellow,#FFE01B)} .ds-nav a:focus-visible{outline:3px solid var(--cyan,#0EA5D9);outline-offset:2px}"
+    },
+    {
+      "name": "Cue Tile",
+      "kind": "card",
+      "refersTo": "cue-tile",
+      "description": "Square panel per cue; floods with its family plate while playing.",
+      "html": "<button class=\"ds-tile\" style=\"--cc:var(--c-press,#E8362B)\"><kbd>T</kbd><span class=\"ds-nm\">thock</span><span class=\"ds-ds\">A soft keycap bottoming out.</span></button>",
+      "css": ".ds-tile{position:relative;width:220px;min-height:160px;border:3px solid var(--ink,#121212);background:var(--paper,#FFFFFF);padding:12px;display:flex;flex-direction:column;gap:6px;text-align:left;cursor:pointer;color:var(--ink,#121212);transition:background-color .2s} .ds-tile kbd{position:absolute;top:10px;left:10px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;font-weight:600;min-width:24px;height:24px;display:grid;place-items:center;border:2px solid var(--ink,#121212);border-radius:6px;background:var(--paper,#FFFFFF)} .ds-nm{font-family:'Bangers',system-ui,sans-serif;font-size:34px;line-height:1;letter-spacing:.03em;margin-top:30px;transform-origin:0 100%;transition:transform .2s cubic-bezier(.16,1,.3,1)} .ds-ds{font-family:'Schibsted Grotesk',system-ui,sans-serif;font-size:13.5px;line-height:1.35;color:var(--ink-soft,#3B3B3B);margin-top:auto} .ds-tile:hover{background:radial-gradient(circle, rgb(18 18 18 / .16) 1.3px, transparent 1.7px) 0 0/7px 7px,var(--paper,#FFFFFF)} .ds-tile:focus-visible{outline:3px solid var(--cyan,#0EA5D9);outline-offset:2px} .ds-tile:active{background:radial-gradient(circle, color-mix(in srgb,var(--cc) 75%,#fff) 2px, transparent 2.5px) 0 0/9px 9px, color-mix(in srgb,var(--cc) 30%,#fff)} .ds-tile:active .ds-nm{transform:scale(1.12) rotate(-3deg)}"
+    },
+    {
+      "name": "Stage with Caption Box",
+      "kind": "custom",
+      "refersTo": "caption-box",
+      "description": "Family-flooded panel with a corner caption and the lettered cue word.",
+      "html": "<div class=\"ds-stage\"><span class=\"ds-cap\">press a cue, any cue</span><span class=\"ds-word\"><span style=\"--v:.9;--tilt:-4deg\">T</span><span style=\"--v:1;--tilt:2deg\">H</span><span style=\"--v:.8;--tilt:3deg\">O</span><span style=\"--v:.7;--tilt:1deg\">C</span><span style=\"--v:.62;--tilt:0deg\">K</span><span style=\"--v:.7\">!</span></span></div>",
+      "css": ".ds-stage{--fc:var(--c-press,#E8362B);position:relative;width:460px;height:280px;border:3px solid var(--ink,#121212);display:grid;place-items:center;background:radial-gradient(circle, color-mix(in srgb,var(--fc) 70%,#fff) 2.2px, transparent 2.7px) 0 0/11px 11px, color-mix(in srgb,var(--fc) 22%,#fff)} .ds-cap{position:absolute;left:14px;top:14px;font-family:'Patrick Hand SC',system-ui,sans-serif;font-size:16.5px;line-height:1.2;background:var(--yellow,#FFE01B);border:2px solid var(--ink,#121212);padding:4px 9px} .ds-word{font-family:'Bangers','Schibsted Grotesk',system-ui,sans-serif;font-weight:400;letter-spacing:.02em;line-height:.9;color:var(--fc,var(--yellow,#FFE01B));text-shadow:-.035em -.035em 0 var(--ink,#121212),0 -.035em 0 var(--ink,#121212),.035em -.035em 0 var(--ink,#121212),.035em 0 0 var(--ink,#121212),.035em .035em 0 var(--ink,#121212),0 .035em 0 var(--ink,#121212),-.035em .035em 0 var(--ink,#121212),-.035em 0 0 var(--ink,#121212),.05em .06em 0 var(--ink,#121212),.065em .08em 0 var(--ink,#121212);font-size:96px;transform:rotate(-5deg)} .ds-word span{display:inline-block;font-size:calc(var(--v,1) * 1em);transform:rotate(var(--tilt,0deg));transform-origin:50% 100%}"
+    },
+    {
+      "name": "Night Code Panel",
+      "kind": "custom",
+      "refersTo": "code-panel",
+      "description": "Code on night with a labelled header strip and copy button.",
+      "html": "<pre class=\"ds-code\" data-label=\"index.html\"><button class=\"ds-copy\">copy</button>&lt;button <span class=\"at\">data-foley-press</span>=<span class=\"st\">\"thock\"</span>&gt;Save&lt;/button&gt;</pre>",
+      "css": ".ds-code{position:relative;margin:0;width:460px;background:var(--night,#121212);color:var(--night-ink,#F4F4F0);border:3px solid var(--ink,#121212);padding:52px 20px 18px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13.5px;line-height:1.75;white-space:pre;overflow-x:auto} .ds-code::before{content:attr(data-label);box-sizing:border-box;position:absolute;left:0;right:0;top:0;height:40px;border-bottom:2px solid #3A3A37;padding:10px 16px;font-family:'Patrick Hand SC',system-ui,sans-serif;font-size:16px;color:#C9C9C2} .ds-code .st{color:var(--yellow,#FFE01B)} .ds-code .at{color:#6CD3FF} .ds-copy{position:absolute;top:6px;right:8px;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-weight:800;font-size:13px;border:2px solid var(--night-ink,#F4F4F0);background:transparent;color:var(--night-ink,#F4F4F0);border-radius:7px;padding:7px 11px;cursor:pointer} .ds-copy:hover{background:var(--yellow,#FFE01B);color:var(--ink,#121212);border-color:var(--yellow,#FFE01B)} .ds-copy:focus-visible{outline:3px solid var(--cyan,#0EA5D9);outline-offset:2px}"
+    },
+    {
+      "name": "Hero Pill",
+      "kind": "chip",
+      "refersTo": "hero-pill",
+      "description": "Tilted Bangers pill; hover straightens and fills with its family plate.",
+      "html": "<button class=\"ds-pill\" style=\"--pc:var(--c-notify,#E0137F);--r:-3deg\">chime</button>",
+      "css": ".ds-pill{font-family:'Bangers',system-ui,sans-serif;font-size:24px;letter-spacing:.03em;line-height:1;padding:9px 14px 7px;border:2.5px solid var(--ink,#121212);border-radius:999px;background:var(--paper,#FFFFFF);color:var(--ink,#121212);cursor:pointer;transform:rotate(var(--r,0deg));transition:transform .14s cubic-bezier(.2,.9,.3,1),background-color .15s} .ds-pill:hover{background:var(--pc);transform:rotate(0deg) scale(1.06)} .ds-pill:focus-visible{outline:3px solid var(--cyan,#0EA5D9);outline-offset:2px} .ds-pill:active{transform:scale(.96)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Sound Words",
+    "overview": "Comics solved silent sound by lettering it. Foley's cues are already onomatopoeia, so the page is a comic page: bright white stock, square panels drawn in a 3px ink line, one 14px gutter between every panel, and Bangers lettering with an ink outline and extrusion that names each cue as it plays. Colour is printed, not glowed: process yellow is the page's signal, seven flat family plates mark the cue families, and Ben-Day halftone dots are the only texture.\n\nThe page reads as panels laid on a grid, never as cards in a dashboard. Sections are unframed bands of paper; the framed things inside them are panels, and a panel is never put inside another framed section. Hand-lettered captions (Patrick Hand SC) sit in yellow boxes pinned to panel corners or as panel notes; speech balloons carry testimonials and toasts; code lives in night panels. Depth comes from line weight and halftone, not shadow.\n\nThe world is light only. There is no dark theme; night is a panel type, not a mode.",
+    "keyCharacteristics": [
+      "Bright white paper, ink line art, square panel corners, one gutter.",
+      "Bangers SFX lettering, outlined and extruded in ink, shaped per letter by the cue's real envelope.",
+      "Process yellow as the single signal colour; seven family plates appear only where a family is named or playing.",
+      "Halftone dots as hover texture and as the flood when a cue plays.",
+      "Caption boxes and balloons in Patrick Hand SC carry the narrator's voice.",
+      "Night panels with a labelled header strip for every code sample.",
+      "Self-hosted fonts from `assets/fonts`; nothing loads from a font CDN."
+    ],
+    "rules": [
+      {
+        "name": "The One Signal Rule",
+        "body": "Yellow is the only interface accent. Hover, selected, and primary states all resolve to yellow (or ink-on-paper inversion for segmented choices); a family plate never stands in for UI state.",
+        "section": "colors"
+      },
+      {
+        "name": "The Plate Discipline Rule",
+        "body": "A family colour appears only where its family is named or its cue is sounding. Canvases read plates through the page's `cssVar()` helper; no hex is hardcoded in script except as a fallback argument.",
+        "section": "colors"
+      },
+      {
+        "name": "The Flood Rule",
+        "body": "When a cue plays, its family plate floods the surface as halftone over a tint: dots at 70-75% plate over a 22-30% plate tint (stage 22% with 11px dots, tiles 30% with 9px dots). Floods are state, never resting decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Lettering Rule",
+        "body": "SFX lettering is one construction: Bangers in a fill colour (`--fc`, default yellow) with an eight-direction 0.035em ink outline plus a two-step extrusion (0.05em/0.06em, 0.065em/0.08em), all in `text-shadow` so it renders on every engine. Because it is in em, it scales with the word. Lettered cue words split into per-letter spans sized by the cue's real envelope (`--v` = 0.56 + 0.44 x envelope) and tilted by its slope (`--tilt`, rotated from the letter's baseline).",
+        "section": "typography"
+      },
+      {
+        "name": "The Headings Are Lettered Rule",
+        "body": "H1, H2, and H3 are Bangers at weight 400 with tight line-height (0.9-1). Only the logo, the H1's second line, the stage word, pop-words, and the closing word get the full outline-and-extrusion treatment; section heads stay flat ink.",
+        "section": "typography"
+      },
+      {
+        "name": "The Narrator Rule",
+        "body": "Patrick Hand SC is for the narrator (captions, balloons, notes). It never sets a heading, a button, or a label above a heading.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Gutter Rule",
+        "body": "Panel-to-panel spacing is `--gut` and nothing else. If two framed things touch, they are separated by the gutter or they share a 2px inner divider inside one panel (the mixing desk); never an ad-hoc gap.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Page Rule",
+        "body": "Panels are never nested inside framed sections. Sections are unframed bands; panels sit directly on paper.",
+        "section": "layout"
+      },
+      {
+        "name": "The Divisible Grid Rule",
+        "body": "Never `repeat(auto-fit, minmax())` for panels with uneven content. Choose a column count that divides the item count, reserve text zones, and bottom-anchor metadata with `margin-top: auto`.",
+        "section": "layout"
+      },
+      {
+        "name": "The Printed Depth Rule",
+        "body": "Depth comes from line weight and halftone. No box-shadows, no blur, no glow; hard offset slabs (`0 2px 0 #000`) are banned. Extrusion belongs to lettering only.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Line Weight Rule",
+        "body": "3px is the panel line; 2-2.5px is control chrome; 2px is an inner divider; 1.5px is a chip or value tag. Never mix a panel at control weight.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do separate every panel by `--gut` (14px, 10px compact) and frame it in the 3px ink `--line` with square corners.",
+      "Do letter cue words with the shared `.sfx` construction (em-based outline and extrusion) and per-letter `--v` and `--tilt` from the cue's envelope.",
+      "Do flood a surface with its family plate while its cue sounds: halftone at 70-75% over a 22-30% tint.",
+      "Do pin caption boxes into panel corners or panel feet, in Patrick Hand SC on yellow.",
+      "Do put every code sample in a night panel with a labelled 40px header strip.",
+      "Do read colours in canvases through `cssVar()`, with hex only as the fallback argument.",
+      "Do load fonts from `assets/fonts` and keep the page light.",
+      "Do honour reduced motion: the slam, burst, pop-word, marquee, and toasts collapse to instant."
+    ],
+    "donts": [
+      "Don't nest a panel inside a framed section, or frame a section band.",
+      "Don't use `repeat(auto-fit, minmax())` for panels; pick column counts that divide the item count.",
+      "Don't add box-shadows, glows, or hard offset slabs; depth is line and halftone.",
+      "Don't put a caption box, kicker, or eyebrow label above a heading.",
+      "Don't use a family plate as UI state or decoration; state is yellow or ink inversion.",
+      "Don't invent new control chrome; reuse the button, segmented control, and knob.",
+      "Don't ship a dark theme or load fonts from a CDN."
+    ]
+  }
+}
