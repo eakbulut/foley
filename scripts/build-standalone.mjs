@@ -35,6 +35,8 @@ const store = { load() { return _mem; }, save(patch) { Object.assign(_mem, patch
     page.slice(m.index + m[0].length);
 
   out = out.replace(/^.*data-goatcounter.*\n/m, "");
+  /* one file, no assets folder beside it: fonts come from the live site */
+  out = out.replaceAll("assets/fonts/", "https://usefoley.dev/assets/fonts/");
   if (out.includes("localStorage")) throw new Error("standalone must not reference localStorage");
   if (out.includes("goatcounter")) throw new Error("standalone must not include analytics");
   mkdirSync(dirname(outFile), { recursive: true });
