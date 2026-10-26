@@ -155,7 +155,7 @@ The world is light only. There is no dark theme; night is a panel type, not a mo
 
 **Key Characteristics:**
 - Bright white paper, ink line art, square panel corners, one gutter.
-- Bangers SFX lettering, outlined and extruded in ink, shaped per letter by the cue's real envelope.
+- Bangers SFX lettering, outlined and extruded in ink, set at one even size.
 - Process yellow as the single signal colour; seven family plates appear only where a family is named or playing.
 - Halftone dots as hover texture and as the flood when a cue plays.
 - Caption boxes and balloons in Patrick Hand SC carry the narrator's voice.
@@ -213,7 +213,7 @@ A printed palette: white stock, near-black ink, one process yellow, and seven fl
 - **Mono** (JetBrains Mono, 12-15px, weight 600 for tags): code, knob values, attribute tags, the version box.
 
 ### Named Rules
-**The Lettering Rule.** SFX lettering is one construction: Bangers in a fill colour (`--fc`, default yellow) with an eight-direction 0.035em ink outline plus a two-step extrusion (0.05em/0.06em, 0.065em/0.08em), all in `text-shadow` so it renders on every engine. Because it is in em, it scales with the word. Lettered cue words split into per-letter spans sized by the cue's real envelope (`--v` = 0.56 + 0.44 x envelope) and tilted by its slope (`--tilt`, rotated from the letter's baseline).
+**The Lettering Rule.** SFX lettering is one construction: Bangers in a fill colour (`--fc`, default yellow) with an eight-direction 0.035em ink outline plus a two-step extrusion (0.05em/0.06em, 0.065em/0.08em), all in `text-shadow` so it renders on every engine. Because it is in em, it scales with the word. Letters stay one size; the word as a whole carries the tilt.
 
 **The Headings Are Lettered Rule.** H1, H2, and H3 are Bangers at weight 400 with tight line-height (0.9-1). Only the logo, the H1's second line, the stage word, pop-words, and the closing word get the full outline-and-extrusion treatment; section heads stay flat ink.
 
@@ -273,7 +273,7 @@ The narrator's box: Patrick Hand SC 16.5px, yellow fill, 2px ink border, square,
 A square panel (3px ink, paper) with a key cap in its top-left (mono 12px, 2px border, 6px radius), a download icon top-right, the cue name in SFX tile type, a 28px envelope canvas, and a 13.5px description bottom-anchored. Hover lays ink halftone; while playing, the family flood fills it and the name scales 1.12 and tilts -3deg. Family heads are panels tinted 16% with a 16px family dot.
 
 ### Stage
-The splash's right panel: family flood (halftone over 22% tint) behind a paper starburst rotated -4deg, the last cue's word lettered by its envelope at up to 10rem (container-sized by letter count), a corner caption, and a footer strip of hero pills behind a 3px top line. On play the word slams in from 1.35 scale and -11deg over 0.5s (cubic-bezier(.16,1,.3,1)).
+The splash's right panel: family flood (halftone over 22% tint) behind a paper starburst rotated -4deg, the last cue's word lettered at up to 10rem (container-sized by letter count), a corner caption, and a footer strip of hero pills behind a 3px top line. On play the word slams in from 1.35 scale and -11deg over 0.5s (cubic-bezier(.16,1,.3,1)).
 
 ### Hero Pill
 Bangers 24px in a 999px pill, 2.5px ink, each set at its own small tilt (`--r`, -3 to 3deg). Hover straightens it, scales 1.06, and fills it with its family plate.
@@ -300,7 +300,7 @@ The generated docs share the tokens on an 860px column: sticky masthead with the
 
 ### Do:
 - **Do** separate every panel by `--gut` (14px, 10px compact) and frame it in the 3px ink `--line` with square corners.
-- **Do** letter cue words with the shared `.sfx` construction (em-based outline and extrusion) and per-letter `--v` and `--tilt` from the cue's envelope.
+- **Do** letter cue words with the shared `.sfx` construction (em-based outline and extrusion) at one even letter size; per-letter sizing reads as broken type.
 - **Do** flood a surface with its family plate while its cue sounds: halftone at 70-75% over a 22-30% tint.
 - **Do** pin caption boxes into panel corners or panel feet, in Patrick Hand SC on yellow.
 - **Do** put every code sample in a night panel with a labelled 40px header strip.

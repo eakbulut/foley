@@ -97,7 +97,6 @@ kbd,code,pre{font-family:var(--mono)}
    -.035em -.035em 0 var(--ink), 0 -.035em 0 var(--ink), .035em -.035em 0 var(--ink), .035em 0 0 var(--ink),
    .035em .035em 0 var(--ink), 0 .035em 0 var(--ink), -.035em .035em 0 var(--ink), -.035em 0 0 var(--ink),
    .05em .06em 0 var(--ink), .065em .08em 0 var(--ink)}
-.sfx span{display:inline-block;font-size:calc(var(--v,1) * 1em);transform:rotate(var(--tilt,0deg));transform-origin:50% 100%}
 
 /* caption box: every panel names what it does */
 .cap{display:inline-block;font-family:var(--hand);font-size:16.5px;line-height:1.2;background:var(--yellow);border:2px solid var(--ink);padding:4px 9px}
@@ -452,7 +451,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     <div class="panel stage" id="stage" data-cue="thock" aria-hidden="true">
       <span class="cap stage-cap" id="stage-cap">press a cue, any cue</span>
       <svg class="stage-burst" viewBox="-8 -2 216 124" preserveAspectRatio="none"><polygon points="204.9,60.0 175.6,66.4 193.3,76.2 155.8,75.1 176.8,89.2 156.6,89.0 165.7,104.8 134.5,91.7 143.3,116.1 120.2,100.7 113.4,115.3 100.0,99.9 86.8,114.3 80.9,98.5 57.3,115.4 61.4,95.6 33.0,105.7 51.6,84.8 22.4,89.5 32.1,78.4 8.8,75.8 39.2,65.2 -4.5,60.0 24.4,53.6 4.5,43.4 44.7,45.1 23.3,30.8 42.6,30.6 35.8,16.2 66.4,29.1 56.5,3.6 79.2,18.2 86.3,3.5 100.0,21.4 113.0,6.4 119.7,20.2 142.0,5.6 137.4,25.6 168.0,13.6 149.9,34.4 178.8,30.0 166.3,42.1 189.4,44.5 162.1,54.7"/></svg>
-      <span class="stage-word sfx" id="stage-word" style="--len:6"><span>T</span><span>H</span><span>O</span><span>C</span><span>K</span><span>!</span></span>
+      <span class="stage-word sfx" id="stage-word" style="--len:6">THOCK!</span>
       <div class="hero-pills">
         <button class="hero-pill" data-cue="chime" style="--pc:var(--c-notify);--r:-3deg">chime</button>
         <button class="hero-pill" data-cue="thock" style="--pc:var(--c-press);--r:2deg">thock</button>
@@ -854,40 +853,15 @@ const ICON = {
   reroll: svg('<path d="M13 8a5 5 0 1 1-1.6-3.7M13.5 2v3h-3"/>'),
 };
 
-/* sound words: every cue is lettered as it plays, like a comic SFX. Letter
-   heights trace the cue's real amplitude envelope (the same offline render the
-   board's chips draw), so CHIME tapers off and THOCK lands all at once. */
-const WORD = new Map();
-function wordEnv(name, L, R, end, peak) {
-  const n = name.length, seg = Math.max(1, Math.floor(end / n)), env = [];
-  for (let i = 0; i < n; i++) {
-    let m = 0;
-    for (let j = i * seg, e = Math.min(end, j + seg); j < e; j += 16) m = Math.max(m, Math.abs(L[j]), Math.abs(R[j]));
-    env.push(peak ? m / peak : 1);
-  }
-  WORD.set(name, env);
-  const st = document.getElementById("stage");
-  if (st && st.dataset.cue === name) letterWord(document.getElementById("stage-word"), name);
-}
+/* sound words: every cue is lettered as it plays, like a comic SFX */
 function letterWord(el, name) {
-  const env = WORD.get(name) || [];
-  const chars = [...name.toUpperCase(), "!"];
-  el.style.setProperty("--len", chars.length);
-  el.textContent = "";
-  chars.forEach((ch, i) => {
-    const v = ch === "!" ? Math.max(0.7, env[i - 1] ?? 1) : (env[i] ?? 1);
-    const s = document.createElement("span");
-    s.textContent = ch;
-    s.style.setProperty("--v", (0.56 + 0.44 * v).toFixed(3));
-    s.style.setProperty("--tilt", (((env[i - 1] ?? v) - (env[i + 1] ?? v)) * 16).toFixed(1) + "deg");
-    el.appendChild(s);
-  });
+  el.style.setProperty("--len", name.length + 1);
+  el.textContent = name.toUpperCase() + "!";
 }
 function toStage(name, family) {
   const st = document.getElementById("stage");
   if (!st) return;
   st.dataset.cue = name;
-  if (!WORD.has(name)) toBuffer(name).then((buf) => paintEnv(name, buf)).catch(() => {});
   st.style.setProperty("--fc", FAM[family].css);
   letterWord(document.getElementById("stage-word"), name);
   document.getElementById("stage-cap").textContent = name + " \u00b7 " + families[family].name.toLowerCase() + " \u00b7 key " + cues[name].key;
@@ -1020,8 +994,7 @@ document.querySelectorAll(".hero-pill").forEach((b) => {
 let envRun = 0;
 async function drawEnvelopes() {
   const run = ++envRun;
-  const first = ["thock", "chime", "success", "swoosh", "sparkle"]; /* the stage's cues letter first */
-  for (const name of [...new Set([...first, ...Object.keys(cues)])]) {
+  for (const name of Object.keys(cues)) {
     if (run !== envRun) return; /* a newer run (theme switch) superseded this one */
     try {
       const buf = await toBuffer(name);
@@ -1042,7 +1015,6 @@ function paintEnv(name, buf) {
     if (m > 0.002) end = i;
   }
   end = Math.min(L.length, end + 1500);
-  wordEnv(name, L, R, end, peak);
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const w = cv.clientWidth || 130, h = cv.clientHeight || 22;
   cv.width = w * dpr; cv.height = h * dpr;
@@ -1071,7 +1043,7 @@ function paintEnv(name, buf) {
   c.lineWidth = 1.4;
   c.stroke();
 }
-setTimeout(drawEnvelopes, 0);
+setTimeout(drawEnvelopes, 500);
 
 /* keyboard mode */
 const KEYMAP = {};

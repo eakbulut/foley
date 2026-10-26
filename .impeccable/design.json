@@ -448,8 +448,8 @@
       "kind": "custom",
       "refersTo": "caption-box",
       "description": "Family-flooded panel with a corner caption and the lettered cue word.",
-      "html": "<div class=\"ds-stage\"><span class=\"ds-cap\">press a cue, any cue</span><span class=\"ds-word\"><span style=\"--v:.9;--tilt:-4deg\">T</span><span style=\"--v:1;--tilt:2deg\">H</span><span style=\"--v:.8;--tilt:3deg\">O</span><span style=\"--v:.7;--tilt:1deg\">C</span><span style=\"--v:.62;--tilt:0deg\">K</span><span style=\"--v:.7\">!</span></span></div>",
-      "css": ".ds-stage{--fc:var(--c-press,#E8362B);position:relative;width:460px;height:280px;border:3px solid var(--ink,#121212);display:grid;place-items:center;background:radial-gradient(circle, color-mix(in srgb,var(--fc) 70%,#fff) 2.2px, transparent 2.7px) 0 0/11px 11px, color-mix(in srgb,var(--fc) 22%,#fff)} .ds-cap{position:absolute;left:14px;top:14px;font-family:'Patrick Hand SC',system-ui,sans-serif;font-size:16.5px;line-height:1.2;background:var(--yellow,#FFE01B);border:2px solid var(--ink,#121212);padding:4px 9px} .ds-word{font-family:'Bangers','Schibsted Grotesk',system-ui,sans-serif;font-weight:400;letter-spacing:.02em;line-height:.9;color:var(--fc,var(--yellow,#FFE01B));text-shadow:-.035em -.035em 0 var(--ink,#121212),0 -.035em 0 var(--ink,#121212),.035em -.035em 0 var(--ink,#121212),.035em 0 0 var(--ink,#121212),.035em .035em 0 var(--ink,#121212),0 .035em 0 var(--ink,#121212),-.035em .035em 0 var(--ink,#121212),-.035em 0 0 var(--ink,#121212),.05em .06em 0 var(--ink,#121212),.065em .08em 0 var(--ink,#121212);font-size:96px;transform:rotate(-5deg)} .ds-word span{display:inline-block;font-size:calc(var(--v,1) * 1em);transform:rotate(var(--tilt,0deg));transform-origin:50% 100%}"
+      "html": "<div class=\"ds-stage\"><span class=\"ds-cap\">press a cue, any cue</span><span class=\"ds-word\">THOCK!</span></div>",
+      "css": ".ds-stage{--fc:var(--c-press,#E8362B);position:relative;width:460px;height:280px;border:3px solid var(--ink,#121212);display:grid;place-items:center;background:radial-gradient(circle, color-mix(in srgb,var(--fc) 70%,#fff) 2.2px, transparent 2.7px) 0 0/11px 11px, color-mix(in srgb,var(--fc) 22%,#fff)} .ds-cap{position:absolute;left:14px;top:14px;font-family:'Patrick Hand SC',system-ui,sans-serif;font-size:16.5px;line-height:1.2;background:var(--yellow,#FFE01B);border:2px solid var(--ink,#121212);padding:4px 9px} .ds-word{font-family:'Bangers','Schibsted Grotesk',system-ui,sans-serif;font-weight:400;letter-spacing:.02em;line-height:.9;color:var(--fc,var(--yellow,#FFE01B));text-shadow:-.035em -.035em 0 var(--ink,#121212),0 -.035em 0 var(--ink,#121212),.035em -.035em 0 var(--ink,#121212),.035em 0 0 var(--ink,#121212),.035em .035em 0 var(--ink,#121212),0 .035em 0 var(--ink,#121212),-.035em .035em 0 var(--ink,#121212),-.035em 0 0 var(--ink,#121212),.05em .06em 0 var(--ink,#121212),.065em .08em 0 var(--ink,#121212);font-size:96px;transform:rotate(-5deg)} "
     },
     {
       "name": "Night Code Panel",
@@ -473,7 +473,7 @@
     "overview": "Comics solved silent sound by lettering it. Foley's cues are already onomatopoeia, so the page is a comic page: bright white stock, square panels drawn in a 3px ink line, one 14px gutter between every panel, and Bangers lettering with an ink outline and extrusion that names each cue as it plays. Colour is printed, not glowed: process yellow is the page's signal, seven flat family plates mark the cue families, and Ben-Day halftone dots are the only texture.\n\nThe page reads as panels laid on a grid, never as cards in a dashboard. Sections are unframed bands of paper; the framed things inside them are panels, and a panel is never put inside another framed section. Hand-lettered captions (Patrick Hand SC) sit in yellow boxes pinned to panel corners or as panel notes; speech balloons carry testimonials and toasts; code lives in night panels. Depth comes from line weight and halftone, not shadow.\n\nThe world is light only. There is no dark theme; night is a panel type, not a mode.",
     "keyCharacteristics": [
       "Bright white paper, ink line art, square panel corners, one gutter.",
-      "Bangers SFX lettering, outlined and extruded in ink, shaped per letter by the cue's real envelope.",
+      "Bangers SFX lettering, outlined and extruded in ink, set at one even size.",
       "Process yellow as the single signal colour; seven family plates appear only where a family is named or playing.",
       "Halftone dots as hover texture and as the flood when a cue plays.",
       "Caption boxes and balloons in Patrick Hand SC carry the narrator's voice.",
@@ -498,7 +498,7 @@
       },
       {
         "name": "The Lettering Rule",
-        "body": "SFX lettering is one construction: Bangers in a fill colour (`--fc`, default yellow) with an eight-direction 0.035em ink outline plus a two-step extrusion (0.05em/0.06em, 0.065em/0.08em), all in `text-shadow` so it renders on every engine. Because it is in em, it scales with the word. Lettered cue words split into per-letter spans sized by the cue's real envelope (`--v` = 0.56 + 0.44 x envelope) and tilted by its slope (`--tilt`, rotated from the letter's baseline).",
+        "body": "SFX lettering is one construction: Bangers in a fill colour (`--fc`, default yellow) with an eight-direction 0.035em ink outline plus a two-step extrusion (0.05em/0.06em, 0.065em/0.08em), all in `text-shadow` so it renders on every engine. Because it is in em, it scales with the word. Letters stay one size; the word as a whole carries the tilt.",
         "section": "typography"
       },
       {
@@ -539,7 +539,7 @@
     ],
     "dos": [
       "Do separate every panel by `--gut` (14px, 10px compact) and frame it in the 3px ink `--line` with square corners.",
-      "Do letter cue words with the shared `.sfx` construction (em-based outline and extrusion) and per-letter `--v` and `--tilt` from the cue's envelope.",
+      "Do letter cue words with the shared `.sfx` construction (em-based outline and extrusion) at one even letter size; per-letter sizing reads as broken type.",
       "Do flood a surface with its family plate while its cue sounds: halftone at 70-75% over a 22-30% tint.",
       "Do pin caption boxes into panel corners or panel feet, in Patrick Hand SC on yellow.",
       "Do put every code sample in a night panel with a labelled 40px header strip.",
