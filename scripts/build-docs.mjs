@@ -9,7 +9,10 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 export function buildDocs(outFile = join(root, "dist", "docs.html")) {
   const md = readFileSync(join(root, "README.md"), "utf8");
-  const body = marked.parse(md);
+  /* README-relative links only exist on GitHub; on usefoley.dev they 404 (Search Console caught it).
+     agents.md is the one file the deploy also ships, so it stays local. */
+  const body = marked.parse(md).replace(/href="\.\/(?!agents\.md")/g,
+    'href="https://github.com/eakbulut/foley/blob/main/');
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>

@@ -33,7 +33,7 @@ jobs:
           cp -r src assets _site/
           echo "usefoley.dev" > _site/CNAME
           printf 'User-agent: *\nAllow: /\nSitemap: https://usefoley.dev/sitemap.xml\n' > _site/robots.txt
-          printf '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>https://usefoley.dev/</loc></url>\n<url><loc>https://usefoley.dev/docs.html</loc></url>\n<url><loc>https://usefoley.dev/agents.md</loc></url>\n</urlset>\n' > _site/sitemap.xml
+          printf '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>https://usefoley.dev/</loc></url>\n<url><loc>https://usefoley.dev/docs.html</loc></url>\n</urlset>\n' > _site/sitemap.xml
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

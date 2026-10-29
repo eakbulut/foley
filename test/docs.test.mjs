@@ -15,6 +15,11 @@ test("docs page builds from the README and covers the current API", () => {
   for (const name of ["playSpec", "toSprite", "getSpec", "duck", "loop", "data-foley-toggle", "@foleyjs/react"]) {
     assert.ok(html.includes(name), "docs missing " + name);
   }
+  /* relative links resolve against usefoley.dev, where only deployed files exist (5 Search Console 404s) */
+  const deploy = readFileSync(join(root, ".github/workflows/deploy.yml"), "utf8");
+  for (const [, path] of html.matchAll(/href="(?!https?:|#|mailto:|data:)([^"]+)"/g)) {
+    assert.ok(deploy.includes(path.replace(/^\.\//, "").split("/")[0]), "docs link 404s on the site: " + path);
+  }
   rmSync(out, { force: true });
 });
 
